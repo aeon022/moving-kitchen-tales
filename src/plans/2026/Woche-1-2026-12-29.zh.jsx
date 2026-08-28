@@ -858,23 +858,24 @@ function aggregateList(data) {
 const LIST_SUMMARY = aggregateList(DATA);
 
 // ---- 图片占位（若无 artwork）----
+// War fest auf ein helles Pink/Grün-Gradient-Pastell codiert (SVG-data-URI, kann keine
+// CSS-Variablen auflösen) — leuchtete im Dark Mode als greller Block. Liest jetzt die aktuell
+// gesetzten Root-Variablen dieser Datei zum Aufrufzeitpunkt aus.
 function animePlaceholder(title, prompt = "") {
   const safe = (s) =>
     String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const cs = typeof document !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  const bg = cs?.getPropertyValue("--bg")?.trim() || "#FAF7F1";
+  const text = cs?.getPropertyValue("--text")?.trim() || "#1F2937";
+  const muted = cs?.getPropertyValue("--muted")?.trim() || "#374151";
   const svg = `
     <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'>
-      <defs>
-        <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stop-color='#FCE7F3'/>
-          <stop offset='100%' stop-color='#DCFCE7'/>
-        </linearGradient>
-      </defs>
-      <rect width='1200' height='675' fill='url(#g)'/>
+      <rect width='1200' height='675' fill='${bg}'/>
       <g font-family='Noto Sans, Arial, sans-serif'>
-        <text x='40' y='120' font-size='44' fill='#1F2937'>🍱  ${safe(title)}</text>
-        <text x='40' y='180' font-size='22' fill='#374151'>Illustration placeholder</text>
-        <text x='40' y='240' font-size='18' fill='#6B7280'>${safe(prompt).slice(0, 300)}</text>
-        <text x='40' y='640' font-size='14' fill='#6B7280'>Moving Kitchen Tales · placeholder</text>
+        <text x='40' y='120' font-size='44' fill='${text}'>🍱  ${safe(title)}</text>
+        <text x='40' y='180' font-size='22' fill='${muted}'>Illustration placeholder</text>
+        <text x='40' y='240' font-size='18' fill='${muted}'>${safe(prompt).slice(0, 300)}</text>
+        <text x='40' y='640' font-size='14' fill='${muted}'>Moving Kitchen Tales · placeholder</text>
       </g>
     </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

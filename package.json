@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "manifest": "node scripts/gen-plan-manifest.mjs",
+    "predev": "npm run manifest",
     "dev": "vite",
+    "prebuild": "npm run manifest",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

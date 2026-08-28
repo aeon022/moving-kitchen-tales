@@ -1,36 +1,51 @@
 // src/plans/PlanTemplate.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { ensureScript, exportHTMLById } from "@/utils/exporters";
+import { ensureScript, exportHTMLById, buildShoppingListText, shareOrCopyText, downloadTextFile } from "@/utils/exporters";
 import { buildEmbedCss } from "@/utils/embedCss";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { CANON as DEFAULT_CANON } from "./canon";
 
+// Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
+// nicht gerendert, nur als String im Code vorgehalten (Konvention aus Woche-1). Ergebnis-Datei
+// unter /plan-art/{jahr}/{kwOrdner}/... ablegen, ImageBanner pickt sie automatisch auf.
+export const PROMPT_HEADER =
+  "Use exactly two cats only: Fleur (small, playful, European Shorthair, grey-black tabby) and Finn (larger, reserved prankster, European Shorthair, grey-black tabby). No third cat, no extra animals. Western man with short fauxhawk as the cook. warm hand-painted watercolor vibe, warm golden light, gentle magical steam/pot/vegetable spirits. Pregnancy-safe food only (no raw fish/eggs). A4 landscape page; manga/cartoon panel with generous margins; image intended to occupy ≤ one-third of the page width on the left.";
+export const buildPrompt = (a, b) => `${a}\n${b}`;
+// Beispiel pro Woche (im jeweiligen Wochen-File, ein einziger Szenen-Prompt reicht):
+//   export const WEEK_SCENE_PROMPT = buildPrompt(PROMPT_HEADER, "Cook stirring a pot of miso soup; Fleur pawing at steam; Finn watching from the counter.");
+
+// Japanese design system — washi/sumi/indigo, torii-red used only as a sparse single accent
+// (viral badge, the hanko stamp). No gradients — --grad-hero is a flat panel tone,
+// kept as a variable only so `background: var(--grad-hero)` call sites don't need touching.
 const THEME_VARS_LIGHT = {
-  "--bg": "#FAF7F1",
-  "--text": "#111827",
-  "--panel": "#FFFFFF",
-  "--border": "rgba(0,0,0,.10)",
-  "--muted": "#6B7280",
-  "--chip-bg": "#EEF8F3",
-  "--shadow": "0 8px 24px rgba(0,0,0,.12)",
-  "--accent": "#e07a9a",
-  "--accent-2": "#2aa769",
-  "--grad-hero": "linear-gradient(135deg, rgba(224,122,154,.2), rgba(42,167,105,.18))",
-  "--btn-on-bg": "#EEF8F3",
-  "--btn-border": "rgba(0,0,0,.15)",
+  "--bg": "#F7F3EA",
+  "--text": "#1C1B19",
+  "--panel": "#FCFAF4",
+  "--border": "rgba(28,27,25,.14)",
+  "--muted": "#837C6E",
+  "--chip-bg": "#E7ECF3",
+  "--shadow": "none",
+  "--accent": "#2E4C7A",
+  "--accent-2": "#2E4C7A",
+  "--seal": "#B7282E",
+  "--grad-hero": "var(--panel)",
+  "--btn-on-bg": "#E7ECF3",
+  "--btn-border": "rgba(28,27,25,.16)",
 };
 const THEME_VARS_DARK = {
-  "--bg": "#0f1115",
-  "--text": "#E5E7EB",
-  "--panel": "#161A22",
-  "--border": "rgba(255,255,255,.12)",
-  "--muted": "#9CA3AF",
-  "--chip-bg": "rgba(255,255,255,.06)",
-  "--shadow": "0 10px 28px rgba(0,0,0,.45)",
-  "--accent": "#e07a9a",
-  "--accent-2": "#2aa769",
-  "--grad-hero": "linear-gradient(135deg, rgba(224,122,154,.18), rgba(42,167,105,.15))",
-  "--btn-on-bg": "rgba(255,255,255,.10)",
-  "--btn-border": "rgba(255,255,255,.18)",
+  "--bg": "#1A1917",
+  "--text": "rgba(247,243,234,.92)",
+  "--panel": "#232220",
+  "--border": "rgba(247,243,234,.14)",
+  "--muted": "#9C9488",
+  "--chip-bg": "rgba(247,243,234,.06)",
+  "--shadow": "none",
+  "--accent": "#7C9BC4",
+  "--accent-2": "#7C9BC4",
+  "--seal": "#D97A63",
+  "--grad-hero": "var(--panel)",
+  "--btn-on-bg": "rgba(247,243,234,.10)",
+  "--btn-border": "rgba(247,243,234,.18)",
 };
 
 function useSystemPrefersDark() {
@@ -52,21 +67,22 @@ const DAYS_ORDER = ["mo", "di", "mi", "do", "fr", "sa", "so"];
 
 const cardPanelStyle = {
   background: "var(--panel)",
-  borderRadius: 18,
+  borderRadius: 0,
   padding: 24, /* Etwas mehr Padding */
   boxShadow: "var(--shadow)",
   border: "1px solid var(--border)",
 };
 
+// Kein eigener Rand mehr — bei bis zu 4 Chips pro Meal-Card (schon selbst umrandet) türmten sich
+// sonst drei verschachtelte Rahmenebenen übereinander. Die getönte Fläche reicht zur Erkennung.
 const tagChip = (text) => (
   <span
     className="mkt-chip"
     style={{
       display: "inline-block",
       padding: "2px 10px",
-      borderRadius: 999,
+      borderRadius: 0,
       background: "var(--chip-bg)",
-      border: "1px solid var(--border)",
       fontSize: 12,
       marginRight: 6,
       marginBottom: 6,
@@ -76,19 +92,27 @@ const tagChip = (text) => (
   </span>
 );
 
+// War fest auf die helle Palette codiert (SVG-data-URI, kann keine CSS-Variablen auflösen) —
+// im Dark Mode leuchtete jeder Platzhalter als greller cremefarbener Block. Liest die aktuell
+// gesetzten Root-Variablen zum Aufrufzeitpunkt aus (die stehen schon vor jedem JS-Effekt fest,
+// dank der reinen @media(prefers-color-scheme:dark)-Regeln in app.css).
 function animePlaceholder(title, subtitle = "") {
   const esc = (s) =>
     String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const cs = typeof document !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  const bg = cs?.getPropertyValue("--bg")?.trim() || "#F7F3EA";
+  const text = cs?.getPropertyValue("--text")?.trim() || "#1C1B19";
+  const muted = cs?.getPropertyValue("--muted")?.trim() || "#837C6E";
+  const seal = cs?.getPropertyValue("--seal")?.trim() || "#B7282E";
   const svg = `
   <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'>
-    <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-      <stop offset='0%' stop-color='#FCE7F3'/><stop offset='100%' stop-color='#DCFCE7'/>
-    </linearGradient></defs>
-    <rect width='1200' height='675' fill='url(#g)'/>
-    <g font-family='Noto Sans, Arial, sans-serif'>
-      <text x='40' y='120' font-size='44' fill='#1F2937'>🍱 ${esc(title)}</text>
-      <text x='40' y='180' font-size='20' fill='#374151'>Illustration placeholder</text>
-      <text x='40' y='640' font-size='14' fill='#6B7280'>Moving Kitchen Tales</text>
+    <rect width='1200' height='675' fill='${bg}'/>
+    <rect x='0' y='0' width='1200' height='675' fill='none' stroke='${text}' stroke-opacity='0.12' stroke-width='2'/>
+    <rect x='1120' y='40' width='40' height='40' fill='${seal}'/>
+    <g font-family='Georgia, "Noto Serif SC", serif'>
+      <text x='40' y='120' font-size='40' fill='${text}'>${esc(title)}</text>
+      <text x='40' y='168' font-size='16' fill='${muted}' letter-spacing='1'>ILLUSTRATION PLACEHOLDER</text>
+      <text x='40' y='630' font-size='14' fill='${muted}'>Moving Kitchen Tales</text>
     </g>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -128,6 +152,13 @@ function aggregateList(data, CANON) {
 }
 
 // ---------- Building blocks ----------
+// Wochennummer aus meta.id ("woche-26-...") oder meta.title ("Woche 26") ableiten statt sie als
+// Default-Prop hartzukodieren, die vorher beim Copy-Paste jeder Woche manuell mitgezogen werden musste.
+function weekFolderFromMeta(meta) {
+  const m = /(?:woche-|woche\s+)(\d+)/i.exec(meta?.id ?? meta?.title ?? "");
+  return m ? `kw${m[1]}` : "kw1";
+}
+
 function ImageBanner({ meal, year, weekFolder = "kw1" }) {
   const [src, setSrc] = useState("");
   useEffect(() => {
@@ -141,9 +172,9 @@ function ImageBanner({ meal, year, weekFolder = "kw1" }) {
   }, [meal, year, weekFolder]);
 
   return (
-    <div className="mkt-art" style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginBottom: 12, border: "1px solid var(--border)", boxShadow: "var(--shadow)" }}>
+    <div className="mkt-art" style={{ position: "relative", borderRadius: 0, overflow: "hidden", marginBottom: 12 }}>
       <img src={src || animePlaceholder(meal.title)} alt={meal.title} style={{ width: "100%", height: "auto", display: "block", aspectRatio: "16/9" }} loading="lazy" />
-      <div style={{ position: "absolute", right: 10, bottom: 10, background: "rgba(0,0,0,.35)", color: "#fff", padding: "4px 10px", borderRadius: 999, fontSize: 12 }}>
+      <div style={{ position: "absolute", right: 10, bottom: 10, background: "rgba(0,0,0,.35)", color: "#fff", padding: "4px 10px", borderRadius: 0, fontSize: 12 }}>
         {src?.startsWith("/plan-art") ? "Artwork" : "Placeholder"}
       </div>
     </div>
@@ -154,10 +185,11 @@ function MealCard({ meal, year, meta }) {
   const { isBookmarked, toggleBookmark, bookmarkLists, toggleInList } = useBookmarks();
   const bookmarked = isBookmarked(meta.id, meal.id);
   const [showOptions, setShowOptions] = React.useState(false);
+  const weekFolder = weekFolderFromMeta(meta);
 
   return (
     <div className="meal-card" style={cardPanelStyle} id={`meal-${meal.id}`}>
-      <ImageBanner meal={meal} year={year} />
+      <ImageBanner meal={meal} year={year} weekFolder={weekFolder} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ position: "relative" }}>
@@ -166,7 +198,7 @@ function MealCard({ meal, year, meta }) {
               style={{
                 background: bookmarked ? "var(--accent)" : "transparent",
                 border: "1px solid var(--border)",
-                borderRadius: 8,
+                borderRadius: 0,
                 padding: "4px 8px",
                 cursor: "pointer",
                 fontSize: 16,
@@ -186,7 +218,7 @@ function MealCard({ meal, year, meta }) {
                 right: 0,
                 background: "var(--panel)",
                 border: "1px solid var(--border)",
-                borderRadius: 8,
+                borderRadius: 0,
                 padding: "8px",
                 zIndex: 10,
                 minWidth: "150px"
@@ -211,7 +243,7 @@ function MealCard({ meal, year, meta }) {
                     cursor: "pointer",
                     fontSize: 12,
                     color: bookmarked ? "#fff" : "var(--text)",
-                    borderRadius: 4
+                    borderRadius: 0
                   }}
                 >
                   {bookmarked ? "Aus Merkliste entfernen" : "Zu Merkliste hinzufügen"}
@@ -243,7 +275,7 @@ function MealCard({ meal, year, meta }) {
                             cursor: "pointer",
                             fontSize: 12,
                             color: inList ? "#fff" : "var(--text)",
-                            borderRadius: 4
+                            borderRadius: 0
                           }}
                         >
                           {list.name} {inList ? "✓" : ""}
@@ -258,9 +290,9 @@ function MealCard({ meal, year, meta }) {
           <h3 style={{ margin: 0, lineHeight: 1.3 }}>{meal.title}</h3>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {meal.isViral ? tagChip("🔥 Viral") : null}
           {tagChip(meal.target)}
           {meal.riceCooker?.enabled ? tagChip("🍚 Reiskocher") : null}
-          {meal.remind ? tagChip("💊 Metformin") : null}
         </div>
       </div>
       {meal.desc ? <p style={{ marginTop: 8, color: "var(--muted)", fontStyle: "italic" }}>{meal.desc}</p> : null}
@@ -271,7 +303,7 @@ function MealCard({ meal, year, meta }) {
       <h4>Zubereitung</h4>
       <ol>{meal.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
       
-      <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--chip-bg)", borderRadius: 12 }}>
+      <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--chip-bg)", borderRadius: 0 }}>
         <p style={{margin:"0 0 4px"}}><strong>Hinweise:</strong> {meal.checks}</p>
         <p style={{margin:"0 0 4px"}}><strong>Austausche:</strong> {meal.swaps}</p>
         <p style={{margin:0}}><strong>Beilage & Getränke:</strong> {meal.side}</p>
@@ -306,47 +338,90 @@ function DaySection({ dayKey, meals, dayName, meta }) {
   );
 }
 
-function WeekOverview({ data, DAY_NAME_DE, meta }) {
+// Register-Seite statt Karten-Grid: Tag-Nummer (01–07) wie im Wochen-Index der Sidebar, Haarlinie
+// statt Kachel, Mahlzeiten als flache Liste statt Pillen — gleiche Sprache wie das Register-Menü.
+function WeekOverview({ data, DAY_NAME_DE, meta, subtitle }) {
   const byDay = useMemo(() => {
     const map = { mo: [], di: [], mi: [], do: [], fr: [], sa: [], so: [] };
     for (const r of data) map[r.id.split("-")[0]].push(r);
     return map;
   }, [data]);
 
-  const pill = (key, text, href, rice) => (
-    <a
-      key={key}
-      href={href}
-      style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999, border: "1px solid var(--border)", background: "var(--panel)", textDecoration: "none", color: "var(--text)", boxShadow: "var(--shadow)", fontSize: 13 }}
-    >
-      {rice ? "🍚" : "🍽️"} <span>{text}</span>
-    </a>
-  );
-
   return (
     <section style={{ marginBottom: 32 }}>
-      <div style={{ ...cardPanelStyle, background: "var(--panel)", border: "1px solid var(--border)" }}>
-        <div className="mkt-hero-inner" style={{ padding: 18, borderRadius: 12, marginBottom: 16, background: "var(--grad-hero)" }}>
+      {/* Kein voller Kartenrand — sitzt direkt im randlosen #kochbuch-root, ein zweiter Rahmen
+          wäre hier nur ein Kasten im Kasten. Eine Haarlinie unten grenzt gegen die Meal-Cards ab. */}
+      <div style={{ ...cardPanelStyle, border: "none", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontFamily: '"Cormorant Garamond", "Noto Serif JP", serif', fontSize: 11.5, letterSpacing: "0.14em", color: "var(--muted)", marginBottom: 8 }}>
+            索引 · Woche
+          </div>
           <h2 style={{ margin: 0 }}>
-            Woche 1 – Übersicht <span className="mkt-date-paren" style={{ color: "var(--muted)" }}>({meta.startDate})</span>
+            {meta.title} <span style={{ color: "var(--muted)", fontWeight: 400 }}>({meta.startDate})</span>
           </h2>
-          <p style={{ marginTop: 6, color: "var(--muted)" }}>Täglich 3 Mahlzeiten · 1× Reiskocher-Gericht pro Tag · mild, salzarm, schwangerschaftsgeeignet.</p>
+          <p style={{ marginTop: 6, color: "var(--muted)" }}>{subtitle ?? "Täglich 3 Mahlzeiten · 1× Reiskocher-Gericht pro Tag · mild, salzarm, schwangerschaftsgeeignet."}</p>
         </div>
-        <div style={{ display: "grid", gap: 12 }}>
-          {DAYS_ORDER.map((d) => (
-            <div key={d} style={{ padding: 12, borderRadius: 12, border: "1px solid var(--border)", background: "var(--panel)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 8, flexWrap: "wrap" }}>
-                <strong>{DAY_NAME_DE[d]}</strong>
-                <a href={`#day-${d}`} style={{ fontSize: 12, color: "var(--text)", textDecoration: "none", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: 8, background: "var(--chip-bg)" }}>
-                  zum Tag ▿
-                </a>
+        <div>
+          {DAYS_ORDER.map((d, i) => (
+            <div key={d} style={{ display: "flex", gap: 18, padding: "16px 0", borderBottom: i < DAYS_ORDER.length - 1 ? "1px solid var(--border)" : "none" }}>
+              <div style={{ fontFamily: '"Cormorant Garamond", "Noto Serif JP", serif', fontSize: 24, color: "var(--muted)", minWidth: "1.6em", textAlign: "right", lineHeight: 1, flexShrink: 0 }}>
+                {String(i + 1).padStart(2, "0")}
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {byDay[d].map((m) => pill(m.id, m.title.replace(/ – .*$/, ""), `#meal-${m.id}`, !!m.riceCooker?.enabled))}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <a href={`#day-${d}`} style={{ display: "block", fontWeight: 600, textDecoration: "none", color: "var(--text)", marginBottom: 8, fontSize: 15 }}>
+                  {DAY_NAME_DE[d]}
+                </a>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {byDay[d].map((m) => (
+                    <a key={m.id} href={`#meal-${m.id}`} style={{ display: "flex", alignItems: "baseline", gap: 8, textDecoration: "none", fontSize: 13.5, color: "var(--muted)" }}>
+                      <span aria-hidden="true">{m.riceCooker?.enabled ? "🍚" : m.isViral ? "🔥" : "·"}</span>
+                      <span style={{ color: "var(--text)" }}>{m.title.replace(/ – .*$/, "")}</span>
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// Separate Tages-Übersicht nur für Reiskocher-Gerichte — zusätzlich zu den Reiskocher-Details
+// pro Karte, damit man auf einen Blick sieht, welcher Tag KEIN Reiskocher-Gericht hat.
+function RiceCookerSection({ data, DAY_NAME_DE }) {
+  const perDay = useMemo(() => {
+    const map = { mo: null, di: null, mi: null, do: null, fr: null, sa: null, so: null };
+    for (const r of data) {
+      const day = r.id.split("-")[0];
+      if (r.riceCooker?.enabled && !map[day]) map[day] = r;
+    }
+    return map;
+  }, [data]);
+  if (!Object.values(perDay).some(Boolean)) return null;
+
+  return (
+    <section style={{ marginTop: 32 }}>
+      <h2 style={{ borderBottom: "2px solid var(--border)", paddingBottom: 10, marginBottom: 20 }}>🍚 Reiskocher-Gerichte (Übersicht)</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+        {DAYS_ORDER.map((d) => {
+          const r = perDay[d];
+          return (
+            <div key={d} style={cardPanelStyle}>
+              <h3 style={{ marginTop: 0, fontSize: 16 }}>
+                {DAY_NAME_DE[d].split(" ")[0]} – {r ? r.title : "Kein Reiskocher-Gericht"}
+              </h3>
+              {r ? (
+                <ul style={{ margin: 0, paddingLeft: 20 }}>
+                  <li><strong>Programm:</strong> {r.riceCooker.program}</li>
+                  <li><strong>Wasser:</strong> {r.riceCooker.water}</li>
+                  {r.riceCooker.notes ? <li><strong>Notiz:</strong> {r.riceCooker.notes}</li> : null}
+                </ul>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -385,9 +460,11 @@ async function exportPdfFromRoot(rootEl, filename) {
 export default function PlanTemplate({
   meta,
   data,
-  canon,
+  canon = DEFAULT_CANON,
   dayNames,
   uiTitles = { main: "Moving Kitchen Tales – Woche", list: "Moving Kitchen Tales – Einkaufsliste" },
+  subtitle,
+  heroChips,
   year = 2026,
   options = { showImagesInViewer: true, pdf: { hideImages: true } },
 }) {
@@ -437,8 +514,12 @@ export default function PlanTemplate({
       .meal-card li { line-height: 1.7; margin-bottom: 0.5rem; }
       .meal-card h4 { margin-top: 1.5rem; margin-bottom: 0.75rem; color: var(--accent-2); font-weight: 700; }
       
-      .mkt-tab { padding:8px 14px; border-radius:10px; border:2px solid var(--btn-border); background:transparent; color:var(--text); cursor:pointer; }
-      .mkt-tab:hover { filter: brightness(1.03); }
+      /* Flach statt Pille — gleiche Sprache wie .btn-primary/.btn-secondary: Haarlinie,
+         keine Rundung, aktiver Zustand über Rand-/Textfarbe statt gefüllter Fläche. Nur der
+         Schalter-Knopf (.mkt-switch) bleibt rund — Konvention wie der Sprachschalter im Register. */
+      .mkt-tab { padding:9px 16px; border-radius:0; border:1px solid var(--btn-border); background:var(--panel); color:var(--text); cursor:pointer; font-weight:600; font-size:13.5px; }
+      .mkt-tab:hover { border-color:var(--seal); color:var(--seal); }
+      .mkt-tab[aria-pressed="true"] { border-color:var(--seal); color:var(--seal); background:var(--chip-bg); }
       .mkt-switch{ --w:48px; --h:28px; --k:22px; position:relative; display:inline-block; width:var(--w); height:var(--h); }
       .mkt-switch input{ opacity:0; width:0; height:0; position:absolute; }
       .mkt-switch .mkt-slider{ position:absolute; inset:0; border-radius:var(--h); background:var(--btn-border); border:1px solid var(--btn-border); }
@@ -446,11 +527,12 @@ export default function PlanTemplate({
       .mkt-switch input:checked + .mkt-slider{ background:var(--accent-2); border-color:var(--accent-2); }
       .mkt-switch input:checked + .mkt-slider::before{ transform:translateY(-50%) translateX(calc(var(--w) - var(--k) - 6px)); }
 
-      .mkt-segment{ display:inline-flex; gap:4px; border:1px solid var(--btn-border); border-radius:999px; padding:4px; background:var(--panel); }
-      .mkt-segment label{ position:relative; display:inline-flex; align-items:center; border-radius:999px; overflow:hidden; }
+      .mkt-segment{ display:inline-flex; gap:0; border:1px solid var(--btn-border); border-radius:0; padding:0; background:var(--panel); }
+      .mkt-segment label{ position:relative; display:inline-flex; align-items:center; }
+      .mkt-segment label:not(:last-child) span{ border-right:1px solid var(--btn-border); }
       .mkt-segment input[type="radio"]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
-      .mkt-segment span{ display:inline-block; padding:8px 14px; border-radius:999px; border:1px solid transparent; }
-      .mkt-segment input[type="radio"]:checked + span{ background:var(--btn-on-bg); outline:2px solid var(--accent-2); outline-offset:1px; }
+      .mkt-segment span{ display:inline-block; padding:9px 16px; font-weight:600; font-size:13.5px; }
+      .mkt-segment input[type="radio"]:checked + span{ background:var(--btn-on-bg); color:var(--seal); }
 
       #mkt-content{ display:block !important; }
       #mkt-content > [hidden]{ display:none !important; }
@@ -502,8 +584,18 @@ export default function PlanTemplate({
         <ul>{items.map((it, idx) => <li key={idx}>{`${it.label} – ${Math.round(it.qty * 10) / 10} ${it.unit}`}</li>)}</ul>
       </div>
     );
+    const listTitle = `Einkaufsliste – ${meta?.title ?? ""}`.trim();
+    const asText = () => buildShoppingListText(listGroups, listTitle);
     return (
       <div>
+        <div className="ghk-no-print" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          <button type="button" className="ghk-tab" onClick={() => shareOrCopyText(asText(), listTitle)}>
+            📤 Teilen / Kopieren
+          </button>
+          <button type="button" className="ghk-tab" onClick={() => downloadTextFile(asText(), `${listTitle}.txt`)}>
+            ⬇️ Als Text herunterladen
+          </button>
+        </div>
         <Group name="Protein/Fisch/Tofu" items={listGroups["Protein/Fisch/Tofu"]} />
         <Group name="Gemüse/Pilze" items={listGroups["Gemüse/Pilze"]} />
         <Group name="Reis/Nudeln/Sättigung" items={listGroups["Reis/Nudeln/Sättigung"]} />
@@ -517,13 +609,11 @@ export default function PlanTemplate({
       <Styles />
 
       <div className="mkt-hero" style={{ ...cardPanelStyle, padding: 16, marginBottom: 18 }}>
-        <div className="mkt-hero-inner" style={{ background: "var(--grad-hero)", borderRadius: 12, padding: 14, marginBottom: 12, display: "grid", gap: 8 }}>
+        <div className="mkt-hero-inner" style={{ background: "var(--grad-hero)", borderRadius: 0, padding: 14, marginBottom: 12, display: "grid", gap: 8 }}>
           <h1 style={{ margin: 0 }}>{uiTitles.main}</h1>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {tagChip(`Start: ${meta.startDate}`)}
-            {tagChip("Mahlzeiten/Woche: 21")}
-            {tagChip("Salzarm · mild · alles durchgegart")}
-            {tagChip("Täglich 1× 🍚 Reiskocher")}
+            {(heroChips ?? ["Mahlzeiten/Woche: 21", "Salzarm · mild · alles durchgegart", "Täglich 1× 🍚 Reiskocher"]).map((c) => tagChip(c))}
           </div>
         </div>
 
@@ -544,7 +634,7 @@ export default function PlanTemplate({
             <button type="button" onClick={doExportHTML} className="mkt-tab" style={{ padding: "8px 12px" }}>⤓ HTML</button>
             <button type="button" onClick={() => doPrint()} className="mkt-tab" style={{ padding: "8px 12px" }}>🖨️ Drucken</button>
 
-            <div className="mkt-theme-switch" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: 6, border: "1px solid var(--btn-border)", borderRadius: 999, background: "var(--panel)" }}>
+            <div className="mkt-theme-switch" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: 6, border: "1px solid var(--btn-border)", background: "var(--panel)" }}>
               <button type="button" className="mkt-tab" aria-pressed={mode === "auto"} onClick={() => setMode(mode === "auto" ? (effectiveDark ? "dark" : "light") : "auto")} style={{ padding: "6px 10px" }}>Auto</button>
               <label className="mkt-switch" title={effectiveDark ? "Dunkel" : "Hell"}>
                 <input type="checkbox" checked={effectiveDark} onChange={(e) => setMode(e.target.checked ? "dark" : "light")} disabled={mode === "auto"} />
@@ -556,11 +646,15 @@ export default function PlanTemplate({
         </div>
       </div>
 
-      <div id="kochbuch-root" style={{ ...cardPanelStyle }}>
-        <WeekOverview data={data} DAY_NAME_DE={dayNames} meta={meta} />
+      {/* Kein eigener Rand: dieser Wrapper gruppiert nur WeekOverview + Week + Liste, er ist kein
+          eigenständiges Karten-Element — mit Rand hier stapelten sich sonst drei Rahmen ineinander
+          (Buch → dieser Wrapper → jede Meal-Card). */}
+      <div id="kochbuch-root" style={{ ...cardPanelStyle, border: "none" }}>
+        <WeekOverview data={data} DAY_NAME_DE={dayNames} meta={meta} subtitle={subtitle} />
         <div id="mkt-content" data-view={tab}>
           <section id="mkt-pane-kochbuch" aria-hidden={tab !== "kochbuch"} hidden={tab !== "kochbuch"}>
             <Week />
+            <RiceCookerSection data={data} DAY_NAME_DE={dayNames} />
           </section>
           <section id="mkt-pane-liste" aria-hidden={tab !== "liste"} hidden={tab !== "liste"}>
             <ShoppingList />
