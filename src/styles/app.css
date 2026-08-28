@@ -1,99 +1,303 @@
 /* src/styles/app.css */
+/* Japanese design system — washi paper, sumi ink, one indigo (ai-iro) accent, torii-red used
+   only as a single sparse stamp/highlight. No gradients, no pastel pink/green, no drop shadows —
+   hairlines and flat fills instead. Approved reference: the "Japanese Design Proposal" canvas. */
 :root {
-  --bg: #FAF7F1;
-  --panel: #ffffff;
-  --text: #111827;
-  --muted: #6B7280;
-  --border: rgba(0,0,0,.08);
-  --shadow: 0 8px 24px rgba(0,0,0,.08);
-  --accent: #2aa769;
-  --accent-2: #2aa769;
-  --accent-light: #EEF8F3;
-  --accent-warm: #e07a9a;
-  --sidebar-w: 280px;
-  --sidebar-w-collapsed: 68px;
+  --bg: #F7F3EA;
+  --panel: #FCFAF4;
+  --text: #1C1B19;
+  --muted: #837C6E;
+  --border: rgba(28,27,25,.14);
+  --shadow: none;
+  --accent: #2E4C7A;
+  --accent-2: #2E4C7A;
+  --accent-light: #E7ECF3;
+  --accent-warm: #B7282E;
+  --seal: #B7282E;
+  /* Third, sparse accent — reserved for Preppen only (its own "cold storage" chapter identity,
+     distinct from the indigo/torii-red used everywhere else). */
+  --frost: #3D6B7D;
+  --frost-light: #E5EEF1;
+  /* Also used inside individual plan pages (PlanTemplate.jsx), which override these on
+     document.documentElement while mounted — defined here too so chips/badges on pages that
+     never mount a plan (Preppen, Rezept-Datenbank, Bookmarks, ...) aren't left transparent. */
+  --chip-bg: #E7ECF3;
+  --btn-border: rgba(28,27,25,.16);
+  /* The book sits ON something — a desk/tatami tone behind it, distinct from the washi paper
+     (--bg/--panel) used for the book's own pages. */
+  --desk-bg: #D4D0C5;
+  --spine-bg: #EBE7E0;
+}
+
+/* Cormorant Garamond (Latin, light/italic-friendly) + Noto Serif JP (Kanji) — a recipe title
+   mixing German and Kanji ("Miso-Suppe (味噌汁)") gets a matched, equally delicate weight on
+   both halves instead of a font clash. */
+h1, h2, h3, .brand, .mincho {
+  font-family: "Cormorant Garamond", "Noto Serif JP", "Noto Serif SC", "Songti SC", "Yu Mincho", "Nanum Myeongjo", serif;
+}
+
+/* Hanko-style stamp — an outlined chop rather than a filled block, 台所 ("kitchen", two real
+   characters stacked vertically) instead of a single decorative glyph. */
+.seal-mark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+  padding: 5px 3px;
+  border: 1px solid var(--seal);
+  border-radius: 1px;
+  color: var(--seal);
+  background: transparent;
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  font-size: 0.6em;
+  font-weight: 500;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+/* Thin ornamental section divider instead of a plain <hr>/border — a nod to the brush-stroke
+   dividers in traditional CN/JP book layout. */
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 28px 0;
+  color: var(--seal);
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+.ornament-divider span {
+  font-size: 12px;
+  transform: rotate(45deg);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; scroll-behavior: smooth; }
 body {
   margin: 0;
-  background: var(--bg);
+  /* Desk tone behind the book — distinct from the book's own washi paper (--bg/--panel) so the
+     "book on a table" framing actually reads. Grain (SVG feTurbulence, generated — no texture
+     asset to ship/load) echoes the textured-paper look of the reference decks. */
+  background-color: var(--desk-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Same literary pairing for index-style numbering/labels (week numbers, nav). */
+.index-num, .index-label {
+  font-family: "Cormorant Garamond", "Noto Serif JP", "Noto Serif SC", serif;
+}
+
 a { color: inherit; }
 
-/* --- Layout Grid (Desktop) --- */
-.app-shell {
+/* Only one :focus rule existed in the whole stylesheet (pinboard input) — everything else
+   relied on the browser default, which several custom buttons (border:none, custom background)
+   suppress or make nearly invisible. One consistent keyboard-focus ring, app-wide. */
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Layout: the whole app rendered as a physical book lying on a desk. .book-wrap gives the
+   desk margin around it; .book is the book itself (shadow = its physical weight, the one
+   deliberate exception to the app's flat/no-shadow rule elsewhere); .book-spine is the visible
+   left-edge binding; .book-pages is where routed content actually renders. --- */
+.app-shell { min-height: 100vh; }
+
+.book-wrap {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
-  transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  justify-content: center;
+  padding: 40px 24px 64px;
 }
-
-.app-shell.collapsed {
-  grid-template-columns: var(--sidebar-w-collapsed) 1fr;
-}
-
-.mobile-top-bar { display: none; }
-
-/* --- Sidebar --- */
-.sidebar {
+.book {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 1080px;
+  align-self: flex-start;
   background: var(--panel);
-  border-right: 1px solid var(--border);
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: 0 18px 40px -14px rgba(28,27,25,0.35), 0 2px 8px rgba(28,27,25,0.12);
+  border-radius: 2px;
+}
+
+/* Watoji-style thread-binding strip along the book's spine — five individual sewn "holes" at
+   fixed positions (10/30/50/70/90%), not a continuous repeating pattern, matching the draft. */
+.book-spine {
+  flex-shrink: 0;
+  width: 28px;
+  background: var(--spine-bg);
+  border-right: 1px dashed var(--border);
+  --hole: radial-gradient(ellipse 2.5px 9px at center,
+    color-mix(in srgb, var(--text) 55%, transparent),
+    color-mix(in srgb, var(--text) 55%, transparent) 60%, transparent 66%);
+  background-image: var(--hole), var(--hole), var(--hole), var(--hole), var(--hole);
+  background-repeat: no-repeat;
+  background-size: 10px 22px;
+  background-position: center 10%, center 30%, center 50%, center 70%, center 90%;
+}
+/* perspective lives here, not on .book — .book contains .shiori-stack (position: fixed), and a
+   perspective on an ancestor makes it the containing block for fixed descendants, which would
+   pin the tabs to the book instead of the viewport. .book-pages doesn't contain the tabs. */
+.book-pages { flex: 1; min-width: 0; perspective: 1800px; }
+
+/* --- Shiori stack: bookmark tabs attached to the book's right edge (opposite the spine),
+   stacked vertically near the top — mirrors the draft's side-mounted index-tab layout. Fixed to
+   the viewport, not book-relative, so they stay reachable while scrolling long content (44
+   weeks, 21 recipes) — the one deliberate practical deviation from the mockup. --- */
+.shiori-stack {
+  position: fixed;
+  top: 64px;
+  right: max(24px, calc(50vw - 540px - 14px));
+  z-index: 250;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  gap: 10px;
+}
+.shiori-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 40px;
+  height: 128px;
+  /* Fixed, not var(--bg) — these ribbons keep their own fill/text regardless of site theme,
+     same reasoning as the sumi accent card below. */
+  color: #F7F3EA;
+  border: none;
+  cursor: pointer;
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  box-shadow: 3px 3px 10px -4px rgba(28,27,25,0.4);
+  transition: width 0.18s ease, transform 0.18s ease;
+  /* Shiori-Lesezeichen-Zuschnitt: unten spitz zulaufend, wie im Entwurf. */
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 50% 100%, 0 90%);
+}
+.shiori-tab:hover { width: 48px; }
+.shiori-tab[aria-pressed="true"] { width: 48px; box-shadow: inset 3px 0 0 #F7F3EA; }
+/* Zweisprachig: das Schriftzeichen bleibt das dekorative Buch-Element (groß, vertikal, wie
+   ein echter Hanko/Kapitel-Stempel), die deutsche Beschriftung darunter ist die eigentliche
+   Wegweisung — unabhängig vom DE/中文-Umschalter der Seite, immer beides sichtbar. */
+.shiori-glyph {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 20px;
+  letter-spacing: 0.2em;
+}
+.shiori-caption {
+  display: block; /* max-width has no effect on the default inline <span> — no wrap, overflow */
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 30px;
+  /* These are single words with no spaces ("REGISTER") — normal wrapping only breaks at
+     whitespace, so without this they'd just overflow the tab instead of wrapping to 2 lines. */
+  overflow-wrap: break-word;
+  opacity: 0.85;
+}
+.shiori-dark { background: #1C1B19; }
+.shiori-seal { background: var(--seal); }
+.shiori-olive { background: #555B4D; }
+
+/* --- Page flip: every swap inside .book-pages (register open/close, route changes) rotates in
+   around the spine-side hinge, like an actual page turning — not a popup entrance, since this is
+   the real in-flow content, not a floating card over a backdrop. --- */
+@keyframes page-flip-in {
+  from { transform: rotateY(-14deg); opacity: 0; }
+  to { transform: rotateY(0deg); opacity: 1; }
+}
+.page-flip {
+  transform-origin: left center;
+  animation: page-flip-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.sidebar-content-scroll {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 16px 24px;
+/* --- Register: turning to the index page of the same book. No backdrop, no floating card, no
+   shadow — it renders as .book-pages' own content exactly like any routed page, so it never
+   reads as a popup. --- */
+.index-overlay {
+  max-width: 1000px;
+  margin: 0 auto;
 }
-
-.app-shell.collapsed .sidebar { padding: 0; align-items: center; }
-.app-shell.collapsed .sidebar-content-scroll { display: none !important; }
+.index-overlay-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.index-overlay-close:hover { color: var(--seal); }
 
 .brand {
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
   font-size: 22px;
-  margin: 24px 16px 20px;
-  background: linear-gradient(135deg, var(--accent), #111827);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  margin: 0 60px 32px 0;
+  min-width: 0;
+}
+.brand-text {
+  color: var(--text);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
-.app-shell.collapsed .brand {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 18px;
-  margin: 40px auto 0;
-  letter-spacing: 0.1em;
-}
-.app-shell.collapsed .brand-suffix { display: none; }
+.index-overlay-content { display: flex; flex-direction: column; }
 
-.sidebar-toggle-btn.desktop-toggle {
-  position: absolute; top: 30px; right: -14px;
-  width: 28px; height: 28px; background: var(--panel);
-  border: 1px solid var(--border); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 1000; transition: transform 0.2s, background 0.2s;
+.index-overlay-stats {
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
 }
-.sidebar-toggle-btn.desktop-toggle:hover { transform: scale(1.1); background: var(--accent-light); }
 
-.toggle-icon { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 6px solid var(--text); }
-.app-shell.collapsed .toggle-icon { border-right: none; border-left: 6px solid var(--text); }
+/* Small caption above each register chapter — same device as the style-guide proposal's
+   "概要 / overview" labels: a Mincho micro-label naming the section, not just a plain heading. */
+.index-section-label {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.index-utility-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 20px;
+}
+
 
 .sidebar-top { margin-bottom: 20px; }
 .lang-switch-container { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -125,53 +329,107 @@ a { color: inherit; }
 
 .sidebar-nav-item { margin-bottom: 12px; }
 
-.sidebar-home-btn {
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
-  padding: 10px; 
-  background: #f3f4f6; 
-  color: #111827 !important; 
-  border-radius: 12px; 
-  border: 1px solid var(--border);
-  text-decoration: none; 
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-.sidebar-home-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
-}
-
-.sidebar-bookmark-btn {
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
-  padding: 10px; 
-  background: #2aa769; /* Explicit Green */
-  color: #fff !important; 
-  border-radius: 12px; 
-  text-decoration: none; 
-  font-weight: 600;
-  font-size: 14px;
-  box-shadow: 0 4px 12px rgba(42,167,105,0.2);
-  transition: all 0.2s;
-}
-.sidebar-bookmark-btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-}
-.app-shell.collapsed .sidebar-nav-item .sidebar-nav-text { display: none; }
 
 .year { margin-bottom: 8px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--panel); }
-.year summary { padding: 12px; font-weight: 700; font-size: 14px; cursor: pointer; list-style: none; user-select: none; }
+.year summary {
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 19px;
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
 .year summary:hover { background: rgba(0,0,0,0.02); }
 .year-list { list-style: none; padding: 0 6px 8px; margin: 0; }
 .year-list li a { display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: all 0.2s; }
 .year-list li a:hover { background: var(--accent-light); color: var(--accent); }
+
+/* Book-index style week list — big number where a page number would sit in a table of
+   contents, hairline rule between entries instead of a filled hover pill. */
+.nav-list { list-style: none; padding: 0; margin: 0; position: relative; }
+.nav-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 4px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  transition: color 0.15s;
+  /* reset for the one nav-row rendered as a <button> ("Zum aktuellen Plan") */
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nav-list li:last-child .nav-row { border-bottom: none; }
+
+/* Wochenliste als zweispaltiges Register statt einer langen Einzelspalte — liest sich mehr wie
+   ein echtes Buch-Inhaltsverzeichnis, halbiert die Scrolllänge bei 40+ Wochen im Jahr. */
+.week-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+.week-list li:last-child .nav-row { border-bottom: 1px solid var(--border); }
+
+.nav-row:hover { color: var(--seal); }
+.nav-row:hover .index-num { color: var(--seal); }
+.nav-lead {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 1.6em;
+  text-align: right;
+  line-height: 1;
+}
+.nav-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.nav-title {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-sub { font-size: 10.5px; color: var(--muted); letter-spacing: 0.03em; }
+/* Icon rows want vertical centering; numeral rows (week list) want baseline so the big figure
+   sits on the same line as the title text — .nav-row defaults to baseline, override per-row. */
+.nav-row:has(.nav-icon) { align-items: center; }
+
+.nav-row-current .nav-lead,
+.nav-row-current .nav-icon,
+.nav-row-current .nav-title { color: var(--seal); }
+
+/* Icon slot for the top-level nav rows (Home, Bookmarks, Preppen, ...) — same column width as
+   the numeral slot used by the week list, so both line up, but centered/muted instead of a big
+   right-aligned figure. Color follows currentColor, so :hover / .nav-row-current above just work. */
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  color: var(--muted);
+}
+
+/* Thin dotted margin rule along the sidebar's inner edge — a nod to the index-page margin
+   marker in the reference. */
+.sidebar-content-scroll { position: relative; }
+.sidebar-content-scroll::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 6px;
+  bottom: 0;
+  width: 0;
+  border-right: 1px dotted var(--border);
+  pointer-events: none;
+}
 
 .sidebar-support-btn {
   display: flex;
@@ -180,13 +438,16 @@ a { color: inherit; }
   gap: 8px;
   margin-top: 12px;
   padding: 11px 12px;
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--accent-warm);
   color: #fff !important;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(224,122,154,0.22);
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(181,67,47,0.22);
   transition: transform 0.2s, filter 0.2s;
 }
 
@@ -212,51 +473,193 @@ a { color: inherit; }
 /* --- HOME PAGE STYLES --- */
 .home-page { padding-bottom: 80px; }
 
-.hero {
-  padding: 100px 20px;
-  text-align: center;
-  background-color: var(--panel);
-  background-image: linear-gradient(rgba(17, 24, 39, 0.6), rgba(17, 24, 39, 0.7)), url('/hero-bg.webp');
-  background-size: cover;
-  background-position: center;
-  border-radius: 32px;
+/* --- Cover: the book's title page, laid out nearly 1:1 after the user's draft — hanko top-left,
+   volume label top-right, centered sepia-toned portrait, italic title, hairline rule, subtitle,
+   vertical tategaki title along the right margin. --- */
+.cover {
+  padding: 56px 40px 80px;
+  min-height: 78vh;
+  display: flex;
+  flex-direction: column;
   margin-bottom: 60px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
+.cover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+.cover-volume {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cover-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+.cover-portrait {
+  width: min(400px, 70vw);
+  height: min(400px, 70vw);
+  margin-bottom: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 0.45s ease, box-shadow 0.45s ease;
+}
+/* Hover or click "morphs" the circular crop open into the full, uncropped source image —
+   2816×1536, so the expanded box keeps that exact aspect ratio at every viewport width. */
+.cover-portrait:hover,
+.cover-portrait.is-open {
+  width: min(680px, 92vw);
+  height: min(371px, 50.2vw);
+  border-radius: 6px;
+  box-shadow: 0 24px 60px -16px rgba(28, 27, 25, 0.4);
+}
+.cover-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  transition: border-radius 0.45s ease;
+}
+.cover-portrait:hover::after,
+.cover-portrait.is-open::after {
+  border-radius: 3px;
+}
+.cover-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* hero-bg.webp has its own painted paper-mat border baked in; object-fit:cover barely crops
+     vertically at this circle's aspect ratio, so that mat shows as a pale ring — jarring once
+     the desk goes dark. Scaling past it keeps only the actual scene inside the circle. Morphing
+     open drops the zoom again since the box itself now matches the image's own aspect ratio. */
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+  transform: scale(1.42);
+  /* Sepia/grayscale wash so the illustration reads as an aged photograph on the title page,
+     not a live banner image. */
+  filter: grayscale(20%) sepia(18%);
+}
+.cover-portrait:hover img,
+.cover-portrait.is-open img {
+  transform: scale(1);
+  filter: none;
+}
+.cover-title {
+  font-size: 42px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+.cover-rule { width: 1px; height: 44px; background: var(--border); margin-bottom: 20px; }
+.cover-subtitle {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 380px;
+  margin: 0 0 32px;
+}
+.cover-kicker {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.cover-tategaki {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  opacity: 0.55;
+  display: none;
+}
+@media (min-width: 900px) { .cover-tategaki { display: block; } }
 
-.hero-title { 
-  font-size: 48px; 
-  font-weight: 900; 
-  margin-bottom: 8px; 
-  color: #ffffff; 
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5); 
-}
-.hero-subtitle { 
-  font-size: 24px; 
-  color: #f9a8d4; /* Helles Pink/Sakura-Farbe */
-  font-weight: 600; 
-  margin-bottom: 24px; 
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
-}
-.hero-text { 
-  max-width: 700px; 
-  margin: 0 auto 40px; 
-  font-size: 18px; 
-  line-height: 1.6; 
-  color: #f3f4f6; 
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5); 
-}
-
-.hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .btn-primary, .btn-secondary, .btn-support {
-  padding: 14px 28px; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;
+  padding: 13px 26px; border-radius: 0; font-weight: 600; font-size: 14px; letter-spacing: 0.03em; cursor: pointer; transition: filter 0.2s, background 0.2s; border: 1px solid transparent; text-decoration: none;
 }
-.btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(42,167,105,0.3); }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(42,167,105,0.4); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); }
 .btn-secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { background: var(--accent-light); }
-.btn-support { background: var(--accent-warm); color: #fff; box-shadow: 0 4px 15px rgba(224,122,154,0.3); }
-.btn-support:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.btn-secondary:hover { background: var(--panel); }
+.btn-support { background: var(--accent-warm); color: #fff; }
+.btn-support:hover { filter: brightness(1.08); }
+
+/* --- Preppen: same register/book language as everywhere else — flat tab switcher, hairline
+   filter bar, flat cards, no rounded pills. --- */
+.prep-header { margin-bottom: 28px; }
+.prep-kicker {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-size: 11.5px; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 8px;
+}
+.prep-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+}
+.prep-tab {
+  padding: 9px 18px; border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  font-weight: 600; font-size: 13.5px; cursor: pointer; transition: border-color 0.15s, color 0.15s;
+}
+/* --frost, not --seal — Preppen is its own chapter with its own "cold storage" identity instead
+   of repeating the torii-red accent used for the rest of the app. */
+.prep-tab[aria-pressed="true"] { border-color: var(--frost); color: var(--frost); }
+.prep-select {
+  margin-left: auto; padding: 9px 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif; font-size: 14px;
+}
+
+/* Mini-Register: Kapitelübersicht mit Sprunglinks vor den eigentlichen Karten — gleiche Idee
+   wie das 一·二·三-Register im Hauptmenü, hier für die Preppen-Kapitel. */
+.prep-index {
+  display: grid; gap: 0; margin-bottom: 32px; border: 1px solid var(--border); background: var(--panel);
+}
+.prep-index-row {
+  display: flex; align-items: baseline; gap: 12px; padding: 10px 16px;
+  text-decoration: none; color: var(--text); border-bottom: 1px solid var(--border);
+  transition: color 0.15s, background 0.15s;
+}
+.prep-index-row:last-child { border-bottom: none; }
+.prep-index-row:hover { color: var(--frost); background: var(--frost-light); }
+.prep-index-num {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-size: 17px; color: var(--frost); min-width: 1.6em;
+}
+.prep-index-count { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+.prep-type-label {
+  display: flex; align-items: baseline; gap: 10px;
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 18px;
+}
+.prep-type-num { font-size: 19px; color: var(--frost); letter-spacing: normal; text-transform: none; }
+
+/* Left edge reads like a storage-jar/freezer-bag label, not just another flat card. */
+.prep-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--frost); padding: 22px; }
+.prep-card h3 { margin: 0; font-size: 19px; }
+.prep-tag { display: inline-block; padding: 2px 10px; background: var(--chip-bg); border: 1px solid var(--border); font-size: 12px; margin-right: 6px; margin-bottom: 6px; }
+.prep-meta-box { margin-top: 16px; padding: 12px 16px; background: var(--frost-light); display: grid; gap: 6px; }
 
 .section-kicker {
   margin-bottom: 10px;
@@ -293,7 +696,7 @@ a { color: inherit; }
   padding: 24px;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 0;
   box-shadow: var(--shadow);
   text-align: left;
 }
@@ -302,13 +705,14 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   margin-bottom: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 800;
+  border-radius: 0;
+  background: var(--seal);
+  color: var(--bg);
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-weight: 600;
 }
 
 .step-card h3 {
@@ -331,14 +735,16 @@ a { color: inherit; }
   align-items: stretch;
   margin-bottom: 72px;
   padding: 28px;
-  background: #111827;
-  color: #fff;
-  border-radius: 24px;
-  box-shadow: 0 12px 30px rgba(17,24,39,0.18);
+  /* Fixed sumi ink, not var(--text)/var(--bg) — this card is deliberately dark in BOTH themes
+     (every child below assumes a dark backdrop via hardcoded white-family colors). Using the
+     swappable vars inverted the whole card to a glaring light panel in dark mode. */
+  background: #1C1B19;
+  color: #F7F3EA;
+  border-radius: 0;
 }
 
 .current-plan-section .section-kicker {
-  color: #f9a8d4;
+  color: #E0A6A0; /* muted rose derived from the torii-red accent, legible on dark sumi */
 }
 
 .current-plan-section h2 {
@@ -381,16 +787,15 @@ a { color: inherit; }
   min-height: 92px;
   padding: 16px;
   border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
+  border-radius: 0;
+  background: rgba(255,255,255,0.06);
+  color: #F7F3EA;
   text-decoration: none;
-  transition: transform 0.2s, background 0.2s;
+  transition: background 0.2s;
 }
 
 .current-plan-recipes a:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.12);
 }
 
 .current-plan-recipes strong {
@@ -439,16 +844,15 @@ a { color: inherit; }
   flex-direction: column;
   padding: 18px;
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 0;
   background: var(--panel);
   box-shadow: var(--shadow);
   text-decoration: none;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: border-color 0.2s;
 }
 
 .latest-plan-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(42,167,105,0.35);
+  border-color: var(--accent);
 }
 
 .latest-plan-card span {
@@ -488,9 +892,9 @@ a { color: inherit; }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 80px;
 }
 .cat-card {
-  padding: 32px; background: var(--panel); border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.2s;
+  padding: 32px; background: var(--panel); border-radius: 0; border: 1px solid var(--border); box-shadow: var(--shadow); transition: border-color 0.2s;
 }
-.cat-card:hover { transform: translateY(-5px); }
+.cat-card:hover { border-color: var(--accent); }
 .cat-icon { font-size: 40px; margin-bottom: 16px; }
 .cat-card h3 { font-size: 20px; margin-bottom: 12px; color: var(--text); }
 .cat-card p { font-size: 15px; line-height: 1.5; color: var(--muted); }
@@ -576,12 +980,11 @@ a { color: inherit; }
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--accent);
   color: #fff;
   text-decoration: none;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(42,167,105,0.2);
 }
 
 .pinboard-create {
@@ -591,7 +994,7 @@ a { color: inherit; }
   margin-bottom: 24px;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 0;
   background: var(--panel);
   box-shadow: var(--shadow);
 }
@@ -601,14 +1004,14 @@ a { color: inherit; }
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #f9fafb;
+  border-radius: 0;
+  background: var(--bg);
   color: var(--text);
   font: inherit;
 }
 
 .pinboard-create input:focus {
-  outline: 2px solid rgba(42,167,105,0.22);
+  outline: 2px solid var(--accent-light);
   border-color: var(--accent);
 }
 
@@ -747,47 +1150,19 @@ a { color: inherit; }
 
 /* --- MOBILE OPTIMIERUNGEN --- */
 @media (max-width: 768px) {
-  .app-shell { display: block; }
-  .desktop-toggle { display: none !important; }
+  /* On a small screen the desk margin/shadow just wastes space — let the book fill the
+     viewport edge-to-edge and drop the spine so the shiori tabs have clearance instead. */
+  .book-wrap { padding: 0; }
+  .book { max-width: 100%; box-shadow: none; border-radius: 0; }
+  .book-spine { display: none; }
+  .shiori-stack { top: 40px; right: 0; }
+  .shiori-tab { width: 32px; height: 96px; gap: 4px; }
+  .shiori-glyph { font-size: 16px; }
+  .shiori-caption { font-size: 7.5px; max-width: 24px; }
+  .week-list { grid-template-columns: 1fr; }
+  .brand { margin-right: 50px; font-size: 19px; }
 
-  .mobile-top-bar {
-    display: flex; align-items: center; position: fixed;
-    top: 0; left: 0; right: 0; height: 60px;
-    background: var(--panel); border-bottom: 1px solid var(--border);
-    padding: 0 16px; z-index: 1000;
-  }
-
-  .mobile-brand { flex: 1; text-align: center; font-weight: 800; color: var(--accent); margin-right: 40px; }
-
-  .sidebar-toggle-btn {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: static !important; width: 40px !important; height: 40px !important;
-    background: var(--accent-light) !important; border: none !important; border-radius: 10px !important;
-    box-shadow: none !important;
-  }
-  
-  .sidebar-toggle-btn .toggle-icon {
-    display: block !important;
-    width: 20px !important; height: 2px !important;
-    background: var(--accent) !important;
-    box-shadow: 0 -6px 0 var(--accent), 0 6px 0 var(--accent) !important;
-    border: none !important;
-  }
-
-  .sidebar {
-    position: fixed; top: 60px; left: -100%;
-    width: 280px; height: calc(100vh - 60px);
-    transition: left 0.3s ease;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-    background: var(--panel);
-  }
-
-  .sidebar-content-scroll { display: block !important; padding: 16px; }
-  .app-shell:not(.collapsed) .sidebar { left: 0; }
-
-  .main { padding: 75px 8px 40px !important; }
+  .main { padding: 56px 8px 40px !important; }
   .main-inner { width: 100% !important; max-width: 100% !important; padding: 0 !important; }
   .pinboard-page { padding: 0 4px 32px !important; }
   .pinboard-header { align-items: stretch; flex-direction: column; }
@@ -809,10 +1184,9 @@ a { color: inherit; }
     box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
   }
 
-  .hero { padding: 40px 16px; margin-bottom: 40px; }
-  .hero-title { font-size: 32px; color: #fff; }
-  .hero-subtitle { font-size: 18px; color: #f9a8d4; }
-  .hero-text { font-size: 15px; color: #f3f4f6; }
+  .cover { padding: 32px 20px 48px; min-height: auto; }
+  .cover-title { font-size: 30px; }
+  .cover-subtitle { font-size: 14px; }
   .how-it-works,
   .current-plan-section,
   .latest-plans-section,
@@ -871,47 +1245,38 @@ a { color: inherit; }
   .mkt-art { margin: -16px -16px 12px -16px !important; border-radius: 20px 20px 0 0 !important; }
 
   .back-to-top { z-index: 2000 !important; bottom: 20px; right: 20px; opacity: 1 !important; visibility: visible !important; }
-
-  .app-shell:not(.collapsed)::after {
-    content: ""; position: fixed; inset: 60px 0 0 0;
-    background: rgba(0,0,0,0.3); backdrop-filter: blur(2px); z-index: 90;
-  }
 }
 
 /* --- Dark Mode Overrides --- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1a1d22;
-    --panel: #242830;
-    --text: rgba(255, 255, 255, 0.87);
-    --muted: #9ca3af;
-    --border: rgba(255, 255, 255, 0.12);
-    --accent: #34d399;
-    --accent-light: rgba(52, 211, 153, 0.1);
-    --accent-warm: #f472b6;
-    --shadow: 0 8px 24px rgba(0,0,0,.25);
+    --bg: #1A1917;
+    --panel: #232220;
+    --text: rgba(247, 243, 234, 0.92);
+    /* Was #9C9488 → 5.3:1 on --panel, borderline for the section kickers/dates/icons that lean
+       on this color everywhere in the register. Raised to 7.4:1. */
+    --muted: #B8B1A0;
+    --border: rgba(247, 243, 234, 0.14);
+    --accent: #7C9BC4;
+    --accent-light: rgba(124, 155, 196, 0.12);
+    --accent-warm: #D97A63;
+    --seal: #D97A63;
+    --frost: #8FC0D2;
+    --frost-light: rgba(143,192,210,.12);
+    --shadow: none;
+    --chip-bg: rgba(247,243,234,.06);
+    --btn-border: rgba(247,243,234,.18);
+    --desk-bg: #101010;
+    --spine-bg: #1F1E1B;
   }
 
-  /* Specific overrides for dark mode if variables aren't enough */
-  .brand {
-    background: linear-gradient(135deg, var(--accent), #ffffff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
+  .brand-text { color: var(--text); }
+
   .lang-toggle {
     background: #313640;
     border: 1px solid rgba(255,255,255,0.1);
   }
   
-  .sidebar-home-btn {
-    background: #313640;
-    color: var(--text) !important;
-  }
-   .sidebar-home-btn:hover {
-    background: #404652;
-  }
-
   .pinboard-create input,
   .pinboard-recipes li:hover {
     background: #313640;

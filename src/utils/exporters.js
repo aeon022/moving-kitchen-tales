@@ -202,3 +202,48 @@ function escapeHtml(s = "") {
     m === "&" ? "&amp;" : m === "<" ? "&lt;" : m === ">" ? "&gt;" : m === '"' ? "&quot;" : "&#39;"
   );
 }
+
+// 6) Einkaufslisten-Export — kein Backend nötig, funktioniert für jeden Besucher der Seite
+//    (kein Google/Apple-OAuth, keine API-Keys — nur Web-Standards).
+export function buildShoppingListText(listGroups, title = "Einkaufsliste") {
+  const lines = [title, ""];
+  for (const [group, items] of Object.entries(listGroups)) {
+    if (!items || !items.length) continue;
+    lines.push(`# ${group}`);
+    for (const it of items) {
+      const qty = Math.round((it.qty ?? 0) * 10) / 10;
+      lines.push(`- ${it.label} – ${qty} ${it.unit}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").trim() + "\n";
+}
+
+// Teilen/Kopieren mit abgestuftem Fallback: Web Share (Handy: direkt an Notizen/Erinnerungen/
+// WhatsApp/etc. schicken) -> Zwischenablage -> manueller prompt() als letzte Rettung.
+export async function shareOrCopyText(text, title = "Einkaufsliste") {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text });
+      return { ok: true, method: "share" };
+    } catch (e) {
+      if (e?.name === "AbortError") return { ok: false, method: "share-cancelled" };
+      // fällt durch auf Zwischenablage, falls Share aus anderem Grund fehlschlägt
+    }
+  }
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return { ok: true, method: "clipboard" };
+    } catch {}
+  }
+  window.prompt("Kopieren mit Cmd/Strg+C:", text);
+  return { ok: true, method: "prompt" };
+}
+
+export function downloadTextFile(text, filename = "einkaufsliste.txt") {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  triggerDownload(url, filename);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}

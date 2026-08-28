@@ -3,6 +3,9 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { Routes, Route, Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useBookmarks, Bookmark, BookmarkList } from "./hooks/useBookmarks";
 import { PinnwandPage } from "./PinnwandPage";
+import { PreppenPage } from "./PreppenPage";
+import { RecipeDatabasePage } from "./RecipeDatabasePage";
+import { PLAN_MANIFEST } from "./plans/manifest";
 
 type Lang = "de" | "zh";
 const LANG_KEY = "mkt.lang";
@@ -26,6 +29,50 @@ type PlanMeta = {
 };
 type PlanModule = { default: React.ComponentType<any>; meta: PlanMeta; DATA?: Recipe[] };
 
+// Perf: the recipe text + component code for every plan used to load eagerly on first paint,
+// growing with every new week forever. Meta (title/date/id) stays eager — it's cheap and the
+// sidebar/homepage need it for all plans at once. Full DATA + the component only load when a
+// specific plan is actually opened, or (for search) the first time the user types a query.
+export const planDataCache = new Map<string, PlanModule>();
+export async function loadPlanData(record: PlanRecord): Promise<PlanModule> {
+  const cached = planDataCache.get(record.slug);
+  if (cached) return cached;
+  const mod = await record.load();
+  planDataCache.set(record.slug, mod);
+  return mod;
+}
+function usePlanData(record: PlanRecord | null | undefined): PlanModule | null {
+  const [mod, setMod] = useState<PlanModule | null>(record ? planDataCache.get(record.slug) ?? null : null);
+  useEffect(() => {
+    if (!record) { setMod(null); return; }
+    const cached = planDataCache.get(record.slug);
+    if (cached) { setMod(cached); return; }
+    let alive = true;
+    setMod(null);
+    loadPlanData(record).then((m) => { if (alive) setMod(m); });
+    return () => { alive = false; };
+  }, [record?.slug]);
+  return mod;
+}
+
+
+// --- Sidebar-Icons (Stroke-SVG statt Emoji/Textlabel — vorher standen hier "home"/"prep"/"db"
+// als winzige Caption-Wörter neben den großen Mincho-Titeln, sah nach vergessenem Debug-Label
+// aus statt nach einem Icon-System.) ---
+const NAV_ICON_PATHS: Record<string, React.ReactNode> = {
+  home: <><path d="M3 12l9-9 9 9" /><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" /></>,
+  "arrow-right": <><line x1="4" y1="12" x2="20" y2="12" /><polyline points="14 6 20 12 14 18" /></>,
+  star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+  box: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
+  database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>,
+};
+function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {NAV_ICON_PATHS[name]}
+    </svg>
+  );
+}
 
 // --- Back to Top Komponente ---
 function BackToTop() {
@@ -68,6 +115,11 @@ function baseIdFromSlug(slug: string) {
   return slug.replace(/-zh$/i, "");
 }
 
+function weekNumberOf(meta: PlanMeta): string {
+  const m = (meta.title ?? "").match(/(\d+)/);
+  return m ? m[1] : "–";
+}
+
 function getPlanYear(startDateStr: string) {
   if (!startDateStr) return new Date().getFullYear();
   const [y, m, d] = startDateStr.split("-").map(Number);
@@ -84,14 +136,13 @@ function pickCurrent(plans: PlanRecord[], lang: Lang) {
   return (pastOrToday.length ? pastOrToday[pastOrToday.length - 1] : list[0]) ?? null;
 }
 
-type PlanRecord = {
+export type PlanRecord = {
   slug: string;
   baseId: string;
   lang: Lang;
   startDate: string;
   meta: PlanMeta;
-  Component: React.ComponentType<any>;
-  recipes: Recipe[];
+  load: () => Promise<PlanModule>;
 };
 
 // ---- Lang Context ----
@@ -122,23 +173,27 @@ function LangProvider({ children }: { children: React.ReactNode }) {
   return <LangCtx.Provider value={{ lang, setLang }}>{children}</LangCtx.Provider>;
 }
 
-const planModules = import.meta.glob("./plans/**/*.{jsx,tsx}", { eager: true }) as Record<string, PlanModule>;
+// Only the manifest (cheap: id/title/date, no recipe text) is eager. The actual week files are
+// ONLY ever dynamically imported below — if anything else in the app statically/eagerly imported
+// one of them too, bundlers would just fold it into the main chunk anyway and this whole
+// exercise would be pointless. Regenerate the manifest after adding a week: gen-plan-manifest.mjs.
+const planLoaders = import.meta.glob("./plans/{2025,2026}/**/*.{jsx,tsx}") as Record<string, () => Promise<PlanModule>>;
 
 function usePlans(): PlanRecord[] {
   return useMemo(() => {
     const out: PlanRecord[] = [];
-    for (const mod of Object.values(planModules)) {
-      if (!mod?.default || !mod?.meta?.id || !mod?.meta?.startDate) continue;
-      const lang = normalizeLang(mod.meta.lang);
-      const slug = slugFor(mod.meta, lang);
+    for (const entry of PLAN_MANIFEST) {
+      const lang = normalizeLang(entry.lang);
+      const slug = slugFor(entry, lang);
+      const load = planLoaders[entry.path];
+      if (!load) { console.warn("manifest entry has no matching file:", entry.path); continue; }
       out.push({
         slug,
-        baseId: mod.meta.id,
+        baseId: entry.id,
         lang,
-        startDate: mod.meta.startDate,
-        meta: mod.meta,
-        Component: mod.default,
-        recipes: mod.DATA || [],
+        startDate: entry.startDate,
+        meta: entry,
+        load,
       });
     }
     out.sort((a, b) => a.startDate.localeCompare(b.startDate));
@@ -147,7 +202,7 @@ function usePlans(): PlanRecord[] {
 }
 
 // --- Sidebar (Mobile Optimized) ---
-function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], collapsed: boolean, setCollapsed: (v:boolean)=>void }) {
+function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => void }) {
   const { lang, setLang } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
@@ -161,22 +216,42 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
     return Array.from(ys).sort((a,b)=>b-a);
   }, [plans]);
 
+  const currentPlan = useMemo(() => pickCurrent(plans, lang), [plans, lang]);
+
   const [openYears, setOpenYears] = useState<Record<number, boolean>>({});
 
+  // Nur das Jahr mit dem aktuellen Plan startet aufgeklappt — sonst wird die Liste bei mehr
+  // Jahren schnell zur Wall of Text. Ältere Jahre bleiben eingeklappt, bis man sie anklickt.
   useEffect(() => {
+    const currentYear = currentPlan ? getPlanYear(currentPlan.startDate) : years[0];
     const initial: Record<number, boolean> = {};
-    years.forEach(y => initial[y] = true);
+    years.forEach(y => initial[y] = y === currentYear);
     setOpenYears(initial);
-  }, [years.join(",")]);
+  }, [years.join(","), currentPlan?.slug]);
 
-  // Auf Mobile: Sidebar beim Start automatisch einklappen (verstecken)
+  // Esc schließt das Register wie jedes andere Overlay.
   useEffect(() => {
-    if (isMobile()) {
-      setCollapsed(true);
-    }
-  }, []);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const filtered = plans.filter(p => p.lang === lang);
+
+  // Recipe search needs every plan's full data, which we otherwise only load on demand —
+  // fetch it in bulk the first time the user actually searches, not on every page load.
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchDataVersion, setSearchDataVersion] = useState(0);
+  useEffect(() => {
+    if (!search.trim()) return;
+    const missing = plans.filter(p => p.lang === lang && !planDataCache.has(p.slug));
+    if (missing.length === 0) return;
+    setSearchLoading(true);
+    Promise.all(missing.map(p => loadPlanData(p))).then(() => {
+      setSearchLoading(false);
+      setSearchDataVersion(v => v + 1);
+    });
+  }, [search, plans, lang]);
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -184,7 +259,9 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
     const res: { plan: PlanRecord, recipe: Recipe }[] = [];
     for (const p of plans) {
       if (p.lang !== lang) continue;
-      for (const r of p.recipes) {
+      const data = planDataCache.get(p.slug)?.DATA;
+      if (!data) continue;
+      for (const r of data) {
         if (
           r.title.toLowerCase().includes(q) ||
           (r.desc && r.desc.toLowerCase().includes(q)) ||
@@ -195,7 +272,8 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
       }
     }
     return res.slice(0, 20); // Limit to 20 results
-  }, [search, plans, lang]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, plans, lang, searchDataVersion]);
 
   const toggleLang = () => {
     const target = lang === "de" ? "zh" : "de";
@@ -209,72 +287,86 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
     setLang(target);
   };
 
-  // Hilfsfunktion: Auf Mobile Sidebar schließen nach Klick
-  const handleLinkClick = () => {
-    if (isMobile()) {
-      setCollapsed(true);
-    }
-  };
+  // Register schließt sich nach jeder Auswahl — egal ob Desktop oder Mobile, kein separater
+  // Collapse-Zustand mehr nötig.
+  const handleLinkClick = () => onClose();
 
   return (
-    <aside className="sidebar">
-      {/* Desktop Toggle Button */}
-      <button 
-        className="sidebar-toggle-btn desktop-toggle" 
-        onClick={() => setCollapsed(!collapsed)} 
-        title={collapsed ? "Ausklappen" : "Einklappen"}
-      >
-        <span className="toggle-icon"></span>
+    <aside className="index-overlay">
+      <button type="button" className="index-overlay-close" onClick={onClose}>
+        <span aria-hidden="true">←</span>
+        <span>{lang === "de" ? "Zurück" : "Back"}</span>
       </button>
 
-      {/* Titel mit Span für Ausblenden */}
-      <div className="brand">
-        MovingKitchenTales
-      </div>
-
-      <div className="sidebar-content-scroll">
-        <div className="sidebar-nav-item" style={{ padding: "0 12px 12px" }}>
-          <Link 
-            to="/" 
-            onClick={handleLinkClick}
-            className="sidebar-home-btn"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
-              <path d="M3 10l9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <path d="M9 21v-3a3 3 0 0 1 6 0v3" />
-              <path d="M6 21l-1 2h2" />
-              <path d="M18 21l1 2h-2" />
-              <path d="M15 3l1-1" />
-            </svg>
-            <span className="sidebar-nav-text">{lang === "de" ? "Startseite" : "首页"}</span>
-          </Link>
+        {/* Titel mit Span für Ausblenden */}
+        <div className="brand">
+          <span className="seal-mark" aria-hidden="true"><span>厨</span><span>房</span></span>
+          <span className="brand-text">MovingKitchenTales</span>
         </div>
+        <p className="index-overlay-stats">
+          {filtered.length} {lang === "de" ? "Wochen" : "weeks"} · {years.length} {lang === "de" ? "Jahre" : "years"} · {bookmarkLists.length} {lang === "de" ? "Pinnwände" : "boards"}
+        </p>
 
-        <div className="sidebar-top">
-          <div className="lang-switch-container">
-            <div 
-              className="lang-toggle" 
-              data-lang={lang} 
-              data-active={lang === "zh"}
-              onClick={toggleLang}
-              title="Sprache umschalten / Switch Language"
-            >
-              <div className="lang-toggle-handle" data-text={lang.toUpperCase()} />
-            </div>
-            <span className="lang-label" style={{fontSize: 13, fontWeight: 500}}>
-              {lang === "de" ? "Deutsch" : "中文"}
-            </span>
+        <div className="index-overlay-content">
+        <div className="index-section-label">一 · 导航 · Navigation</div>
+        <ul className="nav-list">
+          <li>
+            <Link to="/" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="home" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Startseite" : "首页"}</span></span>
+            </Link>
+          </li>
+          {currentPlan && (
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenYears(prev => ({ ...prev, [getPlanYear(currentPlan.startDate)]: true }));
+                  navigate(`/plan/${currentPlan.slug}?lang=${lang}`);
+                  handleLinkClick();
+                }}
+                className="nav-row"
+              >
+                <span className="nav-icon"><NavIcon name="arrow-right" /></span>
+                <span className="nav-body"><span className="nav-title">{lang === "de" ? "Zum aktuellen Plan" : "Jump to current plan"}</span></span>
+              </button>
+            </li>
+          )}
+          <li>
+            <Link to="/bookmarks" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="star" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Meine Merkliste" : "我的收藏"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/preppen" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="box" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Preppen" : "Meal Prep"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/rezepte" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="database" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezept-Datenbank" : "Recipe database"}</span></span>
+            </Link>
+          </li>
+        </ul>
+
+        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
+
+        <div className="index-utility-row">
+          <div
+            className="lang-toggle"
+            data-lang={lang}
+            data-active={lang === "zh"}
+            onClick={toggleLang}
+            title="Sprache umschalten / Switch Language"
+          >
+            <div className="lang-toggle-handle" data-text={lang.toUpperCase()} />
           </div>
-        </div>
-
-        <div className="sidebar-nav-item" style={{ padding: "0 12px 12px" }}>
-          <Link 
-            to="/bookmarks" 
-            onClick={handleLinkClick}
-            className="sidebar-bookmark-btn"
-          >
-            <span>⭐</span> <span className="sidebar-nav-text">{lang === "de" ? "Meine Merkliste" : "我的收藏"}</span>
-          </Link>
+          <span className="lang-label" style={{fontSize: 13, fontWeight: 500}}>
+            {lang === "de" ? "Deutsch" : "中文"}
+          </span>
         </div>
 
         {/* Suche */}
@@ -286,16 +378,22 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: "100%",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-              background: "var(--panel)",
+              padding: "8px 4px",
+              borderRadius: 0,
+              border: "none",
+              borderBottom: "1px solid var(--border)",
+              background: "transparent",
               color: "var(--text)",
+              fontSize: 13,
             }}
           />
           {search.trim() && (
             <div style={{ marginTop: 8, maxHeight: "300px", overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--panel)" }}>
-              {searchResults.length === 0 ? (
+              {searchLoading ? (
+                <div style={{ padding: 8, fontSize: 13, color: "var(--muted)" }}>
+                  {lang === "de" ? "Lädt Rezepte…" : "Loading recipes…"}
+                </div>
+              ) : searchResults.length === 0 ? (
                 <div style={{ padding: 8, fontSize: 13, color: "var(--muted)" }}>Keine Treffer</div>
               ) : (
                 searchResults.map((res, idx) => (
@@ -317,6 +415,9 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
           )}
         </div>
 
+        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
+        <div className="index-section-label">二 · 收藏 · Pinnwand</div>
+
         {/* Pinnwand-Listen */}
         <details className="year" open>
           <summary>{lang === "de" ? "Pinnwand" : "Pinboard"}</summary>
@@ -327,16 +428,15 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
               </Link>
             </div>
           ) : (
-            <ul className="year-list">
+            <ul className="nav-list">
               {bookmarkLists.map((list: BookmarkList) => (
                 <li key={list.id}>
-                  <Link 
-                    to="/pinnwand"
-                    onClick={handleLinkClick}
-                    style={{ display: "flex", flexDirection: "column", gap: 2 }}
-                  >
-                    <span style={{ fontWeight: 600 }}>⭐ {list.name}</span>
-                    <span style={{ fontSize: 11, opacity: 0.7 }}>{list.bookmarks.length} Rezepte</span>
+                  <Link to="/pinnwand" onClick={handleLinkClick} className="nav-row">
+                    <span className="nav-lead">{list.bookmarks.length}</span>
+                    <span className="nav-body">
+                      <span className="nav-title">{list.name}</span>
+                      <span className="nav-sub">{lang === "de" ? "Rezepte" : "recipes"}</span>
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -344,9 +444,12 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
           )}
         </details>
 
+        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
+        <div className="index-section-label">三 · 索引 · Wochen</div>
+
         <div className="year-controls">
-          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), true])))}>Alle +</button>
-          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), false])))}>Alle -</button>
+          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), true])))}>{lang === "de" ? "Alle +" : "全部展开"}</button>
+          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), false])))}>{lang === "de" ? "Alle -" : "全部收起"}</button>
         </div>
 
         {years.map(y => (
@@ -359,17 +462,29 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
                setOpenYears(prev => ({ ...prev, [y]: isOpen }));
             }}
           >
-            <summary>{y}</summary>
-            <ul className="year-list">
+            <summary>
+              {y}
+              {currentPlan && y !== getPlanYear(currentPlan.startDate) && (
+                <span style={{ marginLeft: 8, fontSize: 11, color: "var(--muted)", fontWeight: 400 }}>
+                  {lang === "de" ? "Archiv" : "Archive"}
+                </span>
+              )}
+            </summary>
+            <ul className="nav-list week-list">
               {filtered
                 .filter(p => getPlanYear(p.startDate) === y)
                 .map(p => (
                   <li key={p.slug}>
-                    <Link 
+                    <Link
                       to={`/plan/${p.slug}?lang=${lang}`}
-                      onClick={handleLinkClick} 
+                      onClick={handleLinkClick}
+                      className={`nav-row${currentPlan?.slug === p.slug ? " nav-row-current" : ""}`}
                     >
-                      {p.meta.sidebar || `${p.meta.title ?? p.meta.id} (${p.startDate})`}
+                      <span className="nav-lead index-num">{weekNumberOf(p.meta)}</span>
+                      <span className="nav-body">
+                        <span className="nav-title index-label">{p.meta.title ?? p.meta.id}</span>
+                        <span className="nav-sub">{p.startDate}</span>
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -387,7 +502,7 @@ function Sidebar({ plans, collapsed, setCollapsed }: { plans: PlanRecord[], coll
           <span aria-hidden="true">♥</span>
           <span>{lang === "de" ? "Projekt unterstützen" : "支持项目"}</span>
         </a>
-      </div>
+        </div>
     </aside>
   );
 }
@@ -396,11 +511,20 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
   const { lang } = useLang();
   const { bookmarks, removeBookmark } = useBookmarks();
 
+  // Only load the (usually handful of) plans that are actually bookmarked, not every plan.
+  const [dataVersion, setDataVersion] = useState(0);
+  useEffect(() => {
+    const referenced = new Set(bookmarks.map(b => b.planSlug));
+    const missing = plans.filter(p => referenced.has(p.slug) && !planDataCache.has(p.slug));
+    if (missing.length === 0) return;
+    Promise.all(missing.map(p => loadPlanData(p))).then(() => setDataVersion(v => v + 1));
+  }, [bookmarks, plans]);
+
   const bookmarkedRecipes = useMemo(() => {
     const res: { plan?: PlanRecord, recipe: Recipe, bookmark: Bookmark }[] = [];
     for (const b of bookmarks) {
       const plan = plans.find(p => p.slug === b.planSlug);
-      const recipe = plan?.recipes.find(r => r.id === b.recipeId);
+      const recipe = plan ? planDataCache.get(plan.slug)?.DATA?.find(r => r.id === b.recipeId) : undefined;
       res.push({
         plan,
         recipe: recipe ?? {
@@ -411,7 +535,8 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
       });
     }
     return res;
-  }, [bookmarks, plans]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookmarks, plans, dataVersion]);
 
   if (bookmarkedRecipes.length === 0) {
     return (
@@ -494,11 +619,48 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
   );
 }
 
+// Ein Plan deckt 7 Tage ab; danach zeigt die Startseite den letzten bekannten Plan als
+// "aktuell" an, auch wenn seine Woche längst vorbei ist (siehe pickCurrent) — ohne Warnung
+// fällt eine Planungslücke wie bei Woche 26->36 sonst niemandem auf.
+function daysSincePlanWeekEnded(startDate: string): number {
+  const [y, m, d] = startDate.split("-").map(Number);
+  const weekEnd = new Date(y, (m ?? 1) - 1, (d ?? 1) + 7);
+  const diffMs = Date.now() - weekEnd.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+function StalePlanBanner({ plan }: { plan: PlanRecord | null }) {
+  if (!plan) return null;
+  const staleDays = daysSincePlanWeekEnded(plan.startDate);
+  if (staleDays <= 0) return null;
+  return (
+    <div
+      role="status"
+      style={{
+        margin: "0 0 16px",
+        padding: "10px 16px",
+        borderRadius: 10,
+        background: "rgba(245, 158, 11, 0.15)",
+        border: "1px solid rgba(245, 158, 11, 0.4)",
+        color: "var(--text)",
+        fontSize: 14,
+      }}
+    >
+      ⚠️ Der neueste Plan ist {plan.meta.title ?? plan.meta.id} (Start {plan.startDate}) — seine Woche ist seit {staleDays}{" "}
+      Tag{staleDays === 1 ? "" : "en"} vorbei, es gibt noch keinen neueren.
+    </div>
+  );
+}
+
 function HomePage({ plans }: { plans: PlanRecord[] }) {
   const { lang } = useLang();
   const navigate = useNavigate();
+  // Klick hält das aufgemorphte Titelbild offen (auch ohne Hover, für Touch-Geräte) — Hover
+  // selbst läuft rein über CSS, das hier steuert nur den zusätzlichen "geklickt"-Zustand.
+  const [portraitOpen, setPortraitOpen] = useState(false);
   const currentPlan = useMemo(() => pickCurrent(plans, lang), [plans, lang]);
-  const currentPlanPreview = currentPlan?.recipes.slice(0, 3) ?? [];
+  const currentPlanMod = usePlanData(currentPlan);
+  const currentPlanPreview = currentPlanMod?.DATA?.slice(0, 3) ?? [];
   const latestPlans = useMemo(() => {
     return plans
       .filter((plan) => plan.lang === lang && plan.slug !== currentPlan?.slug)
@@ -506,28 +668,55 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       .slice(0, 4);
   }, [plans, lang, currentPlan?.slug]);
 
+  // Just the small teaser row on the homepage (4 plans) — worth the load, unlike bulk-searching all plans.
+  const [, setTeaserVersion] = useState(0);
+  useEffect(() => {
+    const missing = latestPlans.filter(p => !planDataCache.has(p.slug));
+    if (missing.length === 0) return;
+    Promise.all(missing.map(p => loadPlanData(p))).then(() => setTeaserVersion(v => v + 1));
+  }, [latestPlans]);
+
   return (
     <div className="home-page">
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
-          <h1 className="hero-title">Moving Kitchen Tales</h1>
-          <p className="hero-subtitle">Wo Wochenpläne nach Filmnacht, Streetfood und Zuhause schmecken.</p>
-          <p className="hero-text">
-            Koch dich durch animierte Comfort-Food-Momente, Asia-Klassiker, Reiskocher-Magie und virale Küchenhacks.
-            Kuratiert als Wochenpläne, gemacht für echte Tage, an denen Essen trotzdem ein kleines Ereignis sein darf.
+      <StalePlanBanner plan={currentPlan} />
+      {/* Cover Section — Buchtitelseite: Hanko oben links, Band-Label oben rechts, zentrierte
+          Komposition (sepia Rundbild, kursiver Titel, Trennstrich, Subtitle), Tategaki am
+          rechten Rand. Nahezu 1:1 nach dem Nutzer-Entwurf, CTA-Buttons als notwendige Ergänzung
+          (der Entwurf hatte keine, die App braucht Navigation). */}
+      <section className="cover">
+        <div className="cover-header">
+          <span className="seal-mark" aria-hidden="true"><span>厨</span><span>房</span></span>
+          <span className="cover-volume">Band Eins — 完</span>
+        </div>
+        <div className="cover-center">
+          <div
+            className={`cover-portrait${portraitOpen ? " is-open" : ""}`}
+            onClick={() => setPortraitOpen((v) => !v)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={portraitOpen}
+            aria-label={lang === "de" ? "Titelbild vollständig anzeigen" : "Show full title image"}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPortraitOpen((v) => !v); } }}
+          >
+            <img src={`${import.meta.env.BASE_URL}hero-bg.webp`} alt="" />
+          </div>
+          <h1 className="cover-title">Moving Kitchen Tales</h1>
+          <div className="cover-rule" aria-hidden="true" />
+          <p className="cover-subtitle">
+            Wo Wochenpläne nach Filmnacht, Streetfood<br />und Zuhause schmecken.
+            <span className="cover-kicker">Ein Archiv der Wochen</span>
           </p>
           <div className="hero-btns">
             {currentPlan && (
-              <button 
-                className="btn-primary" 
+              <button
+                className="btn-primary"
                 onClick={() => navigate(`/plan/${currentPlan.slug}?lang=${lang}`)}
               >
                 Zum aktuellen Plan
               </button>
             )}
-            <button 
-              className="btn-secondary" 
+            <button
+              className="btn-secondary"
               onClick={() => {
                 const classics = plans.find(p => p.meta.title?.includes("Woche 1") && p.lang === lang);
                 if (classics) navigate(`/plan/${classics.slug}?lang=${lang}`);
@@ -544,6 +733,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
               Projekt unterstützen
             </a>
           </div>
+          <div className="cover-tategaki" aria-hidden="true">流动厨房的故事</div>
         </div>
       </section>
 
@@ -607,7 +797,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
           </div>
           <div className="latest-plans-grid">
             {latestPlans.map((plan) => {
-              const teaserRecipe = plan.recipes[0];
+              const teaserRecipe = planDataCache.get(plan.slug)?.DATA?.[0];
               return (
                 <Link key={plan.slug} className="latest-plan-card" to={`/plan/${plan.slug}?lang=${lang}`}>
                   <span>{plan.startDate}</span>
@@ -689,9 +879,10 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
   const { hash } = useLocation();
   const nav = useNavigate();
   const current = plans.find(p => p.slug === slug);
+  const mod = usePlanData(current);
 
   useEffect(() => {
-    if (hash) {
+    if (hash && mod) {
       const id = hash.replace("#", "");
       const el = document.getElementById(id);
       if (el) {
@@ -703,7 +894,7 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
         }, 300);
       }
     }
-  }, [hash, slug]);
+  }, [hash, slug, mod]);
 
   if (!current) return <div className="main-inner">Plan nicht gefunden: {slug}</div>;
   if (current.lang !== lang) {
@@ -713,7 +904,8 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
       return null;
     }
   }
-  const Cmp = current.Component;
+  if (!mod) return <div className="main-inner">{lang === "de" ? "Lädt Plan…" : "Loading plan…"}</div>;
+  const Cmp = mod.default;
   return (<div className="main-inner"><Cmp /></div>);
 }
 
@@ -723,37 +915,83 @@ function HomeRedirect({ plans }: { plans: PlanRecord[] }) {
   return <Navigate to={`/plan/${currentDE.slug}?lang=de`} replace />;
 }
 
+// Shiori — mehrere farbige Lesezeichenbänder, an der Buchkante gestapelt, statt eines einzelnen
+// Reiters. Fest auf dem Viewport (nicht an der Buchkante absolut), damit sie bei langen Seiten
+// (44 Wochen, 21 Rezepte) beim Scrollen nicht verschwinden.
+function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolean; onOpenIndex: () => void; onCloseIndex: () => void }) {
+  const navigate = useNavigate();
+  // Explizites onCloseIndex() bei den navigierenden Tabs, nicht nur der Pfadwechsel-Effekt in
+  // App() — wenn man schon auf "/" steht und bei offenem Register auf 封面 klickt, ändert sich
+  // der Pfad nicht, also würde der Effekt allein das Register nicht schließen.
+  const tabs = [
+    { key: "cover", jp: "封面", de: "Start", color: "dark", onClick: () => { onCloseIndex(); navigate("/"); } },
+    // Klick auf 目录 öffnet UND schließt das Register (Toggle) — der Button ist der einzige Weg
+    // zurück, der auch von der Registerseite selbst aus sichtbar bleibt.
+    { key: "index", jp: "目录", de: "Register", color: "seal", onClick: onOpenIndex, pressed: menuOpen },
+    { key: "preppen", jp: "备餐", de: "Preppen", color: "olive", onClick: () => { onCloseIndex(); navigate("/preppen"); } },
+  ];
+  return (
+    <div className="shiori-stack">
+      {tabs.map((t) => (
+        <button key={t.key} type="button" className={`shiori-tab shiori-${t.color}`} onClick={t.onClick} aria-pressed={t.pressed}>
+          {/* Zweisprachig, unabhängig vom DE/中文-Umschalter der Seite — das Schriftzeichen ist
+              ein dekoratives Buch-Element, die deutsche Beschriftung die eigentliche Wegweisung. */}
+          <span className="shiori-glyph" aria-hidden="true">{t.jp}</span>
+          <span className="shiori-caption">{t.de}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
   const plans = usePlans();
-  const [collapsed, setCollapsed] = useState(false);
-  const { lang } = useLang();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Jeder Routenwechsel schließt das Register — egal ob durch einen Link in der App, den
+  // Zurück-Button des Browsers, oder eine von außen eingefügte URL. Ohne das bliebe die
+  // Registerseite sichtbar, weil sie den Routen-Inhalt in .book-pages ersetzt statt überlagert.
+  // Scrollt außerdem nach oben — Client-Side-Routing setzt das anders als eine echte Seiten-
+  // navigation nicht von selbst zurück, man würde sonst z.B. auf "Start" klicken und mitten in
+  // der vorherigen Scrollposition landen. Ausnahme: Ziel hat einen #anchor (Sprung zu einem
+  // bestimmten Rezept aus der Suche) — der Sprung dorthin darf nicht überschrieben werden.
+  useEffect(() => {
+    setMenuOpen(false);
+    if (!location.hash) window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <LangProvider>
-      <div className={`app-shell ${collapsed ? "collapsed" : ""}`}>
-        {/* Mobile Top Bar */}
-        <div className="mobile-top-bar">
-          <button 
-            className="sidebar-toggle-btn" 
-            onClick={() => setCollapsed(!collapsed)} 
-            title={collapsed ? "Ausklappen" : "Einklappen"}
-          >
-            <span className="toggle-icon"></span>
-          </button>
-          <div className="mobile-brand">Moving Kitchen Tales</div>
+      <div className="app-shell">
+        <div className="book-wrap">
+          <div className="book">
+            <ShioriStack menuOpen={menuOpen} onOpenIndex={() => setMenuOpen((v) => !v)} onCloseIndex={() => setMenuOpen(false)} />
+            <div className="book-spine" aria-hidden="true" />
+            <main className="book-pages main">
+              {/* Das Register ist keine Overlay-Karte mehr, sondern ersetzt hier einfach die
+                  aufgeschlagene Seite — wie im echten Buch umblättern, kein Popup obendrauf.
+                  Der key erzwingt bei jedem Wechsel (Register auf/zu, Route-Wechsel) einen echten
+                  Remount, damit die Page-Flip-Animation unten jedes Mal neu abspielt. */}
+              <div key={menuOpen ? "register" : location.pathname} className="page-flip">
+              {menuOpen ? (
+                <IndexOverlay plans={plans} onClose={() => setMenuOpen(false)} />
+              ) : (
+                <Routes>
+                  <Route path="/" element={<HomePage plans={plans} />} />
+                  <Route path="/bookmarks" element={<BookmarkPage plans={plans} />} />
+                  <Route path="/pinnwand" element={<PinnwandPage plans={plans} />} />
+                  <Route path="/preppen" element={<PreppenPage />} />
+                  <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
+                  <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
+                  <Route path="*" element={<HomePage plans={plans} />} />
+                </Routes>
+              )}
+              </div>
+            </main>
+          </div>
         </div>
 
-        <Sidebar plans={plans} collapsed={collapsed} setCollapsed={setCollapsed} />
-        
-        <main className="main">
-          <Routes>
-            <Route path="/" element={<HomePage plans={plans} />} />
-            <Route path="/bookmarks" element={<BookmarkPage plans={plans} />} />
-            <Route path="/pinnwand" element={<PinnwandPage plans={plans} />} />
-            <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
-            <Route path="*" element={<HomePage plans={plans} />} />
-          </Routes>
-        </main>
         <BackToTop />
       </div>
     </LangProvider>

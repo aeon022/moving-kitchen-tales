@@ -152,7 +152,6 @@ export function SharedMealCard({ meal, meta, cardPanelStyle, ImageBanner, tagChi
           {meal.isViral && viralChip ? viralChip() : null}
           {tagChip(meal.target)}
           {meal.riceCooker?.enabled ? tagChip("🍚 Reiskocher") : null}
-          {meal.remind ? tagChip("💊 Metformin") : null}
         </div>
       </div>
       {meal.desc ? <p style={{ marginTop: 8, color: "var(--muted)", fontStyle: "italic" }}>{meal.desc}</p> : null}
