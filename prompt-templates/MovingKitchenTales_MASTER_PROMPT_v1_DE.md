@@ -20,7 +20,6 @@
 3) **Gesundheit (streng)**
    - Diabetes (frühes Stadium): je Mahlzeit **60–90 g KH gesamt (2 P.)**; **Protein 20–40 g p. P.**; ballaststoffbetont.
    - Schwangerschaft: **nichts Rohes**, **Eier vollständig gestockt**, **Fisch quecksilberarm & durchgegart**; **Sojasauce natriumarm**; **Algen/Jod sparsam**.
-   - Gastritis (balanced, sofern nicht explizit „gastritis‑konform“): mild würzen, wenig Fett; milde Säure; Chili optional separat.
 4) **Küchenfokus**: Chinesisch/Japanisch/Koreanisch (max. **1** x andere Küche/Woche, optional).
 5) **Titelkonvention** je Rezept: **Deutsch + Originalname + Schriftzeichen** (z. B. `Miso‑Suppe (味噌汁)`).
 6) **Story** MUSS Herkunft + Mini‑Geschichte enthalten **und** die Zeile: `Inspiration: inspiriert von <Quelle>` (nur Inspiration; nie kopieren). Erlaubte Quellen als Inspiration: Just One Cookbook, MAFF JP, Japan Centre, My Korean Kitchen, Seon Kyoung Longest, Mom's Korean Recipes, Made With Lau, The Woks of Life, Omnivore’s Cookbook, Red House Spice, Lee Kum Kee (UK), The Hong Kong Cookery, China Sichuan Food.
@@ -49,7 +48,7 @@
     "Schritt 2",
     "Schritt 3"
   ],
-  checks: "Gastritis – mild/⚠︎ … · Diabetes ✓/⚠︎ – ≈XX g KH · Schwangerschaft ✓/⚠︎ …",
+  checks: "Diabetes ✓/⚠︎ – ≈XX g KH · Schwangerschaft ✓/⚠︎ …",
   swaps: "Sinnvolle Austausche (z. B. Soba ↔ Udon; Reis ↔ Vollkorn)",
   side: "Beilage/Drink/Tee, z. B. Gurken‑Pickles (ohne Chili)",
   remind: true | false,
@@ -83,7 +82,7 @@ const buildPrompt = (a, b) => `${a}\n${b}`;
 ## Qualitäts‑Checkliste pro Rezept
 - [ ] ≥5 Zutaten mit **Mengen** (g/ml/EL/TL/Stück)
 - [ ] ≥3 Schritte, **Zeiten in Minuten** angeben, schonende Methoden
-- [ ] `checks` enthält **Gastritis/Diabetes/Schwangerschaft** in einer Zeile
+- [ ] `checks` enthält **Diabetes/Schwangerschaft** in einer Zeile
 - [ ] **mild, salzarm**, keine rohe Zutaten; Ei/Fisch vollständig gegart; **Algen/Jod sparsam**
 - [ ] **Reminder‑Logik** korrekt (Frühstück/Abend = true; Mittag = false)
 - [ ] **Story** enthält **Inspiration: inspiriert von …**
@@ -119,7 +118,7 @@ const buildPrompt = (a, b) => `${a}\n${b}`;
   target: "≈68 g KH gesamt (2 P.) · Protein ≈26 g p. P.",
   ingredients: ["Reis (roh) 80 g", "Lachs 240 g", "Pak Choi 200 g", "Wasser 300 ml", "Sojasauce natriumarm 10 ml"],
   steps: ["Reis dämpfen (20 Min.)", "Lachs & Pak Choi auflegen (6–8 Min.)", "Mild würzen, servieren"],
-  checks: "Gastritis – mild · Diabetes ✓ – ≈68 g KH · Schwangerschaft ✓ Lachs vollständig gegart, quecksilberarm",
+  checks: "Diabetes ✓ – ≈68 g KH · Schwangerschaft ✓ Lachs vollständig gegart, quecksilberarm",
   swaps: "Lachs ↔ Kabeljau; Reis ↔ Vollkornreis",
   side: "Gurken‑Pickles (ohne Chili)",
   remind: true,
@@ -132,4 +131,3 @@ const buildPrompt = (a, b) => `${a}\n${b}`;
 ## Lizenz / Hinweise
 - Quellenangaben sind **nur Inspiration**, keine Übernahme von Texten.
 - Umlaute (ä/ö/ü/ß) und CJK‑Zeichen korrekt setzen.
-- Bei „gastritis‑konform“ im Prompt: automatisch in **strengen Gastritis‑Modus** wechseln (kein Chili, kaum Säure, sehr wenig Fett, alles warm & weich).

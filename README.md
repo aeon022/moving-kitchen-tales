@@ -1,6 +1,6 @@
 # Moving Kitchen Tales – Wochenpläne & Kochbuch-Layouts
 
-**Moving Kitchen Tales** ist ein Koch- und Ernährungs-Assistent für strukturierte Wochenpläne, Einkaufslisten und bebilderte Kochbuch-Layouts – mit Fokus auf **CN/JP/KR-Küche**, mild gewürzt und angepasst an **Diabetes (früh), Gastritis (mild) und Schwangerschaft**.  
+**Moving Kitchen Tales** ist ein Koch- und Ernährungs-Assistent für strukturierte Wochenpläne, Einkaufslisten und bebilderte Kochbuch-Layouts – mit Fokus auf **CN/JP/KR-Küche**, mild gewürzt und angepasst an **Diabetes (früh) und Schwangerschaft**.  
 Das Projekt verbindet klar definierte **Gesundheits-Leitplanken**, ein **druckfähiges UI (PDF/HTML)** und eine **Datenstruktur, die von einem GPT („Moving Kitchen Tales“) erzeugt/validiert werden kann**.
 
 Du findest Moving Kitchen Tales Viewer auf Github Pages https://aeon022.github.io/moving-kitchen-tales/ und den Code auf Github https://github.com/aeon022/moving-kitchen-tales/.
@@ -38,9 +38,6 @@ Du findest Moving Kitchen Tales Viewer auf Github Pages https://aeon022.github.i
 - **Diabetes (frühes Stadium; Metformin 3× täglich)**  
   Ziel pro Rezept (2 P.): **60–90 g KH gesamt** (≈30–45 g p. P.), ballaststoffbetont; **Protein 20–40 g p. P.**  
   Metformin-Hinweis: reine **Erinnerung „mit der Mahlzeit“**, **keine** Med-Beratung.
-- **Gastritis (mild)**  
-  Meiden: Chili/Schärfe, stark Fettiges, Zitrone/Essig/zu saure Tomaten, Alkohol, Kaffee, Kohlensäure.  
-  Methoden: **Dämpfen, Sieden, Schmoren, sanftes Dünsten**; Zwiebel/Knoblauch **sparsam & gut gegart**; milde Brühen; **wenig Öl**; **warme Speisen**.
 - **Schwangerschaft**  
   **Kein Rohes**, alles **durchgaren** (Eier vollständig gestockt), **quecksilberarme Fische** (Lachs/Kabeljau/Seelachs/Wolfsbarsch), Hygiene; **Sojasauce natriumarm**, **Jod** (Wakame/Kombu) **sparsam**.
 
@@ -110,7 +107,7 @@ const FILE_BASE = "Woche 2 2025-10-06";
   target: { carbs: string, proteinPerPerson?: string }, // KH gesamt (2 P.), optional Protein p. P.
   ingredients: Array<{ name: string, qty: number, unit: "g"|"ml"|"Stk", notes?: string }>, // ≥5 Einträge
   steps: string[], // ≥3 Schritte, nummeriert im UI
-  checks: string, // "Gastritis ✓/⚠︎ … · Diabetes ✓/⚠︎ – ≈XX g KH · Schwangerschaft ✓/⚠︎ …"
+  checks: string, // "Diabetes ✓/⚠︎ – ≈XX g KH · Schwangerschaft ✓/⚠︎ …"
   swaps: string, // sinnvolle Alternativen
   side: string,  // milde Beilage/Drink
   remind: boolean // Metformin-Reminder: Frühstück/Abend true, Mittag false

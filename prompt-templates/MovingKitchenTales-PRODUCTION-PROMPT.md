@@ -129,10 +129,6 @@ const buildPrompt = (a, b) => `${a}\n${b}`;
 - Diabetes (frühes Stadium; Metformin 2× täglich (früh und abend)): pro Mahlzeit (2 Pers.) **60–90 g KH** (≈30–45 g p. P.), ballaststoffbetont; **Protein 20–40 g p. P.** Metformin: **nur Reminder** („mit der Mahlzeit“).
 - Garmethoden: **Dämpfen, Sieden, Schmoren, Wok (braten)**; wenig Öl; Zwiebel/Knoblauch sparsam & gut gegart; **Säure mild**; Algen/Jod **sparsam**.
 - Schwangerschaft: **nichts Rohes**, alles **durchgaren** (Eier vollständig gestockt); quecksilberarme Fische (Lachs/Kabeljau/Seelachs/Wolfsbarsch); Hygiene; **Sojasauce natriumarm**; **Jod sparsam (Wakame/Kombu)**.
-- Gastritis:
-  - Wenn explizit „gastritis-konform“ → **streng** (Schärfe/zu sauer/fettig meiden, schonend garen, wenig Öl, warm servieren).
-  - Sonst **balanced**: mild würzen, nicht zu scharf; vorsichtiges Wok/Anbraten/Grillen mit wenig Öl erlaubt; milde Säure moderat; Zwiebel/Knoblauch maßvoll & gut gegart; Chili optional separat.
-  - **Non-Strict Checks:** „Gastritis“ **ohne ✓** (nur erläuternder Text, z. B. „Gastritis – mild …“).
 - Titel: Deutsch + Originalname + Schriftzeichen.
 
 ---
