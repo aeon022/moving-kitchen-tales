@@ -26,6 +26,9 @@ type PlanMeta = {
   startDate: string;
   lang?: string;
   sidebar?: string;
+  /** Wochen-Schwerpunkt ("Kürbis, Mais & Pilze 🌽 · Erntefrisch mild · Balanced"), aus dem
+   * subtitle-Prop des Wochen-Files geparst — siehe scripts/gen-plan-manifest.mjs. */
+  focus?: string;
 };
 type PlanModule = { default: React.ComponentType<any>; meta: PlanMeta; DATA?: Recipe[] };
 
@@ -484,6 +487,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
                       <span className="nav-body">
                         <span className="nav-title index-label">{p.meta.title ?? p.meta.id}</span>
                         <span className="nav-sub">{p.startDate}</span>
+                        {p.meta.focus && <span className="nav-focus">{p.meta.focus}</span>}
                       </span>
                     </Link>
                   </li>

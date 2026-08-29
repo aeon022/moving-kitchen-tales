@@ -3,8 +3,10 @@
    only as a single sparse stamp/highlight. No gradients, no pastel pink/green, no drop shadows —
    hairlines and flat fills instead. Approved reference: the "Japanese Design Proposal" canvas. */
 :root {
-  --bg: #F7F3EA;
-  --panel: #FCFAF4;
+  /* Dimmed slightly from #F7F3EA/#FCFAF4 — those read as glaring-white on a bright display,
+     more "backlit screen" than "paper". Same warm washi hue, just less luminous. */
+  --bg: #EDE7D8;
+  --panel: #F5EFE1;
   --text: #1C1B19;
   --muted: #837C6E;
   --border: rgba(28,27,25,.14);
@@ -398,6 +400,9 @@ a { color: inherit; }
   text-overflow: ellipsis;
 }
 .nav-sub { font-size: 10.5px; color: var(--muted); letter-spacing: 0.03em; }
+/* Week's thematic focus ("Kürbis, Mais & Pilze 🌽 · Erntefrisch mild · Balanced") — allowed to
+   wrap, unlike .nav-title/.nav-sub, since it's the one line here with real content. */
+.nav-focus { font-size: 11.5px; font-style: italic; color: var(--muted); line-height: 1.4; margin-top: 2px; }
 /* Icon rows want vertical centering; numeral rows (week list) want baseline so the big figure
    sits on the same line as the title text — .nav-row defaults to baseline, override per-row. */
 .nav-row:has(.nav-icon) { align-items: center; }

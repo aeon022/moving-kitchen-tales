@@ -8,6 +8,7 @@ export type PlanManifestEntry = {
   startDate: string;
   lang?: string;
   sidebar?: string;
+  focus?: string;
   path: string;
 };
 
@@ -154,6 +155,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-2-2026-01-05",
     "lang": "de",
     "sidebar": "Woche 2 (2026-01-05)",
+    "focus": "Asiatische Hausmannskost (CN/JP/KR) · Mild & Schwangerschaftsgeeignet · 1x Reiskocher/Tag",
     "path": "./plans/2026/Woche-2-2026-01-05.de.jsx"
   },
   {
@@ -170,6 +172,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-3-2026-01-12",
     "lang": "de",
     "sidebar": "Woche 3 (2026-01-12)",
+    "focus": "JP/CN · mild & schwangerschaftssicher · viel Fisch/Meeresfrüchte · 1× Reiskocher/Tag",
     "path": "./plans/2026/Woche-3-2026-01-12.de.jsx"
   },
   {
@@ -186,6 +189,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-4-2026-01-19",
     "lang": "de",
     "sidebar": "Woche 4 (2026-01-19)",
+    "focus": "JP/CN/KR · mild & schwangerschaftssicher · abwechslungsreich · 1× Reiskocher/Tag",
     "path": "./plans/2026/Woche-4-2026-01-19.de.jsx"
   },
   {
@@ -202,6 +206,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-5-2026-01-26",
     "lang": "de",
     "sidebar": "Woche 5 (2026-01-26)",
+    "focus": "JP/CN/KR · Balanced · Schwangerschaftssicher · 1× Reiskocher/Tag",
     "path": "./plans/2026/Woche-5-2026-01-26.de.jsx"
   },
   {
@@ -218,6 +223,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-6-2026-02-02",
     "lang": "de",
     "sidebar": "Woche 6 (2026-02-02)",
+    "focus": "Virale Trends (CN/JP/KR) + SWE/IT · Balanced · Schwangerschaftssicher · 1× Reiskocher/Tag",
     "path": "./plans/2026/Woche-6-2026-02-02.de.jsx"
   },
   {
@@ -226,6 +232,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-7-2026-02-09",
     "lang": "de",
     "sidebar": "Woche 7 (2026-02-09)",
+    "focus": "CN Wok & Schwein · Airfryer-Hacks · SWE/HR/IT · 1× Reiskocher/Tag",
     "path": "./plans/2026/Woche-7-2026-02-09.de.jsx"
   },
   {
@@ -234,6 +241,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-8-2026-02-16",
     "lang": "de",
     "sidebar": "Woche 8 (2026-02-16)",
+    "focus": "Airfryer-Hacks · Virale Trends · Balanced · Schwangerschaftssicher",
     "path": "./plans/2026/Woche-8-2026-02-16.de.jsx"
   },
   {
@@ -242,6 +250,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-9-2026-02-23",
     "lang": "de",
     "sidebar": "Woche 9 (2026-02-23)",
+    "focus": "Airfryer Hacks · Reiskocher-Liebe · Balanced · Schwangerschaftssicher",
     "path": "./plans/2026/Woche-9-2026-02-23.de.jsx"
   },
   {
@@ -250,6 +259,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-10-2026-03-02",
     "lang": "de",
     "sidebar": "Woche 10 (2026-03-02)",
+    "focus": "Airfryer Hacks · Udon-Trends · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-10-2026-03-02.de.jsx"
   },
   {
@@ -258,6 +268,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-11-2026-03-09",
     "lang": "de",
     "sidebar": "Woche 11 (2026-03-09)",
+    "focus": "Virale Hits 🔥 · Originaltitel (CN/JP/KR) · Balanced",
     "path": "./plans/2026/Woche-11-2026-03-09.de.jsx"
   },
   {
@@ -266,6 +277,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-12-2026-03-16",
     "lang": "de",
     "sidebar": "Woche 12 (2026-03-16)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced",
     "path": "./plans/2026/Woche-12-2026-03-16.de.jsx"
   },
   {
@@ -274,6 +286,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-13-2026-03-23",
     "lang": "de",
     "sidebar": "Woche 13 (2026-03-23)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced",
     "path": "./plans/2026/Woche-13-2026-03-23.de.jsx"
   },
   {
@@ -282,6 +295,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-14-2026-03-30",
     "lang": "de",
     "sidebar": "Woche 14 (2026-03-30)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-14-2026-03-30.de.jsx"
   },
   {
@@ -290,6 +304,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-15-2026-04-06",
     "lang": "de",
     "sidebar": "Woche 15 (2026-04-06)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-15-2026-04-06.de.jsx"
   },
   {
@@ -298,6 +313,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-16-2026-04-13",
     "lang": "de",
     "sidebar": "Woche 16 (2026-04-13)",
+    "focus": "Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced",
     "path": "./plans/2026/Woche-16-2026-04-13.de.jsx"
   },
   {
@@ -306,6 +322,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-17-2026-04-20",
     "lang": "de",
     "sidebar": "Woche 17 (2026-04-20)",
+    "focus": "Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced",
     "path": "./plans/2026/Woche-17-2026-04-20.de.jsx"
   },
   {
@@ -314,6 +331,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-18-2026-04-27",
     "lang": "de",
     "sidebar": "Woche 18 (2026-04-27)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-18-2026-04-27.de.jsx"
   },
   {
@@ -322,6 +340,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-19-2026-05-04",
     "lang": "de",
     "sidebar": "Woche 19 (2026-05-04)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-19-2026-05-04.de.jsx"
   },
   {
@@ -330,6 +349,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-20-2026-05-11",
     "lang": "de",
     "sidebar": "Woche 20 (2026-05-11)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-20-2026-05-11.de.jsx"
   },
   {
@@ -338,6 +358,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-21-2026-05-18",
     "lang": "de",
     "sidebar": "Woche 21 (2026-05-18)",
+    "focus": "Virale Airfryer-Hacks 🔥 · Goldbrasse, Zha Cai & Co · Balanced",
     "path": "./plans/2026/Woche-21-2026-05-18.de.jsx"
   },
   {
@@ -346,6 +367,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-22-2026-05-25",
     "lang": "de",
     "sidebar": "Woche 22 (2026-05-25)",
+    "focus": "Chinesische Wok-Hits · Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-22-2026-05-25.de.jsx"
   },
   {
@@ -354,6 +376,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-23-2026-06-01",
     "lang": "de",
     "sidebar": "Woche 23 (2026-06-01)",
+    "focus": "Japan (ausgefallen & leicht) · Reiskocher · Balanced",
     "path": "./plans/2026/Woche-23-2026-06-01.de.jsx"
   },
   {
@@ -362,6 +385,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-24-2026-06-08",
     "lang": "de",
     "sidebar": "Woche 24 (2026-06-08)",
+    "focus": "Koreanische Küche · Airfryer-Hacks 🔥 · Balanced",
     "path": "./plans/2026/Woche-24-2026-06-08.de.jsx"
   },
   {
@@ -370,6 +394,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-25-2026-06-15",
     "lang": "de",
     "sidebar": "Woche 25 (2026-06-15)",
+    "focus": "Italien & Asia Fusion · Airfryer-Hacks 🔥 · Balanced",
     "path": "./plans/2026/Woche-25-2026-06-15.de.jsx"
   },
   {
@@ -378,6 +403,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-26-2026-06-22",
     "lang": "de",
     "sidebar": "Woche 26 (2026-06-22)",
+    "focus": "Neue Virale Hacks 🔥 · Italien & Asia Fusion · Balanced",
     "path": "./plans/2026/Woche-26-2026-06-22.de.jsx"
   },
   {
@@ -386,6 +412,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-27-2026-06-29",
     "lang": "de",
     "sidebar": "Woche 27 (2026-06-29)",
+    "focus": "Kalte Soba & Congee 🌊 · Sanftes Dämpfen · Balanced",
     "path": "./plans/2026/Woche-27-2026-06-29.de.jsx"
   },
   {
@@ -394,6 +421,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-28-2026-07-06",
     "lang": "de",
     "sidebar": "Woche 28 (2026-07-06)",
+    "focus": "Dim Sum & Dampfgaren 🥟 · Kantonesisch mild · Balanced",
     "path": "./plans/2026/Woche-28-2026-07-06.de.jsx"
   },
   {
@@ -402,6 +430,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-29-2026-07-13",
     "lang": "de",
     "sidebar": "Woche 29 (2026-07-13)",
+    "focus": "Sōmen & Donburi 🎐 · Japanisch mild · Balanced",
     "path": "./plans/2026/Woche-29-2026-07-13.de.jsx"
   },
   {
@@ -410,6 +439,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-30-2026-07-20",
     "lang": "de",
     "sidebar": "Woche 30 (2026-07-20)",
+    "focus": "Banchan & Jjigae 🥢 · Koreanisch ohne Chili · Balanced",
     "path": "./plans/2026/Woche-30-2026-07-20.de.jsx"
   },
   {
@@ -418,6 +448,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-31-2026-07-27",
     "lang": "de",
     "sidebar": "Woche 31 (2026-07-27)",
+    "focus": "China-Woche 🇨🇳 · Virale Trends · Low Sugar · Schwangerschaftsgeeignet",
     "path": "./plans/2026/Woche-31-2026-07-27.de.jsx"
   },
   {
@@ -426,6 +457,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-32-2026-08-03",
     "lang": "de",
     "sidebar": "Woche 32 (2026-08-03)",
+    "focus": "Viel Gemüse, viel Tofu 🥒 · Leichte Sommerküche · Balanced",
     "path": "./plans/2026/Woche-32-2026-08-03.de.jsx"
   },
   {
@@ -434,6 +466,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-33-2026-08-10",
     "lang": "de",
     "sidebar": "Woche 33 (2026-08-10)",
+    "focus": "Knusprig, wenig Öl 🍗 · Airfryer-Woche · Balanced",
     "path": "./plans/2026/Woche-33-2026-08-10.de.jsx"
   },
   {
@@ -442,6 +475,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-34-2026-08-17",
     "lang": "de",
     "sidebar": "Woche 34 (2026-08-17)",
+    "focus": "Ramen, Udon & Co. 🍜 · Milde Brühen · Balanced",
     "path": "./plans/2026/Woche-34-2026-08-17.de.jsx"
   },
   {
@@ -450,6 +484,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-35-2026-08-24",
     "lang": "de",
     "sidebar": "Woche 35 (2026-08-24)",
+    "focus": "Kürbis, Mais & Pilze 🌽 · Erntefrisch mild · Balanced",
     "path": "./plans/2026/Woche-35-2026-08-24.de.jsx"
   },
   {
@@ -458,6 +493,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-36-2026-08-31",
     "lang": "de",
     "sidebar": "Woche 36 (2026-08-31)",
+    "focus": "Wärmende Eintöpfe & Congee 🍂 · Herbstauftakt · Balanced",
     "path": "./plans/2026/Woche-36-2026-08-31.de.jsx"
   }
 ];

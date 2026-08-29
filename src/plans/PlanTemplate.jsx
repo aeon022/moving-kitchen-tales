@@ -18,9 +18,11 @@ export const buildPrompt = (a, b) => `${a}\n${b}`;
 // (viral badge, the hanko stamp). No gradients — --grad-hero is a flat panel tone,
 // kept as a variable only so `background: var(--grad-hero)` call sites don't need touching.
 const THEME_VARS_LIGHT = {
-  "--bg": "#F7F3EA",
+  // Dimmed from #F7F3EA/#FCFAF4 (glaring-white on a bright display) — kept in sync with the
+  // same tones in app.css's global :root.
+  "--bg": "#EDE7D8",
   "--text": "#1C1B19",
-  "--panel": "#FCFAF4",
+  "--panel": "#F5EFE1",
   "--border": "rgba(28,27,25,.14)",
   "--muted": "#837C6E",
   "--chip-bg": "#E7ECF3",
@@ -100,7 +102,7 @@ function animePlaceholder(title, subtitle = "") {
   const esc = (s) =>
     String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const cs = typeof document !== "undefined" ? getComputedStyle(document.documentElement) : null;
-  const bg = cs?.getPropertyValue("--bg")?.trim() || "#F7F3EA";
+  const bg = cs?.getPropertyValue("--bg")?.trim() || "#EDE7D8";
   const text = cs?.getPropertyValue("--text")?.trim() || "#1C1B19";
   const muted = cs?.getPropertyValue("--muted")?.trim() || "#837C6E";
   const seal = cs?.getPropertyValue("--seal")?.trim() || "#B7282E";

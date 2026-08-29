@@ -43,6 +43,16 @@ function extractMeta(filePath) {
   return meta;
 }
 
+// The week's thematic tagline ("Kürbis, Mais & Pilze 🌽 · Erntefrisch mild · Balanced") lives as
+// a plain `subtitle="..."` prop on <PlanTemplate>, not inside meta — pulling it straight out of
+// the source text (like extractMeta does) means the register/homepage can show it without ever
+// loading the full week module, and without touching all 40+ week files to duplicate it into meta.
+function extractFocus(filePath) {
+  const src = readFileSync(filePath, "utf8");
+  const m = src.match(/subtitle="([^"]*)"/);
+  return m ? m[1] : undefined;
+}
+
 const files = findPlanFiles();
 const rows = [];
 for (const filePath of files) {
@@ -51,8 +61,9 @@ for (const filePath of files) {
     console.warn("skip (no meta):", filePath);
     continue;
   }
+  const focus = extractFocus(filePath);
   const path = "./" + relative(PLANS_DIR, filePath).split("\\").join("/");
-  rows.push({ ...meta, path: `./plans/${path.slice(2)}` });
+  rows.push({ ...meta, ...(focus ? { focus } : {}), path: `./plans/${path.slice(2)}` });
 }
 rows.sort((a, b) => a.startDate.localeCompare(b.startDate));
 
@@ -66,6 +77,7 @@ export type PlanManifestEntry = {
   startDate: string;
   lang?: string;
   sidebar?: string;
+  focus?: string;
   path: string;
 };
 
