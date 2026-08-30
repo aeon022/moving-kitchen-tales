@@ -68,6 +68,7 @@ const NAV_ICON_PATHS: Record<string, React.ReactNode> = {
   star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
   box: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
   database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>,
+  list: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
 };
 function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
   return (
@@ -128,6 +129,38 @@ function getPlanYear(startDateStr: string) {
   const [y, m, d] = startDateStr.split("-").map(Number);
   if (m === 12 && d >= 29) return y + 1;
   return y;
+}
+
+// Same year-rollover rule as getPlanYear — a week starting 12-29+ already counts as next year's
+// "Woche 1" there, so it should land in that year's Q1, not trailing Q4.
+function getPlanQuarter(startDateStr: string): number {
+  if (!startDateStr) return 1;
+  const [, m, d] = startDateStr.split("-").map(Number);
+  if (m === 12 && d >= 29) return 1;
+  return Math.ceil(m / 3);
+}
+const QUARTER_LABEL: Record<number, string> = { 1: "Q1 · Jan–Mär", 2: "Q2 · Apr–Jun", 3: "Q3 · Jul–Sep", 4: "Q4 · Okt–Dez" };
+const QUARTER_SEASON: Record<number, { de: string, zh: string }> = {
+  1: { de: "Winter", zh: "冬季" },
+  2: { de: "Frühling", zh: "春季" },
+  3: { de: "Sommer", zh: "夏季" },
+  4: { de: "Herbst", zh: "秋季" },
+};
+
+// Kurzer, aus den echten Wochen-Schwerpunkten dieses Quartals zusammengesetzter Ausblick statt
+// einer erfundenen Beschreibung — nimmt das jeweils erste Stichwort von Anfang/Mitte/Ende des
+// Quartals, damit die Vorschau über den ganzen Zeitraum streut statt nur die ersten 3 Wochen zu zeigen.
+function quarterDescription(weeks: PlanRecord[]): string {
+  if (weeks.length === 0) return "";
+  const idxs = weeks.length >= 3
+    ? [0, Math.floor((weeks.length - 1) / 2), weeks.length - 1]
+    : weeks.map((_, i) => i);
+  const picks: string[] = [];
+  for (const i of idxs) {
+    const first = weeks[i]?.meta.focus?.split(" · ")[0];
+    if (first && !picks.includes(first)) picks.push(first);
+  }
+  return picks.join(" · ");
 }
 
 function pickCurrent(plans: PlanRecord[], lang: Lang) {
@@ -222,6 +255,9 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
   const currentPlan = useMemo(() => pickCurrent(plans, lang), [plans, lang]);
 
   const [openYears, setOpenYears] = useState<Record<number, boolean>>({});
+  // Zweite Ebene innerhalb eines Jahres — sonst ist selbst das aktuelle Jahr allein schon 40+
+  // Wochen am Stück. Key ist "Jahr-Quartal", nur das aktuelle Quartal startet offen.
+  const [openQuarters, setOpenQuarters] = useState<Record<string, boolean>>({});
 
   // Nur das Jahr mit dem aktuellen Plan startet aufgeklappt — sonst wird die Liste bei mehr
   // Jahren schnell zur Wall of Text. Ältere Jahre bleiben eingeklappt, bis man sie anklickt.
@@ -230,6 +266,16 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
     const initial: Record<number, boolean> = {};
     years.forEach(y => initial[y] = y === currentYear);
     setOpenYears(initial);
+
+    const currentQuarterKey = currentPlan
+      ? `${getPlanYear(currentPlan.startDate)}-${getPlanQuarter(currentPlan.startDate)}`
+      : null;
+    const initialQ: Record<string, boolean> = {};
+    for (const p of plans) {
+      const key = `${getPlanYear(p.startDate)}-${getPlanQuarter(p.startDate)}`;
+      initialQ[key] = key === currentQuarterKey;
+    }
+    setOpenQuarters(initialQ);
   }, [years.join(","), currentPlan?.slug]);
 
   // Esc schließt das Register wie jedes andere Overlay.
@@ -451,8 +497,14 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
         <div className="index-section-label">三 · 索引 · Wochen</div>
 
         <div className="year-controls">
-          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), true])))}>{lang === "de" ? "Alle +" : "全部展开"}</button>
-          <button className="small-btn" onClick={() => setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), false])))}>{lang === "de" ? "Alle -" : "全部收起"}</button>
+          <button className="small-btn" onClick={() => {
+            setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), true])));
+            setOpenQuarters(prev => Object.fromEntries(Object.keys(prev).map(k => [k, true])));
+          }}>{lang === "de" ? "Alle +" : "全部展开"}</button>
+          <button className="small-btn" onClick={() => {
+            setOpenYears(prev => Object.fromEntries(Object.keys(prev).map(k => [Number(k), false])));
+            setOpenQuarters(prev => Object.fromEntries(Object.keys(prev).map(k => [k, false])));
+          }}>{lang === "de" ? "Alle -" : "全部收起"}</button>
         </div>
 
         {years.map(y => (
@@ -473,26 +525,53 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
                 </span>
               )}
             </summary>
-            <ul className="nav-list week-list">
-              {filtered
-                .filter(p => getPlanYear(p.startDate) === y)
-                .map(p => (
-                  <li key={p.slug}>
-                    <Link
-                      to={`/plan/${p.slug}?lang=${lang}`}
-                      onClick={handleLinkClick}
-                      className={`nav-row${currentPlan?.slug === p.slug ? " nav-row-current" : ""}`}
-                    >
-                      <span className="nav-lead index-num">{weekNumberOf(p.meta)}</span>
-                      <span className="nav-body">
-                        <span className="nav-title index-label">{p.meta.title ?? p.meta.id}</span>
-                        <span className="nav-sub">{p.startDate}</span>
-                        {p.meta.focus && <span className="nav-focus">{p.meta.focus}</span>}
+            {[1, 2, 3, 4].map(q => {
+              const weeksInQuarter = filtered.filter(p => getPlanYear(p.startDate) === y && getPlanQuarter(p.startDate) === q);
+              if (weeksInQuarter.length === 0) return null;
+              const qKey = `${y}-${q}`;
+              return (
+                <details
+                  key={qKey}
+                  className="quarter"
+                  open={openQuarters[qKey] ?? false}
+                  onToggle={(e) => {
+                    const isOpen = (e.currentTarget as HTMLDetailsElement).open;
+                    setOpenQuarters(prev => ({ ...prev, [qKey]: isOpen }));
+                  }}
+                >
+                  <summary>
+                    <div className="quarter-head">
+                      <span className="quarter-title">
+                        {QUARTER_LABEL[q]}
+                        <span className="quarter-season">· {lang === "de" ? QUARTER_SEASON[q].de : QUARTER_SEASON[q].zh}</span>
                       </span>
-                    </Link>
-                  </li>
-                ))}
-            </ul>
+                      <span className="quarter-count">{weeksInQuarter.length} {lang === "de" ? "Wochen" : "weeks"}</span>
+                    </div>
+                    {quarterDescription(weeksInQuarter) && (
+                      <div className="quarter-desc">{quarterDescription(weeksInQuarter)}</div>
+                    )}
+                  </summary>
+                  <ul className="nav-list week-list">
+                    {weeksInQuarter.map(p => (
+                      <li key={p.slug}>
+                        <Link
+                          to={`/plan/${p.slug}?lang=${lang}`}
+                          onClick={handleLinkClick}
+                          className={`nav-row${currentPlan?.slug === p.slug ? " nav-row-current" : ""}`}
+                        >
+                          <span className="nav-lead index-num">{weekNumberOf(p.meta)}</span>
+                          <span className="nav-body">
+                            <span className="nav-title index-label">{p.meta.title ?? p.meta.id}</span>
+                            <span className="nav-sub">{p.startDate}</span>
+                            {p.meta.focus && <span className="nav-focus">{p.meta.focus}</span>}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              );
+            })}
           </details>
         ))}
 
@@ -927,21 +1006,24 @@ function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolea
   // Explizites onCloseIndex() bei den navigierenden Tabs, nicht nur der Pfadwechsel-Effekt in
   // App() — wenn man schon auf "/" steht und bei offenem Register auf 封面 klickt, ändert sich
   // der Pfad nicht, also würde der Effekt allein das Register nicht schließen.
+  // Text-Beschriftungen ("Register", "Preppen") brachen in der schmalen Spalte teils unschön
+  // um — durchgängig Icons statt Text, das deutsche Wort wandert in den title-Tooltip.
   const tabs = [
-    { key: "cover", jp: "封面", de: "Start", color: "dark", onClick: () => { onCloseIndex(); navigate("/"); } },
+    { key: "cover", jp: "封面", de: "Startseite", icon: "home" as const, color: "dark", onClick: () => { onCloseIndex(); navigate("/"); } },
     // Klick auf 目录 öffnet UND schließt das Register (Toggle) — der Button ist der einzige Weg
     // zurück, der auch von der Registerseite selbst aus sichtbar bleibt.
-    { key: "index", jp: "目录", de: "Register", color: "seal", onClick: onOpenIndex, pressed: menuOpen },
-    { key: "preppen", jp: "备餐", de: "Preppen", color: "olive", onClick: () => { onCloseIndex(); navigate("/preppen"); } },
+    { key: "index", jp: "目录", de: "Register", icon: "list" as const, color: "seal", onClick: onOpenIndex, pressed: menuOpen },
+    { key: "preppen", jp: "备餐", de: "Preppen", icon: "box" as const, color: "olive", onClick: () => { onCloseIndex(); navigate("/preppen"); } },
   ];
   return (
     <div className="shiori-stack">
       {tabs.map((t) => (
-        <button key={t.key} type="button" className={`shiori-tab shiori-${t.color}`} onClick={t.onClick} aria-pressed={t.pressed}>
+        <button key={t.key} type="button" className={`shiori-tab shiori-${t.color}`} onClick={t.onClick} aria-pressed={t.pressed} title={t.de}>
           {/* Zweisprachig, unabhängig vom DE/中文-Umschalter der Seite — das Schriftzeichen ist
-              ein dekoratives Buch-Element, die deutsche Beschriftung die eigentliche Wegweisung. */}
+              ein dekoratives Buch-Element, das Icon die eigentliche Wegweisung; das deutsche
+              Wort steckt im title-Tooltip statt im Text, der in der schmalen Spalte umbrach. */}
           <span className="shiori-glyph" aria-hidden="true">{t.jp}</span>
-          <span className="shiori-caption">{t.de}</span>
+          <span className="shiori-caption shiori-caption-icon"><NavIcon name={t.icon} /></span>
         </button>
       ))}
     </div>

@@ -1,7 +1,7 @@
 // src/PreppenPage.tsx
 import React, { useMemo, useState } from "react";
 import { useLang } from "./App";
-import { PREP_RECIPES, PrepRecipe } from "./plans/prep/preppen";
+import { PREP_RECIPES, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
 
 // Kapitel-Nummerierung wie im Register (一·二·三…) statt nackter Sektions-Labels — Preppen
 // bekommt so das gleiche "Buch"-Gefühl, nicht nur eine Filter-Seite.
@@ -18,36 +18,57 @@ function groupByType(recipes: PrepRecipe[]) {
   return map;
 }
 
+// Magazin-Stil statt Datenbank-Liste: editorielle Kicker-Zeile + kursive Headline (Cormorant
+// Garamond, hier groß genug um elegant statt dünn/schwer lesbar zu wirken), Zutaten als
+// Chip-Reihe statt Aufzählung, keine Icons — nur Typografie trägt die Hierarchie.
 function PrepCard({ r, lang }: { r: PrepRecipe; lang: "de" | "zh" }) {
+  // Kontrollierter State statt <details>/<summary> — ein natives <details> hat keinen
+  // deklarativen Schließen-Button, den bräuchten wir aber für die Volle-Breite-Ansicht.
+  const [open, setOpen] = useState(false);
   return (
-    <article className="prep-card">
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 22 }} aria-hidden="true">{r.emoji}</span>
-        <h3>{r.title}</h3>
-      </div>
-      <p style={{ color: "var(--muted)", fontStyle: "italic", marginTop: 0 }}>{r.desc}</p>
+    <article className={`prep-card${open ? " prep-card-open" : ""}`}>
+      <div className="prep-card-kicker">{r.tags[0]}</div>
+      <h3 className="prep-card-title">{r.title}</h3>
+      <p className="prep-card-desc">{r.desc}</p>
 
-      <div style={{ marginBottom: 12 }}>
+      <div className="prep-tags-row">
         {r.tags.map((t) => <span key={t} className="prep-tag">{t}</span>)}
       </div>
 
-      <p style={{ fontWeight: 600, marginBottom: 4 }}>{r.batchSize}</p>
-
-      <h4 style={{ fontSize: 14, marginBottom: 6 }}>{lang === "de" ? "Zutaten" : "Ingredients"}</h4>
-      <ul style={{ marginTop: 0 }}>
-        {r.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}
-      </ul>
-
-      <h4 style={{ fontSize: 14, marginBottom: 6 }}>{lang === "de" ? "Zubereitung & Einfrieren" : "Prep & freeze"}</h4>
-      <ol style={{ marginTop: 0 }}>
-        {r.steps.map((s, idx) => <li key={idx}>{s}</li>)}
-      </ol>
-
-      <div className="prep-meta-box">
-        <p style={{ margin: 0 }}><strong>{lang === "de" ? "Einfrier-Methode" : "Freeze method"}:</strong> {r.freezeMethod}</p>
-        <p style={{ margin: 0 }}><strong aria-hidden="true">❄ </strong><strong>{lang === "de" ? "Haltbarkeit" : "Freezer life"}:</strong> {r.freezerLife}</p>
-        <p style={{ margin: 0 }}><strong>{lang === "de" ? "Aufwärmen" : "Reheat"}:</strong> {r.reheat}</p>
-      </div>
+      {!open ? (
+        // Geschlossen: Karte bleibt im Raster, wie ein Zeitschriften-Teaser.
+        <button type="button" className="prep-card-toggle" onClick={() => setOpen(true)}>
+          {lang === "de" ? "Details ansehen" : "Show details"}
+        </button>
+      ) : (
+        // Offen: Karte bricht auf volle Rasterbreite aus (siehe .prep-card-open in app.css),
+        // Zutaten/Zubereitung laufen dort zweispaltig nebeneinander statt gequetscht.
+        <div className="prep-card-full">
+          <button type="button" className="prep-card-close" onClick={() => setOpen(false)}>
+            {lang === "de" ? "Schließen ×" : "Close ×"}
+          </button>
+          <div className="prep-card-full-grid">
+            <div>
+              <div className="prep-card-batch">{r.batchSize}</div>
+              <div className="prep-card-label">{lang === "de" ? "Zutaten" : "Ingredients"}</div>
+              <div className="prep-ingredients">
+                {r.ingredients.map((i, idx) => <span key={idx} className="prep-ingredient-chip">{i}</span>)}
+              </div>
+              <div className="prep-meta-box">
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Einfrieren" : "Freeze"}</span>{r.freezeMethod}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "Freezer life"}</span>{r.freezerLife}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Aufwärmen" : "Reheat"}</span>{r.reheat}</div>
+              </div>
+            </div>
+            <div>
+              <div className="prep-card-label">{lang === "de" ? "Zubereitung & Einfrieren" : "Prep & freeze"}</div>
+              <ol className="prep-steps">
+                {r.steps.map((s, idx) => <li key={idx}>{s}</li>)}
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
@@ -59,7 +80,7 @@ function TypeSection({ index, type, recipes, lang }: { index: number; type: stri
         <span className="prep-type-num" aria-hidden="true">{kanjiOf(index)}</span>
         {type}
       </h3>
-      <div style={{ display: "grid", gap: 20 }}>
+      <div className="prep-grid">
         {recipes.map((r) => <PrepCard key={r.id} r={r} lang={lang} />)}
       </div>
     </section>
@@ -71,13 +92,16 @@ const cuisineOf = (r: PrepRecipe) => r.tags[0] ?? "";
 
 export function PreppenPage() {
   const { lang } = useLang();
-  const [tab, setTab] = useState<"gericht" | "basis">("gericht");
+  const [tab, setTab] = useState<PrepCategory>("gericht");
   const [cuisine, setCuisine] = useState<string>("Alle");
 
   const dishes = useMemo(() => PREP_RECIPES.filter((r) => r.category === "gericht"), []);
   const bases = useMemo(() => PREP_RECIPES.filter((r) => r.category === "basis"), []);
+  // Baby-Beikost: tags[0] ist hier eine Altersangabe, keine Küche — die Küchen-Auswahl ergibt für
+  // diesen Tab keinen Sinn und bleibt ausgeblendet, die "type"-Gruppierung (Altersstufe) reicht.
+  const babies = useMemo(() => PREP_RECIPES.filter((r) => r.category === "baby"), []);
   const cuisines = useMemo(() => {
-    const active = tab === "gericht" ? dishes : bases;
+    const active = tab === "gericht" ? dishes : tab === "basis" ? bases : [];
     return Array.from(new Set(active.map(cuisineOf))).sort();
   }, [tab, dishes, bases]);
   const dishesByType = useMemo(
@@ -88,7 +112,8 @@ export function PreppenPage() {
     () => groupByType(cuisine === "Alle" ? bases : bases.filter((r) => cuisineOf(r) === cuisine)),
     [bases, cuisine]
   );
-  const activeGroups = tab === "gericht" ? dishesByType : basesByType;
+  const babiesByType = useMemo(() => groupByType(babies), [babies]);
+  const activeGroups = tab === "gericht" ? dishesByType : tab === "basis" ? basesByType : babiesByType;
   const activeGroupsArr = Array.from(activeGroups.entries());
 
   return (
@@ -120,14 +145,34 @@ export function PreppenPage() {
         >
           {lang === "de" ? `Basis & Saucen (${bases.length})` : `Bases & sauces (${bases.length})`}
         </button>
+        <button
+          type="button"
+          className="prep-tab"
+          onClick={() => { setTab("baby"); setCuisine("Alle"); }}
+          aria-pressed={tab === "baby"}
+        >
+          {lang === "de" ? `Baby-Beikost (${babies.length})` : `Baby food (${babies.length})`}
+        </button>
 
-        <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="prep-select">
-          <option value="Alle">{lang === "de" ? "Alle Küchen" : "All cuisines"}</option>
-          {cuisines.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+        {tab !== "baby" && (
+          <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="prep-select">
+            <option value="Alle">{lang === "de" ? "Alle Küchen" : "All cuisines"}</option>
+            {cuisines.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {tab === "baby" && (
+        <div className="prep-notice">
+          <p>
+            {lang === "de"
+              ? "Beikost ist erst ab ca. 6 Monaten nötig — Muttermilch/Pre-Nahrung deckt den Bedarf davor allein. Kein Ersatz für die Beratung durch Kinderarzt/Hebamme."
+              : "Solid food isn't needed before ~6 months — breast milk/formula alone covers everything before that. Not a substitute for advice from a pediatrician/midwife."}
+          </p>
+        </div>
+      )}
 
       {/* Mini-Register: Kapitelübersicht mit Sprunglinks, bevor die eigentlichen Karten kommen —
           gleiche Idee wie das 一·二·三-Register im Hauptmenü, nur für Preppen-Kapitel. */}

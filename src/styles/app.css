@@ -29,14 +29,20 @@
      (--bg/--panel) used for the book's own pages. */
   --desk-bg: #D4D0C5;
   --spine-bg: #EBE7E0;
+  /* Cormorant Garamond is a high-contrast display serif — elegant at large decorative sizes
+     (hero title, chapter headings) but its hairline strokes read as thin/washed-out at smaller
+     UI sizes (recipe titles, week-list rows, labels), even at heavier weights. Georgia is a
+     sturdier text serif already used for the placeholder-illustration text; reusing it here for
+     every dense/functional bit of text instead of guessing a new font. */
+  --font-ui: Georgia, "Noto Serif SC", "Songti SC", "Yu Mincho", "Nanum Myeongjo", serif;
 }
 
-/* Cormorant Garamond (Latin, light/italic-friendly) + Noto Serif JP (Kanji) — a recipe title
-   mixing German and Kanji ("Miso-Suppe (味噌汁)") gets a matched, equally delicate weight on
-   both halves instead of a font clash. */
-h1, h2, h3, .brand, .mincho {
+/* Cormorant Garamond (Latin, light/italic-friendly) + Noto Serif JP (Kanji) — reserved for big
+   decorative headings now (h3 moved to --font-ui below, see comment above). */
+h1, h2, .brand, .mincho {
   font-family: "Cormorant Garamond", "Noto Serif JP", "Noto Serif SC", "Songti SC", "Yu Mincho", "Nanum Myeongjo", serif;
 }
+h3 { font-family: var(--font-ui); }
 
 /* Hanko-style stamp — an outlined chop rather than a filled block, 台所 ("kitchen", two real
    characters stacked vertically) instead of a single decorative glyph. */
@@ -95,7 +101,7 @@ body {
 
 /* Same literary pairing for index-style numbering/labels (week numbers, nav). */
 .index-num, .index-label {
-  font-family: "Cormorant Garamond", "Noto Serif JP", "Noto Serif SC", serif;
+  font-family: var(--font-ui);
 }
 
 a { color: inherit; }
@@ -186,7 +192,9 @@ a { color: inherit; }
   color: #F7F3EA;
   border: none;
   cursor: pointer;
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  /* Inherited by .shiori-caption too — the German label needs this to be legible; the CJK glyph
+     in .shiori-glyph skips straight past it to Noto Serif SC either way. */
+  font-family: var(--font-ui);
   box-shadow: 3px 3px 10px -4px rgba(28,27,25,0.4);
   transition: width 0.18s ease, transform 0.18s ease;
   /* Shiori-Lesezeichen-Zuschnitt: unten spitz zulaufend, wie im Entwurf. */
@@ -217,6 +225,7 @@ a { color: inherit; }
   overflow-wrap: break-word;
   opacity: 0.85;
 }
+.shiori-caption-icon { display: flex; align-items: center; justify-content: center; }
 .shiori-dark { background: #1C1B19; }
 .shiori-seal { background: var(--seal); }
 .shiori-olive { background: #555B4D; }
@@ -249,7 +258,7 @@ a { color: inherit; }
   background: none;
   border: none;
   color: var(--muted);
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   letter-spacing: 0.06em;
   cursor: pointer;
@@ -286,7 +295,7 @@ a { color: inherit; }
 /* Small caption above each register chapter — same device as the style-guide proposal's
    "概要 / overview" labels: a Mincho micro-label naming the section, not just a plain heading. */
 .index-section-label {
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-size: 11.5px;
   letter-spacing: 0.14em;
   color: var(--muted);
@@ -337,13 +346,54 @@ a { color: inherit; }
   padding: 10px 12px;
   font-weight: 600;
   font-size: 19px;
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   letter-spacing: 0.02em;
   cursor: pointer;
   list-style: none;
   user-select: none;
 }
 .year summary:hover { background: rgba(0,0,0,0.02); }
+
+/* Second level inside a year — otherwise even just the current year is 40+ weeks in one
+   unbroken list. No extra box-in-box border, just a hairline separator + indent. Sized up (was
+   13px, one line) with its own description line — reads as a real section now, not a footnote. */
+.quarter { border-top: 1px solid var(--border); }
+.year > .quarter:first-of-type { border-top: none; }
+.quarter summary {
+  display: block;
+  padding: 14px 16px 14px 20px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.quarter-head { display: flex; align-items: baseline; gap: 10px; }
+.quarter-title {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.quarter-season {
+  margin-left: 6px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--muted);
+  font-size: 0.8em;
+}
+.quarter summary:hover .quarter-title { color: var(--seal); }
+.quarter-count { margin-left: auto; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.quarter-desc {
+  margin-top: 5px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.quarter .week-list { padding: 0 12px 14px 20px; }
 .year-list { list-style: none; padding: 0 6px 8px; margin: 0; }
 .year-list li a { display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: all 0.2s; }
 .year-list li a:hover { background: var(--accent-light); color: var(--accent); }
@@ -380,7 +430,7 @@ a { color: inherit; }
 .nav-row:hover { color: var(--seal); }
 .nav-row:hover .index-num { color: var(--seal); }
 .nav-lead {
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 600;
   color: var(--muted);
@@ -390,7 +440,7 @@ a { color: inherit; }
 }
 .nav-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .nav-title {
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -447,7 +497,7 @@ a { color: inherit; }
   background: var(--accent-warm);
   color: #fff !important;
   text-decoration: none;
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -615,7 +665,7 @@ a { color: inherit; }
    filter bar, flat cards, no rounded pills. --- */
 .prep-header { margin-bottom: 28px; }
 .prep-kicker {
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-family: var(--font-ui);
   font-size: 11.5px; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 8px;
 }
 .prep-tabs {
@@ -631,7 +681,7 @@ a { color: inherit; }
 .prep-tab[aria-pressed="true"] { border-color: var(--frost); color: var(--frost); }
 .prep-select {
   margin-left: auto; padding: 9px 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text);
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif; font-size: 14px;
+  font-family: var(--font-ui); font-size: 14px;
 }
 
 /* Mini-Register: Kapitelübersicht mit Sprunglinks vor den eigentlichen Karten — gleiche Idee
@@ -647,24 +697,83 @@ a { color: inherit; }
 .prep-index-row:last-child { border-bottom: none; }
 .prep-index-row:hover { color: var(--frost); background: var(--frost-light); }
 .prep-index-num {
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-family: var(--font-ui);
   font-size: 17px; color: var(--frost); min-width: 1.6em;
 }
 .prep-index-count { margin-left: auto; font-size: 12px; color: var(--muted); }
 
 .prep-type-label {
   display: flex; align-items: baseline; gap: 10px;
-  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-family: var(--font-ui);
   font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
   border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 18px;
 }
 .prep-type-num { font-size: 19px; color: var(--frost); letter-spacing: normal; text-transform: none; }
 
+/* Magazin-Raster statt einspaltiger Liste — auf breiten Screens mehrere Karten nebeneinander,
+   auf schmalen automatisch einspaltig (kein eigener Mobile-Breakpoint nötig). Schmaler als
+   vorher (war 400px), weil die Karten jetzt geschlossen viel kürzer sind — mehr passen nebeneinander. */
+.prep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; align-items: start; }
+
 /* Left edge reads like a storage-jar/freezer-bag label, not just another flat card. */
-.prep-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--frost); padding: 22px; }
-.prep-card h3 { margin: 0; font-size: 19px; }
-.prep-tag { display: inline-block; padding: 2px 10px; background: var(--chip-bg); border: 1px solid var(--border); font-size: 12px; margin-right: 6px; margin-bottom: 6px; }
-.prep-meta-box { margin-top: 16px; padding: 12px 16px; background: var(--frost-light); display: grid; gap: 6px; }
+.prep-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--frost); padding: 20px 22px; }
+.prep-card-kicker {
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--frost); margin-bottom: 6px;
+}
+/* Groß genug, damit Cormorant Garamonds dünne Striche als elegante Editorial-Headline wirken statt
+   als schwer lesbarer Fließtext (siehe die Schrift-Kontrast-Korrektur an anderer Stelle im Register). */
+.prep-card-title {
+  font-family: "Cormorant Garamond", "Noto Serif SC", "Songti SC", serif;
+  font-style: italic; font-weight: 500; font-size: 23px; line-height: 1.22;
+  margin: 0 0 8px;
+}
+.prep-card-desc { font-family: var(--font-ui); font-style: italic; color: var(--muted); margin: 0 0 12px; line-height: 1.5; font-size: 14px; }
+.prep-tags-row { margin-bottom: 4px; }
+/* Kein Rand mehr (war eine harte Box) — kleine Kapitälchen-Etiketten statt Datenbank-Chips,
+   passend zur restlichen Kicker-Typografie der Karte. */
+.prep-tag {
+  display: inline-block; padding: 3px 10px; background: var(--chip-bg);
+  font-family: var(--font-ui); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--muted);
+  margin-right: 6px; margin-bottom: 6px;
+}
+.prep-card-batch { font-weight: 600; font-size: 13.5px; margin: 14px 0 18px; }
+.prep-card-label {
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.prep-ingredients { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.prep-ingredient-chip { display: inline-block; padding: 3px 10px; background: var(--chip-bg); font-size: 12.5px; }
+.prep-steps { margin: 0 0 20px; padding-left: 20px; }
+.prep-steps li { margin-bottom: 8px; line-height: 1.6; }
+
+/* Geschlossen: dezenter Kapitälchen-Trigger statt eines Buttons, keine Icons — Karte bleibt im
+   Raster (Teaser). Offen: Karte bricht auf die volle Rasterbreite aus (span 1/-1), Inhalt läuft
+   zweispaltig statt in der schmalen Kartenspalte gequetscht zu werden. */
+.prep-card-toggle {
+  margin-top: 10px; padding: 0; background: none; border: none;
+  font-family: var(--font-ui); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--frost); cursor: pointer;
+}
+.prep-card-toggle:hover { text-decoration: underline; }
+
+.prep-card-open { grid-column: 1 / -1; }
+.prep-card-full { margin-top: 14px; position: relative; }
+.prep-card-close {
+  display: block; margin: 0 0 18px auto; padding: 0; background: none; border: none;
+  font-family: var(--font-ui); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); cursor: pointer;
+}
+.prep-card-close:hover { color: var(--seal); }
+.prep-card-full-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+
+.prep-meta-box { margin-top: 4px; padding: 16px 18px; background: var(--frost-light); display: grid; gap: 10px; }
+.prep-meta-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; font-size: 13px; line-height: 1.5; }
+.prep-meta-label { font-family: var(--font-ui); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--frost); font-weight: 600; }
+
+.prep-notice { border-left: 3px solid var(--frost); background: var(--frost-light); padding: 12px 16px; margin-top: -12px; margin-bottom: 24px; }
+.prep-notice p { margin: 0; font-size: 13.5px; color: var(--text); line-height: 1.5; }
 
 .section-kicker {
   margin-bottom: 10px;
@@ -716,7 +825,7 @@ a { color: inherit; }
   border-radius: 0;
   background: var(--seal);
   color: var(--bg);
-  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-family: var(--font-ui);
   font-weight: 600;
 }
 
@@ -1165,9 +1274,15 @@ a { color: inherit; }
   .shiori-glyph { font-size: 16px; }
   .shiori-caption { font-size: 7.5px; max-width: 24px; }
   .week-list { grid-template-columns: 1fr; }
+  .prep-grid { grid-template-columns: 1fr; }
+  .prep-card-full-grid { grid-template-columns: 1fr; gap: 0; }
+  .prep-meta-row { grid-template-columns: 1fr; gap: 2px; }
   .brand { margin-right: 50px; font-size: 19px; }
 
-  .main { padding: 56px 8px 40px !important; }
+  /* The comment above always said the tabs would get clearance, but nothing actually reserved
+     it — .shiori-stack is position:fixed, so content just ran full-width underneath it, covering
+     "BAND EINS — 完", the Alle+/Alle- row, etc. Right padding now matches the 32px tab width. */
+  .main { padding: 56px 48px 40px 8px !important; }
   .main-inner { width: 100% !important; max-width: 100% !important; padding: 0 !important; }
   .pinboard-page { padding: 0 4px 32px !important; }
   .pinboard-header { align-items: stretch; flex-direction: column; }
@@ -1249,7 +1364,12 @@ a { color: inherit; }
   .day-section h2 { padding: 0 16px 8px !important; font-size: 20px !important; }
   .mkt-art { margin: -16px -16px 12px -16px !important; border-radius: 20px 20px 0 0 !important; }
 
-  .back-to-top { z-index: 2000 !important; bottom: 20px; right: 20px; opacity: 1 !important; visibility: visible !important; }
+  /* Was right:20px, z-index:2000, forced permanently visible — predates the Shiori tab stack
+     (also fixed, also right-edge, z-index:250) and always overlapped whatever page content sat
+     behind it, at the top of the page too since the forced visibility ignored the scroll-past-
+     300px logic in BackToTop(). Moved to the left edge, shrunk a touch, and the forced
+     opacity/visibility removed so it only shows once there's actually somewhere to scroll up to. */
+  .back-to-top { z-index: 90; bottom: 20px; left: 16px; right: auto; width: 40px; height: 40px; }
 }
 
 /* --- Dark Mode Overrides --- */
@@ -1264,8 +1384,13 @@ a { color: inherit; }
     --border: rgba(247, 243, 234, 0.14);
     --accent: #7C9BC4;
     --accent-light: rgba(124, 155, 196, 0.12);
-    --accent-warm: #D97A63;
-    --seal: #D97A63;
+    /* --accent-warm/--seal are TEXT colors here (current-week highlight, "Plan öffnen" links,
+       hover state, dividers) — #D97A63 only hit 5.2:1 on the dark panel, noticeably dimmer than
+       the ~12:1 everywhere else. Brightened to 7:1. The two buttons that use --accent-warm as a
+       solid FILL with white text (.btn-support/.sidebar-support-btn) get their own darker override
+       further below — a fill needs the opposite direction from a foreground color. */
+    --accent-warm: #E89A79;
+    --seal: #E89A79;
     --frost: #8FC0D2;
     --frost-light: rgba(143,192,210,.12);
     --shadow: none;
@@ -1276,6 +1401,10 @@ a { color: inherit; }
   }
 
   .brand-text { color: var(--text); }
+
+  /* White text needs a darker fill than --accent-warm now gives (that var is tuned as a
+     foreground color here, see :root above) — 3:1 with the old shared value, fixed to 5:1. */
+  .btn-support, .sidebar-support-btn { background: #B54E33; }
 
   .lang-toggle {
     background: #313640;

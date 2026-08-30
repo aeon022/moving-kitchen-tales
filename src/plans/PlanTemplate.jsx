@@ -355,7 +355,7 @@ function WeekOverview({ data, DAY_NAME_DE, meta, subtitle }) {
           wäre hier nur ein Kasten im Kasten. Eine Haarlinie unten grenzt gegen die Meal-Cards ab. */}
       <div style={{ ...cardPanelStyle, border: "none", borderBottom: "1px solid var(--border)" }}>
         <div style={{ marginBottom: 8 }}>
-          <div style={{ fontFamily: '"Cormorant Garamond", "Noto Serif JP", serif', fontSize: 11.5, letterSpacing: "0.14em", color: "var(--muted)", marginBottom: 8 }}>
+          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11.5, letterSpacing: "0.14em", color: "var(--muted)", marginBottom: 8 }}>
             索引 · Woche
           </div>
           <h2 style={{ margin: 0 }}>
@@ -366,7 +366,7 @@ function WeekOverview({ data, DAY_NAME_DE, meta, subtitle }) {
         <div>
           {DAYS_ORDER.map((d, i) => (
             <div key={d} style={{ display: "flex", gap: 18, padding: "16px 0", borderBottom: i < DAYS_ORDER.length - 1 ? "1px solid var(--border)" : "none" }}>
-              <div style={{ fontFamily: '"Cormorant Garamond", "Noto Serif JP", serif', fontSize: 24, color: "var(--muted)", minWidth: "1.6em", textAlign: "right", lineHeight: 1, flexShrink: 0 }}>
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 24, color: "var(--muted)", minWidth: "1.6em", textAlign: "right", lineHeight: 1, flexShrink: 0 }}>
                 {String(i + 1).padStart(2, "0")}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
