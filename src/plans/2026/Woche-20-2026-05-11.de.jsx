@@ -591,7 +591,7 @@ export default function Woche18DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Lachs, Fisch & Meeresfrüchte · Reiskocher-Vielfalt · Balanced"
       heroChips={["Woche 20", "Schwedisch & CN/JP Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

@@ -17,6 +17,7 @@ export const meta = {
   id: "woche-4-2026-01-19", // ID 保持不变以便同步
   lang: "zh",
   sidebar: "第4周 (2026-01-19)",
+  focus: "韩式风味三文鱼 · 电饭煲煲仔饭 · 孕期安全",
 };
 
 const FILE_BASE = "第4周 2026-01-19";

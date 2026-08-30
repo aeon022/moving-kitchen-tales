@@ -139,6 +139,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-1-2025-12-29",
     "lang": "de",
     "sidebar": "Woche 1 (2025-12-29)",
+    "focus": "Japanisch mild · Reisbrei & Congee · Schwangerschaftssicher",
     "path": "./plans/2026/Woche-1-2025-12-29.de.jsx"
   },
   {
@@ -147,6 +148,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-1-2025-12-29",
     "lang": "zh",
     "sidebar": "第1周（2025-12-29）",
+    "focus": "日式温和粥品 · 清蒸鳕鱼 · 孕期安全",
     "path": "./plans/2026/Woche-1-2026-12-29.zh.jsx"
   },
   {
@@ -164,6 +166,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-2-2026-01-05",
     "lang": "zh",
     "sidebar": "第2周 (2026-01-05)",
+    "focus": "韩式鸡肉粥 & 海南鸡饭 · 电饭煲家常 · 孕期安全",
     "path": "./plans/2026/Woche-2-2026-01-05.zh.jsx"
   },
   {
@@ -181,6 +184,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-3-2026-01-12",
     "lang": "zh",
     "sidebar": "第3周 (2026-01-12)",
+    "focus": "三文鱼 & 海鲜家常 · 电饭煲料理 · 孕期安全",
     "path": "./plans/2026/Woche-3-2026-01-12.zh.jsx"
   },
   {
@@ -198,6 +202,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-4-2026-01-19",
     "lang": "zh",
     "sidebar": "第4周 (2026-01-19)",
+    "focus": "韩式风味三文鱼 · 电饭煲煲仔饭 · 孕期安全",
     "path": "./plans/2026/Woche-4-2026-01-19.zh.jsx"
   },
   {
@@ -215,6 +220,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-5-2026-01-26",
     "lang": "zh",
     "sidebar": "第5周 (2026-01-26)",
+    "focus": "台式蛋饼 & 天津饭 · 亚洲早餐特辑 · 孕期安全",
     "path": "./plans/2026/Woche-5-2026-01-26.zh.jsx"
   },
   {
@@ -268,7 +274,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-11-2026-03-09",
     "lang": "de",
     "sidebar": "Woche 11 (2026-03-09)",
-    "focus": "Virale Hits 🔥 · Originaltitel (CN/JP/KR) · Balanced",
+    "focus": "Japanisch mild · Reiskocher-Donburi · Balanced",
     "path": "./plans/2026/Woche-11-2026-03-09.de.jsx"
   },
   {
@@ -277,7 +283,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-12-2026-03-16",
     "lang": "de",
     "sidebar": "Woche 12 (2026-03-16)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced",
+    "focus": "Sushi Bake & Donburi · Reiskocher-Vielfalt · Balanced",
     "path": "./plans/2026/Woche-12-2026-03-16.de.jsx"
   },
   {
@@ -286,7 +292,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-13-2026-03-23",
     "lang": "de",
     "sidebar": "Woche 13 (2026-03-23)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced",
+    "focus": "Drei-Tassen-Huhn & Claypot · Reiskocher-Vielfalt · Balanced",
     "path": "./plans/2026/Woche-13-2026-03-23.de.jsx"
   },
   {
@@ -295,7 +301,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-14-2026-03-30",
     "lang": "de",
     "sidebar": "Woche 14 (2026-03-30)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Teriyaki & Takikomi Gohan · Fusion-Frühstück · Balanced",
     "path": "./plans/2026/Woche-14-2026-03-30.de.jsx"
   },
   {
@@ -304,7 +310,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-15-2026-04-06",
     "lang": "de",
     "sidebar": "Woche 15 (2026-04-06)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Gochujang & Tom Yum · Würzige Reisbowls · Balanced",
     "path": "./plans/2026/Woche-15-2026-04-06.de.jsx"
   },
   {
@@ -313,7 +319,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-16-2026-04-13",
     "lang": "de",
     "sidebar": "Woche 16 (2026-04-13)",
-    "focus": "Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced",
+    "focus": "Internationale Food-Trends · Bunte Vielfalt · Balanced",
     "path": "./plans/2026/Woche-16-2026-04-13.de.jsx"
   },
   {
@@ -322,7 +328,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-17-2026-04-20",
     "lang": "de",
     "sidebar": "Woche 17 (2026-04-20)",
-    "focus": "Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced",
+    "focus": "Fusion-Nudeln (JP/KR/IT) · Katsu & Risotto · Balanced",
     "path": "./plans/2026/Woche-17-2026-04-20.de.jsx"
   },
   {
@@ -331,7 +337,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-18-2026-04-27",
     "lang": "de",
     "sidebar": "Woche 18 (2026-04-27)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Bulgogi & Takikomi Gohan · Curry-Bowls · Balanced",
     "path": "./plans/2026/Woche-18-2026-04-27.de.jsx"
   },
   {
@@ -340,7 +346,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-19-2026-05-04",
     "lang": "de",
     "sidebar": "Woche 19 (2026-05-04)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Thai & Kürbis-Kokos · Herzhafte Reisbowls · Balanced",
     "path": "./plans/2026/Woche-19-2026-05-04.de.jsx"
   },
   {
@@ -349,7 +355,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-20-2026-05-11",
     "lang": "de",
     "sidebar": "Woche 20 (2026-05-11)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Lachs, Fisch & Meeresfrüchte · Reiskocher-Vielfalt · Balanced",
     "path": "./plans/2026/Woche-20-2026-05-11.de.jsx"
   },
   {
@@ -358,7 +364,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-21-2026-05-18",
     "lang": "de",
     "sidebar": "Woche 21 (2026-05-18)",
-    "focus": "Virale Airfryer-Hacks 🔥 · Goldbrasse, Zha Cai & Co · Balanced",
+    "focus": "Goldbrasse, Zha Cai & Co · Airfryer-Hacks · Balanced",
     "path": "./plans/2026/Woche-21-2026-05-18.de.jsx"
   },
   {
@@ -367,7 +373,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-22-2026-05-25",
     "lang": "de",
     "sidebar": "Woche 22 (2026-05-25)",
-    "focus": "Chinesische Wok-Hits · Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced",
+    "focus": "Chinesische Wok-Hits · Reiskocher-Magie · Balanced",
     "path": "./plans/2026/Woche-22-2026-05-25.de.jsx"
   },
   {
@@ -385,7 +391,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-24-2026-06-08",
     "lang": "de",
     "sidebar": "Woche 24 (2026-06-08)",
-    "focus": "Koreanische Küche · Airfryer-Hacks 🔥 · Balanced",
+    "focus": "Koreanische Küche · Airfryer-Hacks · Balanced",
     "path": "./plans/2026/Woche-24-2026-06-08.de.jsx"
   },
   {
@@ -394,7 +400,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-25-2026-06-15",
     "lang": "de",
     "sidebar": "Woche 25 (2026-06-15)",
-    "focus": "Italien & Asia Fusion · Airfryer-Hacks 🔥 · Balanced",
+    "focus": "Italien & Asia Fusion · Airfryer-Hacks · Balanced",
     "path": "./plans/2026/Woche-25-2026-06-15.de.jsx"
   },
   {
@@ -403,7 +409,7 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "id": "woche-26-2026-06-22",
     "lang": "de",
     "sidebar": "Woche 26 (2026-06-22)",
-    "focus": "Neue Virale Hacks 🔥 · Italien & Asia Fusion · Balanced",
+    "focus": "Thai & Szechuan Würze · Airfryer-Vielfalt · Balanced",
     "path": "./plans/2026/Woche-26-2026-06-22.de.jsx"
   },
   {
@@ -495,5 +501,77 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 36 (2026-08-31)",
     "focus": "Wärmende Eintöpfe & Congee 🍂 · Herbstauftakt · Balanced",
     "path": "./plans/2026/Woche-36-2026-08-31.de.jsx"
+  },
+  {
+    "title": "Woche 37",
+    "startDate": "2026-09-07",
+    "id": "woche-37-2026-09-07",
+    "lang": "de",
+    "sidebar": "Woche 37 (2026-09-07)",
+    "focus": "家常菜 · Chinesische Hausmannskost · Balanced",
+    "path": "./plans/2026/Woche-37-2026-09-07.de.jsx"
+  },
+  {
+    "title": "Woche 38",
+    "startDate": "2026-09-14",
+    "id": "woche-38-2026-09-14",
+    "lang": "de",
+    "sidebar": "Woche 38 (2026-09-14)",
+    "focus": "川菜 mild · Mapo & Gong Bao · Balanced",
+    "path": "./plans/2026/Woche-38-2026-09-14.de.jsx"
+  },
+  {
+    "title": "Woche 39",
+    "startDate": "2026-09-21",
+    "id": "woche-39-2026-09-21",
+    "lang": "de",
+    "sidebar": "Woche 39 (2026-09-21)",
+    "focus": "粵菜 · Dampfgaren & klare Brühen · Balanced",
+    "path": "./plans/2026/Woche-39-2026-09-21.de.jsx"
+  },
+  {
+    "title": "Woche 40",
+    "startDate": "2026-09-28",
+    "id": "woche-40-2026-09-28",
+    "lang": "de",
+    "sidebar": "Woche 40 (2026-09-28)",
+    "focus": "家常湯 🥣 · Klare Brühen & Eintöpfe · Balanced",
+    "path": "./plans/2026/Woche-40-2026-09-28.de.jsx"
+  },
+  {
+    "title": "Woche 41",
+    "startDate": "2026-10-05",
+    "id": "woche-41-2026-10-05",
+    "lang": "de",
+    "sidebar": "Woche 41 (2026-10-05)",
+    "focus": "麵食 🥟 · Nudeln, Jiaozi & Baozi · Balanced",
+    "path": "./plans/2026/Woche-41-2026-10-05.de.jsx"
+  },
+  {
+    "title": "Woche 42",
+    "startDate": "2026-10-12",
+    "id": "woche-42-2026-10-12",
+    "lang": "de",
+    "sidebar": "Woche 42 (2026-10-12)",
+    "focus": "家常炒菜 · Hongshao & süß-sauer · Balanced",
+    "path": "./plans/2026/Woche-42-2026-10-12.de.jsx"
+  },
+  {
+    "title": "Woche 43",
+    "startDate": "2026-10-19",
+    "id": "woche-43-2026-10-19",
+    "lang": "de",
+    "sidebar": "Woche 43 (2026-10-19)",
+    "focus": "中式早點 🥣 · Frühstück den ganzen Tag · Balanced",
+    "path": "./plans/2026/Woche-43-2026-10-19.de.jsx"
+  },
+  {
+    "title": "Woche 44",
+    "startDate": "2026-10-26",
+    "id": "woche-44-2026-10-26",
+    "lang": "de",
+    "sidebar": "Woche 44 (2026-10-26)",
+    "focus": "秋冬滋補 🍂 · Nährende Schmorgerichte · Balanced",
+    "path": "./plans/2026/Woche-44-2026-10-26.de.jsx"
   }
 ];

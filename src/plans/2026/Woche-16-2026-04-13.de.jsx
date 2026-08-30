@@ -594,7 +594,7 @@ export default function Woche16DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced"
+      subtitle="Internationale Food-Trends · Bunte Vielfalt · Balanced"
       heroChips={["Woche 16", "Neue Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

@@ -17,6 +17,7 @@ export const meta = {
   id: "woche-3-2026-01-12", // ID bleibt gleich für Sync
   lang: "zh",
   sidebar: "第3周 (2026-01-12)",
+  focus: "三文鱼 & 海鲜家常 · 电饭煲料理 · 孕期安全",
 };
 
 const FILE_BASE = "第3周 2026-01-12";

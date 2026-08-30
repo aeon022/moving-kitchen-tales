@@ -586,7 +586,7 @@ export default function Woche25DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Italien & Asia Fusion · Airfryer-Hacks 🔥 · Balanced"
+      subtitle="Italien & Asia Fusion · Airfryer-Hacks · Balanced"
       heroChips={["Woche 25", "Italien & Asia Fusion", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

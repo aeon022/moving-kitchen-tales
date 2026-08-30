@@ -590,7 +590,7 @@ export default function Woche26DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Neue Virale Hacks 🔥 · Italien & Asia Fusion · Balanced"
+      subtitle="Thai & Szechuan Würze · Airfryer-Vielfalt · Balanced"
       heroChips={["Woche 26", "Italien & Asia Fusion", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

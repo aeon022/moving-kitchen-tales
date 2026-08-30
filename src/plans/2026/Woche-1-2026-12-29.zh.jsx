@@ -16,6 +16,7 @@ export const meta = {
   id: "woche-1-2025-12-29", // WICHTIG: Identisch zu DE, ohne "-zh"
   lang: "zh",
   sidebar: "第1周（2025-12-29）",
+  focus: "日式温和粥品 · 清蒸鳕鱼 · 孕期安全",
 };
 
 const FILE_BASE = "第1周 2025-12-29";

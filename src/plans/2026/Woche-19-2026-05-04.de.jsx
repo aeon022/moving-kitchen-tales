@@ -594,7 +594,7 @@ export default function Woche19DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Thai & Kürbis-Kokos · Herzhafte Reisbowls · Balanced"
       heroChips={["Woche 19", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

@@ -594,7 +594,7 @@ export default function Woche15DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Gochujang & Tom Yum · Würzige Reisbowls · Balanced"
       heroChips={["Woche 15", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

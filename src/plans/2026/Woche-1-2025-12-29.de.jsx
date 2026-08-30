@@ -11,6 +11,7 @@ export const meta = {
   id: "woche-1-2025-12-29",
   lang: "de",
   sidebar: "Woche 1 (2025-12-29)",
+  focus: "Japanisch mild · Reisbrei & Congee · Schwangerschaftssicher",
 };
 
 const DAY_NAME_DE = {

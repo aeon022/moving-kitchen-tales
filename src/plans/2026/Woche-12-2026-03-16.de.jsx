@@ -584,7 +584,7 @@ export default function Woche12DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced"
+      subtitle="Sushi Bake & Donburi · Reiskocher-Vielfalt · Balanced"
       heroChips={["Woche 12", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

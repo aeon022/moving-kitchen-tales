@@ -17,6 +17,7 @@ export const meta = {
   id: "woche-2-2026-01-05", // Identisch zu DE
   lang: "zh",
   sidebar: "第2周 (2026-01-05)",
+  focus: "韩式鸡肉粥 & 海南鸡饭 · 电饭煲家常 · 孕期安全",
 };
 
 const FILE_BASE = "第2周 2026-01-05";

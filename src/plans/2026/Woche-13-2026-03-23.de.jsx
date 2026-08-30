@@ -596,7 +596,7 @@ export default function Woche13DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Originaltitel (CN/JP/KR) · Balanced"
+      subtitle="Drei-Tassen-Huhn & Claypot · Reiskocher-Vielfalt · Balanced"
       heroChips={["Woche 13", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

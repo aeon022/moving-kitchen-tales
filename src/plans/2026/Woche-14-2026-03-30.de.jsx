@@ -594,7 +594,7 @@ export default function Woche14DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Teriyaki & Takikomi Gohan · Fusion-Frühstück · Balanced"
       heroChips={["Woche 14", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

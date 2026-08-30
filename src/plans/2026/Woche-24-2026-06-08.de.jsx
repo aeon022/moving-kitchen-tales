@@ -592,7 +592,7 @@ export default function Woche24DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Koreanische Küche · Airfryer-Hacks 🔥 · Balanced"
+      subtitle="Koreanische Küche · Airfryer-Hacks · Balanced"
       heroChips={["Woche 24", "Koreanische Küche & Virale Trends", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

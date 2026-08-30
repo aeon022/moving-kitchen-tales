@@ -594,7 +594,7 @@ export default function Woche18DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Bulgogi & Takikomi Gohan · Curry-Bowls · Balanced"
       heroChips={["Woche 18", "Neue Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

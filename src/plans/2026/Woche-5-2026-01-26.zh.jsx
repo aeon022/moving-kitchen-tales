@@ -17,6 +17,7 @@ export const meta = {
   id: "woche-5-2026-01-26", // ID 保持不变以便同步
   lang: "zh",
   sidebar: "第5周 (2026-01-26)",
+  focus: "台式蛋饼 & 天津饭 · 亚洲早餐特辑 · 孕期安全",
 };
 
 const FILE_BASE = "第5周 2026-01-26";

@@ -596,7 +596,7 @@ export default function Woche21DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Airfryer-Hacks 🔥 · Goldbrasse, Zha Cai & Co · Balanced"
+      subtitle="Goldbrasse, Zha Cai & Co · Airfryer-Hacks · Balanced"
       heroChips={["Woche 21", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

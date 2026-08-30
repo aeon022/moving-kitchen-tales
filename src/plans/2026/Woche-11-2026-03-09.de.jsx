@@ -593,7 +593,7 @@ export default function Woche11DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Virale Hits 🔥 · Originaltitel (CN/JP/KR) · Balanced"
+      subtitle="Japanisch mild · Reiskocher-Donburi · Balanced"
       heroChips={["Woche 11", "Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

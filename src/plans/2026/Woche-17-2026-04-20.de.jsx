@@ -598,7 +598,7 @@ export default function Woche17DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Neue Virale Hacks 🔥 · Abwechslung pur · Reiskocher · Balanced"
+      subtitle="Fusion-Nudeln (JP/KR/IT) · Katsu & Risotto · Balanced"
       heroChips={["Woche 17", "Neue Virale Trends & Wohlfühlküche", "Täglich 1× 🍚 Reiskocher"]}
     />
   );

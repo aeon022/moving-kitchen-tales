@@ -597,7 +597,7 @@ export default function Woche22DE() {
       data={DATA}
       dayNames={DAY_NAME_DE}
       uiTitles={UI_TITLES}
-      subtitle="Chinesische Wok-Hits · Airfryer-Hacks 🔥 · Reiskocher-Magie · Balanced"
+      subtitle="Chinesische Wok-Hits · Reiskocher-Magie · Balanced"
       heroChips={["Woche 22", "Chinesische Wok-Hits & Reiskocher", "Täglich 1× 🍚 Reiskocher"]}
     />
   );
