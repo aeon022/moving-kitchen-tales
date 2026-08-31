@@ -4,6 +4,8 @@ import { Routes, Route, Link, Navigate, useLocation, useNavigate, useParams } fr
 import { useBookmarks, Bookmark, BookmarkList } from "./hooks/useBookmarks";
 import { PinnwandPage } from "./PinnwandPage";
 import { PreppenPage } from "./PreppenPage";
+import { KalteGerichtePage } from "./KalteGerichtePage";
+import { KochtechnikenPage } from "./KochtechnikenPage";
 import { RecipeDatabasePage } from "./RecipeDatabasePage";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -69,6 +71,8 @@ const NAV_ICON_PATHS: Record<string, React.ReactNode> = {
   box: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
   database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>,
   list: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
+  snowflake: <><line x1="12" y1="2" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="19.07" y2="4.93" /></>,
+  "book-open": <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>,
 };
 function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
   return (
@@ -391,6 +395,18 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <Link to="/preppen" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="box" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Preppen" : "Meal Prep"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/kalte-gerichte" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="snowflake" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kalte Gerichte" : "Cold Dishes"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/kochtechniken" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="book-open" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kochtechniken" : "Cooking Techniques"}</span></span>
             </Link>
           </li>
           <li>
@@ -1068,6 +1084,8 @@ export default function App() {
                   <Route path="/bookmarks" element={<BookmarkPage plans={plans} />} />
                   <Route path="/pinnwand" element={<PinnwandPage plans={plans} />} />
                   <Route path="/preppen" element={<PreppenPage />} />
+                  <Route path="/kalte-gerichte" element={<KalteGerichtePage />} />
+                  <Route path="/kochtechniken" element={<KochtechnikenPage />} />
                   <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
                   <Route path="*" element={<HomePage plans={plans} />} />

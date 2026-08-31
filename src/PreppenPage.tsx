@@ -97,14 +97,14 @@ export function PreppenPage() {
 
   const dishes = useMemo(() => PREP_RECIPES.filter((r) => r.category === "gericht"), []);
   const bases = useMemo(() => PREP_RECIPES.filter((r) => r.category === "basis"), []);
-  const colds = useMemo(() => PREP_RECIPES.filter((r) => r.category === "kalt"), []);
+  const konserven = useMemo(() => PREP_RECIPES.filter((r) => r.category === "konserve"), []);
   // Baby-Beikost: tags[0] ist hier eine Altersangabe, keine Küche — die Küchen-Auswahl ergibt für
   // diesen Tab keinen Sinn und bleibt ausgeblendet, die "type"-Gruppierung (Altersstufe) reicht.
   const babies = useMemo(() => PREP_RECIPES.filter((r) => r.category === "baby"), []);
   const cuisines = useMemo(() => {
-    const active = tab === "gericht" ? dishes : tab === "basis" ? bases : tab === "kalt" ? colds : [];
+    const active = tab === "gericht" ? dishes : tab === "basis" ? bases : tab === "konserve" ? konserven : [];
     return Array.from(new Set(active.map(cuisineOf))).sort();
-  }, [tab, dishes, bases, colds]);
+  }, [tab, dishes, bases, konserven]);
   const dishesByType = useMemo(
     () => groupByType(cuisine === "Alle" ? dishes : dishes.filter((r) => cuisineOf(r) === cuisine)),
     [dishes, cuisine]
@@ -113,13 +113,13 @@ export function PreppenPage() {
     () => groupByType(cuisine === "Alle" ? bases : bases.filter((r) => cuisineOf(r) === cuisine)),
     [bases, cuisine]
   );
-  const coldsByType = useMemo(
-    () => groupByType(cuisine === "Alle" ? colds : colds.filter((r) => cuisineOf(r) === cuisine)),
-    [colds, cuisine]
+  const konservenByType = useMemo(
+    () => groupByType(cuisine === "Alle" ? konserven : konserven.filter((r) => cuisineOf(r) === cuisine)),
+    [konserven, cuisine]
   );
   const babiesByType = useMemo(() => groupByType(babies), [babies]);
   const activeGroups =
-    tab === "gericht" ? dishesByType : tab === "basis" ? basesByType : tab === "kalt" ? coldsByType : babiesByType;
+    tab === "gericht" ? dishesByType : tab === "basis" ? basesByType : tab === "konserve" ? konservenByType : babiesByType;
   const activeGroupsArr = Array.from(activeGroups.entries());
 
   return (
@@ -154,10 +154,10 @@ export function PreppenPage() {
         <button
           type="button"
           className="prep-tab"
-          onClick={() => { setTab("kalt"); setCuisine("Alle"); }}
-          aria-pressed={tab === "kalt"}
+          onClick={() => { setTab("konserve"); setCuisine("Alle"); }}
+          aria-pressed={tab === "konserve"}
         >
-          {lang === "de" ? `Kalte Gerichte (${colds.length})` : `Cold dishes (${colds.length})`}
+          {lang === "de" ? `Konservieren & Einlegen (${konserven.length})` : `Preserving & pickling (${konserven.length})`}
         </button>
         <button
           type="button"
