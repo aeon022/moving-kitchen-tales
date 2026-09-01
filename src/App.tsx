@@ -5,6 +5,7 @@ import { useBookmarks, Bookmark, BookmarkList } from "./hooks/useBookmarks";
 import { PinnwandPage } from "./PinnwandPage";
 import { PreppenPage } from "./PreppenPage";
 import { KalteGerichtePage } from "./KalteGerichtePage";
+import { FesttagsgerichtePage } from "./FesttagsgerichtePage";
 import { KochtechnikenPage } from "./KochtechnikenPage";
 import { RecipeDatabasePage } from "./RecipeDatabasePage";
 import { PLAN_MANIFEST } from "./plans/manifest";
@@ -73,6 +74,7 @@ const NAV_ICON_PATHS: Record<string, React.ReactNode> = {
   list: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
   snowflake: <><line x1="12" y1="2" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="19.07" y2="4.93" /></>,
   "book-open": <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>,
+  gift: <><polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C9 2 12 7 12 7z" /></>,
 };
 function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
   return (
@@ -401,6 +403,12 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <Link to="/kalte-gerichte" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="snowflake" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kalte Gerichte" : "Cold Dishes"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/festtagsgerichte" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="gift" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Festtagsgerichte" : "Festive Dishes"}</span></span>
             </Link>
           </li>
           <li>
@@ -1085,6 +1093,7 @@ export default function App() {
                   <Route path="/pinnwand" element={<PinnwandPage plans={plans} />} />
                   <Route path="/preppen" element={<PreppenPage />} />
                   <Route path="/kalte-gerichte" element={<KalteGerichtePage />} />
+                  <Route path="/festtagsgerichte" element={<FesttagsgerichtePage />} />
                   <Route path="/kochtechniken" element={<KochtechnikenPage />} />
                   <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
