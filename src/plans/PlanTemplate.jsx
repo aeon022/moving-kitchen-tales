@@ -130,7 +130,8 @@ function aggregateList(data, CANON) {
       const name = m[1].trim();
       const qty = parseFloat(m[2].replace(",", "."));
       const unit = m[3];
-      let key = Object.keys(CANON).find((k) => name.startsWith(k));
+      // Längster Treffer gewinnt, sonst zählt "Reismehl" als "Reis".
+      let key = Object.keys(CANON).filter((k) => name.startsWith(k)).sort((a, b) => b.length - a.length)[0];
       if (!key) {
         if (name.includes("Brauner Reis")) key = "Brauner Reis";
         else if (name.includes("Vollkornreis")) key = "Vollkornreis";
@@ -142,7 +143,8 @@ function aggregateList(data, CANON) {
       }
       if (!key) continue;
       const c = CANON[key];
-      const id = `${key}|${unit || c.unitDefault}`;
+      // nach Label, weil mehrere Schlüssel dasselbe Label haben ("Kohl"/"Weißkohl")
+      const id = `${c.label}|${unit || c.unitDefault}`;
       if (!totals[id]) totals[id] = { key, label: c.label, unit: unit || c.unitDefault, qty: 0, group: c.group };
       totals[id].qty += qty;
     }

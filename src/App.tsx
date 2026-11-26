@@ -8,6 +8,7 @@ import { KalteGerichtePage } from "./KalteGerichtePage";
 import { FesttagsgerichtePage } from "./FesttagsgerichtePage";
 import { KochtechnikenPage } from "./KochtechnikenPage";
 import { RecipeDatabasePage } from "./RecipeDatabasePage";
+import { KuehlschrankPage } from "./KuehlschrankPage";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
 type Lang = "de" | "zh";
@@ -69,6 +70,7 @@ const NAV_ICON_PATHS: Record<string, React.ReactNode> = {
   home: <><path d="M3 12l9-9 9 9" /><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" /></>,
   "arrow-right": <><line x1="4" y1="12" x2="20" y2="12" /><polyline points="14 6 20 12 14 18" /></>,
   star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+  fridge: <><rect x="5" y="2" width="14" height="20" /><line x1="5" y1="10" x2="19" y2="10" /><line x1="9" y1="5" x2="9" y2="7" /><line x1="9" y1="13" x2="9" y2="17" /></>,
   box: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
   database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>,
   list: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
@@ -219,7 +221,7 @@ function LangProvider({ children }: { children: React.ReactNode }) {
 // ONLY ever dynamically imported below — if anything else in the app statically/eagerly imported
 // one of them too, bundlers would just fold it into the main chunk anyway and this whole
 // exercise would be pointless. Regenerate the manifest after adding a week: gen-plan-manifest.mjs.
-const planLoaders = import.meta.glob("./plans/{2025,2026}/**/*.{jsx,tsx}") as Record<string, () => Promise<PlanModule>>;
+const planLoaders = import.meta.glob("./plans/{2025,2026,2027}/**/*.{jsx,tsx}") as Record<string, () => Promise<PlanModule>>;
 
 function usePlans(): PlanRecord[] {
   return useMemo(() => {
@@ -391,6 +393,12 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <Link to="/bookmarks" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="star" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Meine Merkliste" : "我的收藏"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/kuehlschrank" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="fridge" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kühlschrank" : "冰箱找菜谱"}</span></span>
             </Link>
           </li>
           <li>
@@ -1037,6 +1045,7 @@ function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolea
     // Klick auf 目录 öffnet UND schließt das Register (Toggle) — der Button ist der einzige Weg
     // zurück, der auch von der Registerseite selbst aus sichtbar bleibt.
     { key: "index", jp: "目录", de: "Register", icon: "list" as const, color: "seal", onClick: onOpenIndex, pressed: menuOpen },
+    { key: "fridge", jp: "冰箱", de: "Kühlschrank", icon: "fridge" as const, color: "dark", onClick: () => { onCloseIndex(); navigate("/kuehlschrank"); } },
     { key: "preppen", jp: "备餐", de: "Preppen", icon: "box" as const, color: "olive", onClick: () => { onCloseIndex(); navigate("/preppen"); } },
   ];
   return (
@@ -1091,6 +1100,7 @@ export default function App() {
                   <Route path="/" element={<HomePage plans={plans} />} />
                   <Route path="/bookmarks" element={<BookmarkPage plans={plans} />} />
                   <Route path="/pinnwand" element={<PinnwandPage plans={plans} />} />
+                  <Route path="/kuehlschrank" element={<KuehlschrankPage plans={plans} />} />
                   <Route path="/preppen" element={<PreppenPage />} />
                   <Route path="/kalte-gerichte" element={<KalteGerichtePage />} />
                   <Route path="/festtagsgerichte" element={<FesttagsgerichtePage />} />

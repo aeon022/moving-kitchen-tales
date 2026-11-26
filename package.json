@@ -10,6 +10,7 @@
     "prebuild": "npm run manifest",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "check": "node scripts/check-plans.mjs && node --experimental-strip-types scripts/test-fridge.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

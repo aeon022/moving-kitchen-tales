@@ -573,5 +573,140 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 44 (2026-10-26)",
     "focus": "秋冬滋補 🍂 · Nährende Schmorgerichte · Balanced",
     "path": "./plans/2026/Woche-44-2026-10-26.de.jsx"
+  },
+  {
+    "title": "Woche 45",
+    "startDate": "2026-11-02",
+    "id": "woche-45-2026-11-02",
+    "lang": "de",
+    "sidebar": "Woche 45 (2026-11-02)",
+    "focus": "鍋物 🍲 · Japanische Wintertöpfe · Balanced",
+    "path": "./plans/2026/Woche-45-2026-11-02.de.jsx"
+  },
+  {
+    "title": "Woche 46",
+    "startDate": "2026-11-09",
+    "id": "woche-46-2026-11-09",
+    "lang": "de",
+    "sidebar": "Woche 46 (2026-11-09)",
+    "focus": "국·찜 🍲 · Koreanische Suppen & Schmorgerichte · Balanced",
+    "path": "./plans/2026/Woche-46-2026-11-09.de.jsx"
+  },
+  {
+    "title": "Woche 47",
+    "startDate": "2026-11-16",
+    "id": "woche-47-2026-11-16",
+    "lang": "de",
+    "sidebar": "Woche 47 (2026-11-16)",
+    "focus": "廣東蒸菜 🥟 · Kantonesische Dampfküche · Balanced",
+    "path": "./plans/2026/Woche-47-2026-11-16.de.jsx"
+  },
+  {
+    "title": "Woche 48",
+    "startDate": "2026-11-23",
+    "id": "woche-48-2026-11-23",
+    "lang": "de",
+    "sidebar": "Woche 48 (2026-11-23)",
+    "focus": "炊き込みご飯 🍄 · Herbstreis & Schmorgemüse · Balanced",
+    "path": "./plans/2026/Woche-48-2026-11-23.de.jsx"
+  },
+  {
+    "title": "Woche 49",
+    "startDate": "2026-11-30",
+    "id": "woche-49-2026-11-30",
+    "lang": "de",
+    "sidebar": "Woche 49 (2026-11-30)",
+    "focus": "江南菜 🥢 · Mild geschmort aus Jiangnan · Balanced",
+    "path": "./plans/2026/Woche-49-2026-11-30.de.jsx"
+  },
+  {
+    "title": "Woche 50",
+    "startDate": "2026-12-07",
+    "id": "woche-50-2026-12-07",
+    "lang": "de",
+    "sidebar": "Woche 50 (2026-12-07)",
+    "focus": "鍋物 🍲 · Wintertöpfe aus einem Topf · Balanced",
+    "path": "./plans/2026/Woche-50-2026-12-07.de.jsx"
+  },
+  {
+    "title": "Woche 51",
+    "startDate": "2026-12-14",
+    "id": "woche-51-2026-12-14",
+    "lang": "de",
+    "sidebar": "Woche 51 (2026-12-14)",
+    "focus": "根菜 🥕 · Wurzelgemüse & sanftes Schmoren · Balanced",
+    "path": "./plans/2026/Woche-51-2026-12-14.de.jsx"
+  },
+  {
+    "title": "Woche 52",
+    "startDate": "2026-12-21",
+    "id": "woche-52-2026-12-21",
+    "lang": "de",
+    "sidebar": "Woche 52 (2026-12-21)",
+    "focus": "冬至 ❄️ · Wintersonnenwende & Weihnachten · Balanced",
+    "path": "./plans/2026/Woche-52-2026-12-21.de.jsx"
+  },
+  {
+    "title": "Woche 53",
+    "startDate": "2026-12-28",
+    "id": "woche-53-2026-12-28",
+    "lang": "de",
+    "sidebar": "Woche 53 (2026-12-28)",
+    "focus": "年越し 🎍 · Silvester & Neujahr · Balanced",
+    "path": "./plans/2026/Woche-53-2026-12-28.de.jsx"
+  },
+  {
+    "title": "Woche 1",
+    "startDate": "2027-01-04",
+    "id": "woche-1-2027-01-04",
+    "lang": "de",
+    "sidebar": "Woche 1 (2027-01-04)",
+    "focus": "坐月子 🍲 · Sanft ankommen mit warmen Suppen · Wochenbett",
+    "path": "./plans/2027/Woche-1-2027-01-04.de.jsx"
+  },
+  {
+    "title": "Woche 2",
+    "startDate": "2027-01-11",
+    "id": "woche-2-2027-01-11",
+    "lang": "de",
+    "sidebar": "Woche 2 (2027-01-11)",
+    "focus": "산후조리 🥣 · Weich, warm und eisenreich · Wochenbett",
+    "path": "./plans/2027/Woche-2-2027-01-11.de.jsx"
+  },
+  {
+    "title": "Woche 3",
+    "startDate": "2027-01-18",
+    "id": "woche-3-2027-01-18",
+    "lang": "de",
+    "sidebar": "Woche 3 (2027-01-18)",
+    "focus": "産後の食養生 🌱 · Behutsam aufbauen · Wochenbett",
+    "path": "./plans/2027/Woche-3-2027-01-18.de.jsx"
+  },
+  {
+    "title": "Woche 4",
+    "startDate": "2027-01-25",
+    "id": "woche-4-2027-01-25",
+    "lang": "de",
+    "sidebar": "Woche 4 (2027-01-25)",
+    "focus": "坐月子 🥢 · Aufbauen mit Biss · Wochenbett",
+    "path": "./plans/2027/Woche-4-2027-01-25.de.jsx"
+  },
+  {
+    "title": "Woche 5",
+    "startDate": "2027-02-01",
+    "id": "woche-5-2027-02-01",
+    "lang": "de",
+    "sidebar": "Woche 5 (2027-02-01)",
+    "focus": "春節 🧧 · Neujahr und Seollal, kräftigend · Wochenbett",
+    "path": "./plans/2027/Woche-5-2027-02-01.de.jsx"
+  },
+  {
+    "title": "Woche 6",
+    "startDate": "2027-02-08",
+    "id": "woche-6-2027-02-08",
+    "lang": "de",
+    "sidebar": "Woche 6 (2027-02-08)",
+    "focus": "산후조리 💪 · Kräftig in den Alltag · Wochenbett",
+    "path": "./plans/2027/Woche-6-2027-02-08.de.jsx"
   }
 ];

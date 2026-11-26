@@ -1427,3 +1427,18 @@ a { color: inherit; }
     color: #fca5a5;
   }
 }
+
+/* --- Kühlschrank-Suche --- */
+.fridge-form { display: flex; gap: 8px; margin-bottom: 14px; }
+.fridge-input { flex: 1; min-width: 0; padding: 10px 12px; font: 16px var(--font-ui); border: 1px solid var(--border); border-radius: 0; background: var(--panel); color: var(--text); }
+.fridge-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+.fridge-chip { padding: 5px 11px; font: 13px var(--font-ui); border: 1px solid var(--accent); background: var(--chip-bg); color: var(--text); cursor: pointer; }
+.fridge-chip-quick { border-color: var(--border); background: transparent; color: var(--muted); }
+.fridge-pantry { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.fridge-heading { margin: 0 0 4px; }
+.fridge-heading span { font-size: 14px; color: var(--muted); }
+.fridge-hint { color: var(--muted); font-size: 13.5px; margin: 0 0 14px; }
+.fridge-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 18px 20px; min-width: 0; }
+.fridge-line { font-size: 13.5px; line-height: 1.5; margin: 0 0 6px; }
+.fridge-sub { color: var(--accent); }
+@media (max-width: 420px) { .fridge-card { padding: 14px; } .prep-grid:has(.fridge-card) { grid-template-columns: 1fr; } }

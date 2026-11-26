@@ -12,7 +12,7 @@ import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const PLANS_DIR = join(import.meta.dirname, "..", "src", "plans");
-const YEAR_DIRS = ["2025", "2026"];
+const YEAR_DIRS = ["2025", "2026", "2027"];
 
 function findPlanFiles() {
   const files = [];
