@@ -1442,3 +1442,8 @@ a { color: inherit; }
 .fridge-line { font-size: 13.5px; line-height: 1.5; margin: 0 0 6px; }
 .fridge-sub { color: var(--accent); }
 @media (max-width: 420px) { .fridge-card { padding: 14px; } .prep-grid:has(.fridge-card) { grid-template-columns: 1fr; } }
+.rice-alt { font-size: 13.5px; line-height: 1.5; border-left: 3px solid var(--accent); background: var(--chip-bg); padding: 10px 14px; margin: 0 0 16px; }
+details.prep-notice { margin-top: 0; }
+details.prep-notice summary { cursor: pointer; font-weight: 600; }
+details.prep-notice h4 { margin: 14px 0 4px; }
+details.prep-notice ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.6; }

@@ -1,7 +1,8 @@
 // src/PreppenPage.tsx
 import React, { useMemo, useState } from "react";
 import { useLang } from "./App";
-import { PREP_RECIPES, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
+import { PREP_RECIPES, PREP_SCHEDULE, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
+import { riceAlternative } from "./utils/riceAlternative";
 
 // Kapitel-Nummerierung wie im Register (一·二·三…) statt nackter Sektions-Labels — Preppen
 // bekommt so das gleiche "Buch"-Gefühl, nicht nur eine Filter-Seite.
@@ -25,6 +26,8 @@ function PrepCard({ r, lang }: { r: PrepRecipe; lang: "de" | "zh" }) {
   // Kontrollierter State statt <details>/<summary> — ein natives <details> hat keinen
   // deklarativen Schließen-Button, den bräuchten wir aber für die Volle-Breite-Ansicht.
   const [open, setOpen] = useState(false);
+  // Nicht bei Beikost: für Babys wird nichts kohlenhydratreduziert.
+  const riceAlt = r.category === "baby" ? null : riceAlternative(r.ingredients, r.title);
   return (
     <article className={`prep-card${open ? " prep-card-open" : ""}`}>
       <div className="prep-card-kicker">{r.tags[0]}</div>
@@ -54,6 +57,7 @@ function PrepCard({ r, lang }: { r: PrepRecipe; lang: "de" | "zh" }) {
               <div className="prep-ingredients">
                 {r.ingredients.map((i, idx) => <span key={idx} className="prep-ingredient-chip">{i}</span>)}
               </div>
+              {riceAlt && <p className="rice-alt"><strong>{lang === "de" ? "Reis-Alternative" : "Rice alternative"}:</strong> {riceAlt}</p>}
               <div className="prep-meta-box">
                 <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Einfrieren" : "Freeze"}</span>{r.freezeMethod}</div>
                 <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "Freezer life"}</span>{r.freezerLife}</div>
@@ -133,6 +137,19 @@ export function PreppenPage() {
             : "Cook once, eat many times: freezer/prep recipes independent of the weekly plans."}
         </p>
       </header>
+
+      <details className="prep-notice">
+        <summary>{lang === "de" ? "Vorkochplan Dezember – fürs Wochenbett" : "December prep plan"}</summary>
+        {PREP_SCHEDULE.map((w) => (
+          <div key={w.when}>
+            <h4>{w.when} · {w.focus}</h4>
+            <ul>
+              {w.ids.map((id) => <li key={id}>{PREP_RECIPES.find((r) => r.id === id)?.title}</li>)}
+            </ul>
+          </div>
+        ))}
+        <p>Kommt das Baby früher, zuerst die Wochenenden 1 und 2 kochen. Alles mit Datum beschriften, rasch abkühlen, nur einmal auftauen und durchgehend heiß erhitzen.</p>
+      </details>
 
       <div className="prep-tabs">
         <button

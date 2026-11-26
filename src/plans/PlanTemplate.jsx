@@ -4,6 +4,7 @@ import { ensureScript, exportHTMLById, buildShoppingListText, shareOrCopyText, d
 import { buildEmbedCss } from "@/utils/embedCss";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { CANON as DEFAULT_CANON } from "./canon";
+import { riceAlternative } from "../utils/riceAlternative";
 
 // Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
 // nicht gerendert, nur als String im Code vorgehalten (Konvention aus Woche-1). Ergebnis-Datei
@@ -190,6 +191,7 @@ function MealCard({ meal, year, meta }) {
   const bookmarked = isBookmarked(meta.id, meal.id);
   const [showOptions, setShowOptions] = React.useState(false);
   const weekFolder = weekFolderFromMeta(meta);
+  const riceAlt = riceAlternative(meal.ingredients, meal.title);
 
   return (
     <div className="meal-card" style={cardPanelStyle} id={`meal-${meal.id}`}>
@@ -304,6 +306,8 @@ function MealCard({ meal, year, meta }) {
       <h4>Zutaten (2 Personen)</h4>
       <ul>{meal.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
       
+      {riceAlt ? <p className="rice-alt"><strong>Reis-Alternative:</strong> {riceAlt}</p> : null}
+
       <h4>Zubereitung</h4>
       <ol>{meal.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
       

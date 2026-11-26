@@ -9,6 +9,7 @@ import { COLD_DISHES } from "./plans/coldDishes";
 import { FESTIVE_DISHES } from "./plans/festtagsgerichte";
 import { PREP_RECIPES } from "./plans/prep/preppen";
 import { matchRecipes, Match, Ingredient } from "./utils/fridgeMatch";
+import { riceAlternative } from "./utils/riceAlternative";
 
 type Entry = {
   key: string;
@@ -41,6 +42,7 @@ const COLLECTIONS: Entry[] = [
 
 function ResultCard({ m, t }: { m: Match<Entry>; t: (de: string, zh: string) => string }) {
   const r = m.recipe;
+  const riceAlt = riceAlternative(r.ingredients.map((i) => (typeof i === "string" ? i : i.name)), r.title);
   return (
     <article className="fridge-card">
       <div className="prep-card-kicker">{r.source}</div>
@@ -57,6 +59,7 @@ function ResultCard({ m, t }: { m: Match<Entry>; t: (de: string, zh: string) => 
         <div className="prep-ingredients" style={{ marginTop: 12 }}>
           {r.ingredients.map((i, idx) => <span key={idx} className="prep-ingredient-chip">{typeof i === "string" ? i : i.name}</span>)}
         </div>
+        {riceAlt && <p className="rice-alt"><strong>{t("Reis-Alternative", "米饭替代")}:</strong> {riceAlt}</p>}
         <ol className="prep-steps">{r.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
         {r.swaps && r.swaps !== "-" && <p className="fridge-line">{t("Austausche", "替换")}: {r.swaps}</p>}
         <Link to={r.to} className="prep-card-toggle">{t("In der Sammlung öffnen →", "打开所在页面 →")}</Link>
