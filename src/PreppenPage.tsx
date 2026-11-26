@@ -139,7 +139,7 @@ export function PreppenPage() {
       </header>
 
       <details className="prep-notice">
-        <summary>{lang === "de" ? "Vorkochplan Dezember – fürs Wochenbett" : "December prep plan"}</summary>
+        <summary>{lang === "de" ? "Vorkochplan fürs Wochenbett (ab 28.11.)" : "Prep plan"}</summary>
         {PREP_SCHEDULE.map((w) => (
           <div key={w.when}>
             <h4>{w.when} · {w.focus}</h4>
@@ -148,7 +148,7 @@ export function PreppenPage() {
             </ul>
           </div>
         ))}
-        <p>Kommt das Baby früher, zuerst die Wochenenden 1 und 2 kochen. Alles mit Datum beschriften, rasch abkühlen, nur einmal auftauen und durchgehend heiß erhitzen.</p>
+        <p>Geburtstermin 28.12.: Ab Anfang Dezember kann es losgehen, daher früh beginnen. Rohmariniertes, Brei, Onigiri und Suppenpaket innerhalb eines Monats verbrauchen. Alles mit Datum beschriften, rasch abkühlen, nur einmal auftauen und durchgehend heiß erhitzen.</p>
       </details>
 
       <div className="prep-tabs">

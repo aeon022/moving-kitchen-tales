@@ -2599,10 +2599,10 @@ export const PREP_RECIPES: PrepRecipe[] = [
   },
 ];
 
-/** Vorkochplan vor der Geburt: Haltbares zuerst, Rohmariniertes und Reis zuletzt (kürzere Frist). */
+/** Vorkochplan, Geburtstermin 28.12.2026: Haltbares zuerst, Rohmariniertes und Reis zuletzt (1 Monat). */
 export const PREP_SCHEDULE: { when: string; focus: string; ids: string[] }[] = [
-  { when: "5./6. Dezember", focus: "Suppen mit langer Haltbarkeit", ids: ["huehnerbruehe-basis", "wb-sesamoel-huhn", "wb-sogogi-muguk"] },
-  { when: "12./13. Dezember", focus: "Teigtaschen und Aromen", ids: ["china-jiaozi-fuellung-huhn-kohl", "china-wonton-suppe-komplett-freezerpack", "ingwer-knoblauch-fruehlingszwiebel-paste"] },
-  { when: "19./20. Dezember", focus: "Marinaden und Saucenbasis", ids: ["wb-shoga-pork-bag", "wb-oyakodon-basis", "bulgogi-marinade-bag"] },
-  { when: "26./27. Dezember", focus: "Frühstück, Snacks, Suppenpaket", ids: ["wb-hirse-dattel-brei", "wb-yaki-onigiri", "wb-rippchen-lotos-kit"] },
+  { when: "28./29. November", focus: "Suppen und Aromen, lange haltbar", ids: ["huehnerbruehe-basis", "wb-sesamoel-huhn", "wb-sogogi-muguk", "ingwer-knoblauch-fruehlingszwiebel-paste"] },
+  { when: "5./6. Dezember", focus: "Teigtaschen", ids: ["china-jiaozi-fuellung-huhn-kohl", "china-wonton-fuellung-garnelen", "china-wonton-suppe-komplett-freezerpack"] },
+  { when: "12./13. Dezember", focus: "Marinaden und Saucenbasis", ids: ["wb-shoga-pork-bag", "wb-oyakodon-basis", "bulgogi-marinade-bag"] },
+  { when: "19./20. Dezember", focus: "Frühstück, Snacks, Suppenpaket", ids: ["wb-hirse-dattel-brei", "wb-yaki-onigiri", "wb-rippchen-lotos-kit"] },
 ];
