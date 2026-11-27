@@ -176,7 +176,13 @@ function quarterDescription(weeks: PlanRecord[]): string {
   return picks.join(" · ");
 }
 
-function pickCurrent(plans: PlanRecord[], lang: Lang) {
+function pickCurrent(plans: PlanRecord[], lang: Lang): PlanRecord | null {
+  // Chinesisch folgt dem deutschen Kalender: dieselbe Woche, falls übersetzt, sonst die nächste übersetzte.
+  if (lang === "zh") {
+    const de = pickCurrent(plans, "de");
+    const zh = plans.filter(p => p.lang === "zh").sort((a,b)=>a.startDate.localeCompare(b.startDate));
+    return zh.find(p => p.baseId === de?.baseId) ?? zh.find(p => p.startDate >= (de?.startDate ?? "")) ?? zh[zh.length - 1] ?? null;
+  }
   const list = plans.filter(p => p.lang === lang).sort((a,b)=>a.startDate.localeCompare(b.startDate));
   if (!list.length) return null;
   const today = new Date();
@@ -199,26 +205,34 @@ const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang
 function useLang() { return useContext(LangCtx); }
 export { useLang };
 
+/** Adresse (?lang=) vor gemerkter Wahl vor Browsersprache. Kein Standort, nichts wird abgefragt. */
+function initialLang(search: string): Lang {
+  const fromUrl = new URLSearchParams(search).get("lang");
+  if (fromUrl) return normalizeLang(fromUrl);
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved) return normalizeLang(saved);
+  } catch { /* privates Fenster */ }
+  return /^zh/i.test(navigator.languages?.[0] ?? navigator.language) ? "zh" : "de";
+}
+
 function LangProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const nav = useNavigate();
-  const isRoot = location.pathname === "/" || location.pathname === "/moving-kitchen-tales" || location.pathname === "/moving-kitchen-tales/";
-  // ?lang=zh in der Adresse gewinnt, damit ein verschickter Link gleich chinesisch öffnet.
-  const [lang, setLangState] = useState<Lang>(() => normalizeLang(new URLSearchParams(location.search).get("lang")));
+  const [lang, setLangState] = useState<Lang>(() => initialLang(location.search));
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "de";
   }, [lang]);
-
+  // Ein verschickter ?lang=-Link wird gemerkt.
   useEffect(() => {
-    if (isRoot && !new URLSearchParams(location.search).has("lang")) {
-      setLangState("de");
-      localStorage.setItem(LANG_KEY, "de");
+    if (new URLSearchParams(location.search).has("lang")) {
+      try { localStorage.setItem(LANG_KEY, lang); } catch { /* privates Fenster */ }
     }
-  }, [isRoot]);
+  }, []);
 
   const setLang = (l: Lang) => {
     setLangState(l);
-    localStorage.setItem(LANG_KEY, l);
+    try { localStorage.setItem(LANG_KEY, l); } catch { /* privates Fenster */ }
     const qs = new URLSearchParams(location.search);
     qs.set("lang", l);
     nav({ pathname: location.pathname, search: qs.toString() }, { replace: true });
@@ -772,6 +786,7 @@ function daysSincePlanWeekEnded(startDate: string): number {
 }
 
 function StalePlanBanner({ plan }: { plan: PlanRecord | null }) {
+  const { lang } = useLang();
   if (!plan) return null;
   const staleDays = daysSincePlanWeekEnded(plan.startDate);
   if (staleDays <= 0) return null;
@@ -788,8 +803,8 @@ function StalePlanBanner({ plan }: { plan: PlanRecord | null }) {
         fontSize: 14,
       }}
     >
-      ⚠️ Der neueste Plan ist {plan.meta.title ?? plan.meta.id} (Start {plan.startDate}) — seine Woche ist seit {staleDays}{" "}
-      Tag{staleDays === 1 ? "" : "en"} vorbei, es gibt noch keinen neueren.
+      ⚠️ {lang === "zh" ? `最新的菜单是${plan.meta.title}（${plan.startDate} 开始），之后还没有新菜单。` : <>Der neueste Plan ist {plan.meta.title ?? plan.meta.id} (Start {plan.startDate}) — seine Woche ist seit {staleDays}{" "}
+      Tag{staleDays === 1 ? "" : "en"} vorbei, es gibt noch keinen neueren.</>}
     </div>
   );
 }
@@ -797,6 +812,7 @@ function StalePlanBanner({ plan }: { plan: PlanRecord | null }) {
 function HomePage({ plans }: { plans: PlanRecord[] }) {
   const { lang } = useLang();
   const navigate = useNavigate();
+  const t = (de: string, zh: string) => (lang === "de" ? de : zh);
   // Klick hält das aufgemorphte Titelbild offen (auch ohne Hover, für Touch-Geräte) — Hover
   // selbst läuft rein über CSS, das hier steuert nur den zusätzlichen "geklickt"-Zustand.
   const [portraitOpen, setPortraitOpen] = useState(false);
@@ -845,8 +861,8 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
           <h1 className="cover-title">Moving Kitchen Tales</h1>
           <div className="cover-rule" aria-hidden="true" />
           <p className="cover-subtitle">
-            Wo Wochenpläne nach Filmnacht, Streetfood<br />und Zuhause schmecken.
-            <span className="cover-kicker">Ein Archiv der Wochen</span>
+            {t("Wo Wochenpläne nach Filmnacht, Streetfood", "让每周菜单有电影之夜、街头小吃")}<br />{t("und Zuhause schmecken.", "和家的味道。")}
+            <span className="cover-kicker">{t("Ein Archiv der Wochen", "一周一周的厨房档案")}</span>
           </p>
           <div className="hero-btns">
             {currentPlan && (
@@ -854,7 +870,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
                 className="btn-primary"
                 onClick={() => navigate(`/plan/${currentPlan.slug}?lang=${lang}`)}
               >
-                Zum aktuellen Plan
+                {t("Zum aktuellen Plan", "查看本周菜单")}
               </button>
             )}
             <button
@@ -864,7 +880,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
                 if (classics) navigate(`/plan/${classics.slug}?lang=${lang}`);
               }}
             >
-              Entdecke die Klassiker
+              {t("Entdecke die Klassiker", "翻看经典菜单")}
             </button>
             <a
               className="btn-support"
@@ -872,7 +888,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
               target="_blank"
               rel="noreferrer"
             >
-              Projekt unterstützen
+              {t("Projekt unterstützen", "支持项目")}
             </a>
           </div>
           <div className="cover-tategaki" aria-hidden="true">流动厨房的故事</div>
@@ -880,23 +896,23 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       </section>
 
       <section className="how-it-works">
-        <div className="section-kicker">So funktioniert's</div>
-        <h2>Plan auf, Hunger an, loskochen.</h2>
+        <div className="section-kicker">{t("So funktioniert's", "使用方法")}</div>
+        <h2>{t("Plan auf, Hunger an, loskochen.", "打开菜单，开始做饭。")}</h2>
         <div className="steps-grid">
           <div className="step-card">
             <span>1</span>
-            <h3>Woche auswählen</h3>
-            <p>Spring in den aktuellen Plan oder stöbere durch alte Küchenkapitel.</p>
+            <h3>{t("Woche auswählen", "选择一周")}</h3>
+            <p>{t("Spring in den aktuellen Plan oder stöbere durch alte Küchenkapitel.", "直接看本周菜单，或翻看以前的章节。")}</p>
           </div>
           <div className="step-card">
             <span>2</span>
-            <h3>Gericht kochen</h3>
-            <p>Frühstück, Lunch, Dinner: mit klaren Zutaten, Alltagstempo und genug Story.</p>
+            <h3>{t("Gericht kochen", "动手做菜")}</h3>
+            <p>{t("Frühstück, Lunch, Dinner: mit klaren Zutaten, Alltagstempo und genug Story.", "早、午、晚餐：食材清楚，节奏日常，还有小故事。")}</p>
           </div>
           <div className="step-card">
             <span>3</span>
-            <h3>Favoriten pinnen</h3>
-            <p>Sammle Lieblinge in Merkliste und Pinnwand, damit gute Ideen nicht verschwinden.</p>
+            <h3>{t("Favoriten pinnen", "收藏喜欢的菜")}</h3>
+            <p>{t("Sammle Lieblinge in Merkliste und Pinnwand, damit gute Ideen nicht verschwinden.", "把喜欢的菜放进收藏和收藏板，好点子不丢失。")}</p>
           </div>
         </div>
       </section>
@@ -904,17 +920,17 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       {currentPlan ? (
         <section className="current-plan-section">
           <div className="current-plan-copy">
-            <div className="section-kicker">Aktueller Wochenplan</div>
+            <div className="section-kicker">{t("Aktueller Wochenplan", "本周菜单")}</div>
             <h2>{currentPlan.meta.title} <span>{currentPlan.startDate}</span></h2>
             <p>
-              Ein kompletter Plan mit drei Mahlzeiten pro Tag, viel Asia-Comfort, Reiskocher-Ideen
-              und genug Abwechslung, damit die Woche nicht nach Routine schmeckt.
+              {t("Ein kompletter Plan mit drei Mahlzeiten pro Tag, viel Asia-Comfort, Reiskocher-Ideen", "每天三餐的完整菜单，亚洲家常味、电饭煲做法，")}
+              {t("und genug Abwechslung, damit die Woche nicht nach Routine schmeckt.", "花样丰富，一周不单调。")}
             </p>
             <button
               className="btn-primary"
               onClick={() => navigate(`/plan/${currentPlan.slug}?lang=${lang}`)}
             >
-              Aktuellen Plan öffnen
+              {t("Aktuellen Plan öffnen", "打开本周菜单")}
             </button>
           </div>
           <div className="current-plan-recipes">
@@ -932,10 +948,10 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
         <section className="latest-plans-section">
           <div className="latest-plans-head">
             <div>
-              <div className="section-kicker">Frisch aus der Küche</div>
-              <h2>Neue Kapitel, wenn du direkt weiterkochen willst.</h2>
+              <div className="section-kicker">{t("Frisch aus der Küche", "新鲜出炉")}</div>
+              <h2>{t("Neue Kapitel, wenn du direkt weiterkochen willst.", "想继续做饭？看看新章节。")}</h2>
             </div>
-            <span>{latestPlans.length} Vorschläge</span>
+            <span>{latestPlans.length} {t("Vorschläge", "个推荐")}</span>
           </div>
           <div className="latest-plans-grid">
             {latestPlans.map((plan) => {
@@ -945,7 +961,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
                   <span>{plan.startDate}</span>
                   <h3>{plan.meta.title ?? plan.meta.id}</h3>
                   {teaserRecipe ? <p>{teaserRecipe.title}</p> : null}
-                  <strong>Plan öffnen</strong>
+                  <strong>{t("Plan öffnen", "打开菜单")}</strong>
                 </Link>
               );
             })}
@@ -957,32 +973,34 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       <section className="categories">
         <div className="cat-card">
           <div className="cat-icon">🎬</div>
-          <h3>Studio Classics</h3>
-          <p>Gerichte mit dieser warmen Filmküchen-Energie: dampfende Schalen, knusprige Toasts und Essen, das sofort nach Szene klingt.</p>
+          <h3>{t("Studio Classics", "动画经典")}</h3>
+          <p>{t("Gerichte mit dieser warmen Filmküchen-Energie: dampfende Schalen, knusprige Toasts und Essen, das sofort nach Szene klingt.", "像动画厨房一样温暖：热气腾腾的碗、香脆的吐司。")}</p>
         </div>
         <div className="cat-card">
           <div className="cat-icon">🔥</div>
-          <h3>Viral Asia-Hits</h3>
-          <p>TikTok-Tricks mit Substanz: Rice-Paper-Hacks, knusprige Airfryer-Ideen und schnelle Bowls mit echter Alltagstauglichkeit.</p>
+          <h3>{t("Viral Asia-Hits", "亚洲网红菜")}</h3>
+          <p>{t("TikTok-Tricks mit Substanz: Rice-Paper-Hacks, knusprige Airfryer-Ideen und schnelle Bowls mit echter Alltagstauglichkeit.", "实用的网红做法：米纸、空气炸锅和快手盖饭。")}</p>
         </div>
         <div className="cat-card">
           <div className="cat-icon">⏲️</div>
-          <h3>The 10-Minute Pantry</h3>
-          <p>Für Tage mit wenig Energie und großem Hunger: Vorratsküche, Reiskocher, ein paar Handgriffe, fertig ist das Kapitel.</p>
+          <h3>{t("The 10-Minute Pantry", "十分钟储备菜")}</h3>
+          <p>{t("Für Tage mit wenig Energie und großem Hunger: Vorratsküche, Reiskocher, ein paar Handgriffe, fertig ist das Kapitel.", "累了又饿的日子：储备食材、电饭煲，几步就好。")}</p>
         </div>
       </section>
 
       <section className="pinboard-teaser">
         <div>
-          <div className="section-kicker">Merkliste & Pinnwand</div>
-          <h2>Deine Lieblingsgerichte bekommen einen festen Platz.</h2>
+          <div className="section-kicker">{t("Merkliste & Pinnwand", "收藏与收藏板")}</div>
+          <h2>{t("Deine Lieblingsgerichte bekommen einen festen Platz.", "给喜欢的菜一个固定的位置。")}</h2>
           <p>
+            {lang === "zh" ? <>用星标收藏食谱，或分到自己的收藏板：快手午餐、电饭煲菜、周末菜、待客菜。</> : <>
             Markiere Rezepte mit dem Stern oder sortiere sie in eigene Pinnwände:
             schnelle Lunches, Reiskocher-Favoriten, Comfort Food, Wochenende, Gäste.
+            </>}
           </p>
         </div>
         <Link className="btn-secondary" to="/pinnwand">
-          Pinnwand öffnen
+          {t("Pinnwand öffnen", "打开收藏板")}
         </Link>
       </section>
 
@@ -990,21 +1008,23 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       <section id="about" className="about-section">
         <div className="about-content">
           <p className="quote">
+            {lang === "zh" ? <>“有些菜让人记得，是因为它们讲的不只是做法：还有家、出发、安慰，和餐桌上的小冒险。”</> : <>
             "Manche Gerichte bleiben im Kopf, weil sie mehr erzählen als ein Rezept: von Zuhause, Aufbruch, Trost und kleinen Abenteuern am Küchentisch."
+            </>}
           </p>
           <p>
+            {lang === "zh" ? <><strong>Moving Kitchen Tales</strong> 不是枯燥的菜谱库，而是一个不断长大的厨房小世界：每周三餐菜单，灵感来自亚洲家常菜、动画里的美食瞬间和下班后也做得到的网红点子。</> : <>
             <strong>Moving Kitchen Tales</strong> ist kein trockenes Kocharchiv, sondern ein wachsendes Küchen-Universum:
             Wochenpläne mit Frühstück, Mittagessen und Abendessen, inspiriert von asiatischer Hausmannskost,
             animierten Food-Momenten und viralen Ideen, die auch nach Feierabend noch machbar bleiben.
+            </>}
           </p>
-          <div className="teaser">
-            Such dir einen Plan aus, pinne deine Favoriten und bau dir deine eigene kleine Küchenreise zusammen.
-          </div>
+          <div className="teaser">{lang === "zh" ? "挑一个菜单，收藏喜欢的菜，拼出属于自己的小小厨房之旅。" : "Such dir einen Plan aus, pinne deine Favoriten und bau dir deine eigene kleine Küchenreise zusammen."}</div>
         </div>
       </section>
 
       <footer className="home-footer">
-        <p><em>"Ein Plan für die Woche. Ein Teller für die Stimmung. Eine Geschichte nach der anderen."</em></p>
+        <p><em>{lang === "zh" ? "“一周一份菜单，一盘一种心情，一个接一个的故事。”" : "\"Ein Plan für die Woche. Ein Teller für die Stimmung. Eine Geschichte nach der anderen.\""}</em></p>
         <div className="home-footer-links">
           <a href="https://abteilung83.at" target="_blank" rel="noreferrer">
             Made with love by abteilung83.at & Imprint
@@ -1062,6 +1082,7 @@ function HomeRedirect({ plans }: { plans: PlanRecord[] }) {
 // (44 Wochen, 21 Rezepte) beim Scrollen nicht verschwinden.
 function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolean; onOpenIndex: () => void; onCloseIndex: () => void }) {
   const navigate = useNavigate();
+  const { lang, setLang } = useLang();
   // Explizites onCloseIndex() bei den navigierenden Tabs, nicht nur der Pfadwechsel-Effekt in
   // App() — wenn man schon auf "/" steht und bei offenem Register auf 封面 klickt, ändert sich
   // der Pfad nicht, also würde der Effekt allein das Register nicht schließen.
@@ -1078,7 +1099,7 @@ function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolea
   return (
     <div className="shiori-stack">
       {tabs.map((t) => (
-        <button key={t.key} type="button" className={`shiori-tab shiori-${t.color}`} onClick={t.onClick} aria-pressed={t.pressed} title={t.de}>
+        <button key={t.key} type="button" className={`shiori-tab shiori-${t.color}`} onClick={t.onClick} aria-pressed={t.pressed} title={lang === "zh" ? t.jp : t.de}>
           {/* Zweisprachig, unabhängig vom DE/中文-Umschalter der Seite — das Schriftzeichen ist
               ein dekoratives Buch-Element, das Icon die eigentliche Wegweisung; das deutsche
               Wort steckt im title-Tooltip statt im Text, der in der schmalen Spalte umbrach. */}
@@ -1086,12 +1107,39 @@ function ShioriStack({ menuOpen, onOpenIndex, onCloseIndex }: { menuOpen: boolea
           <span className="shiori-caption shiori-caption-icon"><NavIcon name={t.icon} /></span>
         </button>
       ))}
+      <button
+        type="button"
+        className="shiori-tab shiori-lang"
+        onClick={() => setLang(lang === "de" ? "zh" : "de")}
+        lang={lang === "de" ? "zh-CN" : "de"}
+        title={lang === "de" ? "切换到中文" : "Auf Deutsch umschalten"}
+        aria-label={lang === "de" ? "切换到中文" : "Auf Deutsch umschalten"}
+      >
+        {lang === "de" ? "中文" : "DE"}
+      </button>
     </div>
   );
 }
 
 export default function App() {
   const plans = usePlans();
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const href = (e.target as Element).closest?.("a")?.getAttribute("href");
+      if (e.defaultPrevented || !href?.startsWith("#") || href.startsWith("#/")) return;
+      e.preventDefault();
+      const find = () => document.getElementById(href.slice(1));
+      const el = find();
+      if (!el) return;
+      // Steht gerade die Einkaufsliste offen, erst zu den Rezepten wechseln.
+      const hidden = !!el.closest("[hidden]");
+      if (hidden) document.getElementById("view-kochbuch")?.click();
+      // Neu suchen: beim Tab-Wechsel baut die Wochenvorlage ihre Karten neu auf.
+      setTimeout(() => find()?.scrollIntoView({ behavior: "smooth", block: "start" }), hidden ? 80 : 0);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 

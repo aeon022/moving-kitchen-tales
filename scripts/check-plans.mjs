@@ -96,6 +96,17 @@ for (const year of ["2026", "2027"]) {
 }
 console.log(`${translated} Übersetzungen geprüft`);
 
+// Chinesische Vorrats-Rezepte: vollständig, gleiche Mengen.
+const { PREP_ZH1 } = await import("../src/plans/prep/preppen.zh1.ts");
+const { PREP_ZH2 } = await import("../src/plans/prep/preppen.zh2.ts");
+const prepZh = { ...PREP_ZH1, ...PREP_ZH2 };
+for (const r of PREP_RECIPES) {
+  const z = prepZh[r.id];
+  if (!z) { errors.push(`preppen zh: ${r.id} fehlt`); continue; }
+  if (numbers(z.ingredients) !== numbers(r.ingredients)) errors.push(`preppen zh ${r.id}: Mengen weichen ab`);
+  if (z.steps.length !== r.steps.length) errors.push(`preppen zh ${r.id}: Anzahl Schritte weicht ab`);
+}
+
 if (errors.length) console.error(errors.join("\n"));
 console.log(`${count} Wochenpläne geprüft, ${errors.length} Fehler`);
 process.exit(errors.length ? 1 : 0);

@@ -611,6 +611,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2026/Woche-48-2026-11-23.de.jsx"
   },
   {
+    "title": "第48周",
+    "startDate": "2026-11-23",
+    "id": "woche-48-2026-11-23",
+    "lang": "zh",
+    "sidebar": "第48周 (2026-11-23)",
+    "focus": "炊き込みご飯 🍄 · 秋日焖饭和炖菜 · 均衡",
+    "path": "./plans/2026/Woche-48-2026-11-23.zh.jsx"
+  },
+  {
     "title": "Woche 49",
     "startDate": "2026-11-30",
     "id": "woche-49-2026-11-30",
@@ -618,6 +627,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 49 (2026-11-30)",
     "focus": "江南菜 🥢 · Mild geschmort aus Jiangnan · Balanced",
     "path": "./plans/2026/Woche-49-2026-11-30.de.jsx"
+  },
+  {
+    "title": "第49周",
+    "startDate": "2026-11-30",
+    "id": "woche-49-2026-11-30",
+    "lang": "zh",
+    "sidebar": "第49周 (2026-11-30)",
+    "focus": "江南菜 🥢 · 江南风味温和炖煮 · 均衡",
+    "path": "./plans/2026/Woche-49-2026-11-30.zh.jsx"
   },
   {
     "title": "Woche 50",
@@ -629,6 +647,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2026/Woche-50-2026-12-07.de.jsx"
   },
   {
+    "title": "第50周",
+    "startDate": "2026-12-07",
+    "id": "woche-50-2026-12-07",
+    "lang": "zh",
+    "sidebar": "第50周 (2026-12-07)",
+    "focus": "鍋物 🍲 · 一锅搞定的冬日暖锅 · 均衡",
+    "path": "./plans/2026/Woche-50-2026-12-07.zh.jsx"
+  },
+  {
     "title": "Woche 51",
     "startDate": "2026-12-14",
     "id": "woche-51-2026-12-14",
@@ -638,6 +665,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2026/Woche-51-2026-12-14.de.jsx"
   },
   {
+    "title": "第51周",
+    "startDate": "2026-12-14",
+    "id": "woche-51-2026-12-14",
+    "lang": "zh",
+    "sidebar": "第51周 (2026-12-14)",
+    "focus": "根菜 🥕 · 根茎蔬菜与小火慢炖 · 均衡",
+    "path": "./plans/2026/Woche-51-2026-12-14.zh.jsx"
+  },
+  {
     "title": "Woche 52",
     "startDate": "2026-12-21",
     "id": "woche-52-2026-12-21",
@@ -645,6 +681,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 52 (2026-12-21)",
     "focus": "冬至 ❄️ · Wintersonnenwende & Weihnachten · Balanced",
     "path": "./plans/2026/Woche-52-2026-12-21.de.jsx"
+  },
+  {
+    "title": "第52周",
+    "startDate": "2026-12-21",
+    "id": "woche-52-2026-12-21",
+    "lang": "zh",
+    "sidebar": "第52周 (2026-12-21)",
+    "focus": "冬至 ❄️ · 冬至与圣诞节 · 均衡",
+    "path": "./plans/2026/Woche-52-2026-12-21.zh.jsx"
   },
   {
     "title": "Woche 53 · Wochenbett",
@@ -672,6 +717,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 53 (2026-12-28)",
     "focus": "年越し 🎍 · Silvester & Neujahr · Balanced",
     "path": "./plans/2026/Woche-53-2026-12-28.de.jsx"
+  },
+  {
+    "title": "第53周",
+    "startDate": "2026-12-28",
+    "id": "woche-53-2026-12-28",
+    "lang": "zh",
+    "sidebar": "第53周 (2026-12-28)",
+    "focus": "年越し 🎍 · 除夕与新年 · 均衡",
+    "path": "./plans/2026/Woche-53-2026-12-28.zh.jsx"
   },
   {
     "title": "Woche 1",

@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { useLang } from "./App";
 import { PREP_RECIPES, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
+import { localizedRecipes } from "./plans/prep/localized";
 import { riceAlternative } from "./utils/riceAlternative";
 import { Link } from "react-router-dom";
 
@@ -28,7 +29,9 @@ function PrepCard({ r, lang }: { r: PrepRecipe; lang: "de" | "zh" }) {
   // deklarativen Schließen-Button, den bräuchten wir aber für die Volle-Breite-Ansicht.
   const [open, setOpen] = useState(false);
   // Nicht bei Beikost: für Babys wird nichts kohlenhydratreduziert.
-  const riceAlt = r.category === "baby" ? null : riceAlternative(r.ingredients, r.title);
+  // Aus dem deutschen Original berechnet.
+  const source = PREP_RECIPES.find((x) => x.id === r.id)!;
+  const riceAlt = r.category === "baby" ? null : riceAlternative(source.ingredients, source.title, lang);
   return (
     <article className={`prep-card${open ? " prep-card-open" : ""}`}>
       <div className="prep-card-kicker">{r.tags[0]}</div>
@@ -42,31 +45,31 @@ function PrepCard({ r, lang }: { r: PrepRecipe; lang: "de" | "zh" }) {
       {!open ? (
         // Geschlossen: Karte bleibt im Raster, wie ein Zeitschriften-Teaser.
         <button type="button" className="prep-card-toggle" onClick={() => setOpen(true)}>
-          {lang === "de" ? "Details ansehen" : "Show details"}
+          {lang === "de" ? "Details ansehen" : "查看详情"}
         </button>
       ) : (
         // Offen: Karte bricht auf volle Rasterbreite aus (siehe .prep-card-open in app.css),
         // Zutaten/Zubereitung laufen dort zweispaltig nebeneinander statt gequetscht.
         <div className="prep-card-full">
           <button type="button" className="prep-card-close" onClick={() => setOpen(false)}>
-            {lang === "de" ? "Schließen ×" : "Close ×"}
+            {lang === "de" ? "Schließen ×" : "收起 ×"}
           </button>
           <div className="prep-card-full-grid">
             <div>
               <div className="prep-card-batch">{r.batchSize}</div>
-              <div className="prep-card-label">{lang === "de" ? "Zutaten" : "Ingredients"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Zutaten" : "食材"}</div>
               <div className="prep-ingredients">
                 {r.ingredients.map((i, idx) => <span key={idx} className="prep-ingredient-chip">{i}</span>)}
               </div>
-              {riceAlt && <p className="rice-alt"><strong>{lang === "de" ? "Reis-Alternative" : "Rice alternative"}:</strong> {riceAlt}</p>}
+              {riceAlt && <p className="rice-alt"><strong>{lang === "de" ? "Reis-Alternative" : "米饭替代"}:</strong> {riceAlt}</p>}
               <div className="prep-meta-box">
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Einfrieren" : "Freeze"}</span>{r.freezeMethod}</div>
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "Freezer life"}</span>{r.freezerLife}</div>
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Aufwärmen" : "Reheat"}</span>{r.reheat}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Einfrieren" : "冷冻"}</span>{r.freezeMethod}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "保存期限"}</span>{r.freezerLife}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Aufwärmen" : "加热"}</span>{r.reheat}</div>
               </div>
             </div>
             <div>
-              <div className="prep-card-label">{lang === "de" ? "Zubereitung & Einfrieren" : "Prep & freeze"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Zubereitung & Einfrieren" : "制作和冷冻"}</div>
               <ol className="prep-steps">
                 {r.steps.map((s, idx) => <li key={idx}>{s}</li>)}
               </ol>
@@ -99,13 +102,16 @@ export function PreppenPage() {
   const { lang } = useLang();
   const [tab, setTab] = useState<PrepCategory>("gericht");
   const [cuisine, setCuisine] = useState<string>("Alle");
+  // Beim Sprachwechsel heißen die Küchen anders, also Filter zurücksetzen.
+  React.useEffect(() => setCuisine("Alle"), [lang]);
 
-  const dishes = useMemo(() => PREP_RECIPES.filter((r) => r.category === "gericht"), []);
-  const bases = useMemo(() => PREP_RECIPES.filter((r) => r.category === "basis"), []);
-  const konserven = useMemo(() => PREP_RECIPES.filter((r) => r.category === "konserve"), []);
+  const all = useMemo(() => localizedRecipes(lang), [lang]);
+  const dishes = useMemo(() => all.filter((r) => r.category === "gericht"), [all]);
+  const bases = useMemo(() => all.filter((r) => r.category === "basis"), [all]);
+  const konserven = useMemo(() => all.filter((r) => r.category === "konserve"), [all]);
   // Baby-Beikost: tags[0] ist hier eine Altersangabe, keine Küche — die Küchen-Auswahl ergibt für
   // diesen Tab keinen Sinn und bleibt ausgeblendet, die "type"-Gruppierung (Altersstufe) reicht.
-  const babies = useMemo(() => PREP_RECIPES.filter((r) => r.category === "baby"), []);
+  const babies = useMemo(() => all.filter((r) => r.category === "baby"), [all]);
   const cuisines = useMemo(() => {
     const active = tab === "gericht" ? dishes : tab === "basis" ? bases : tab === "konserve" ? konserven : [];
     return Array.from(new Set(active.map(cuisineOf))).sort();
@@ -130,18 +136,18 @@ export function PreppenPage() {
   return (
     <div className="main-inner" style={{ padding: "0 20px" }}>
       <header className="prep-header">
-        <div className="prep-kicker">备餐 · Vorrat</div>
-        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Preppen" : "Meal Prep"}</h1>
+        <div className="prep-kicker">备餐 · {lang === "de" ? "Vorrat" : "储备"}</div>
+        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Preppen" : "备餐"}</h1>
         <p style={{ color: "var(--muted)" }}>
           {lang === "de"
             ? "Einmal kochen, mehrmals essen: Vorrats- und Gefrier-Rezepte, unabhängig von der Wochenplanung."
-            : "Cook once, eat many times: freezer/prep recipes independent of the weekly plans."}
+            : "一次做好，多次享用：独立于每周菜单的冷冻和备餐食谱。"}
         </p>
       </header>
 
       <Link to="/vorkochen" className="roll-teaser">
         <span aria-hidden="true">備え</span>
-        {lang === "de" ? "Vorkochplan: vier Wochenenden mit Einkaufszetteln →" : "Prep plan →"}
+        {lang === "de" ? "Vorkochplan: vier Wochenenden mit Einkaufszetteln →" : "备餐计划 →"}
       </Link>
 
       <div className="prep-tabs">
@@ -151,7 +157,7 @@ export function PreppenPage() {
           onClick={() => { setTab("gericht"); setCuisine("Alle"); }}
           aria-pressed={tab === "gericht"}
         >
-          {lang === "de" ? `Volle Gerichte (${dishes.length})` : `Full dishes (${dishes.length})`}
+          {lang === "de" ? `Volle Gerichte (${dishes.length})` : `成品菜 (${dishes.length})`}
         </button>
         <button
           type="button"
@@ -159,7 +165,7 @@ export function PreppenPage() {
           onClick={() => { setTab("basis"); setCuisine("Alle"); }}
           aria-pressed={tab === "basis"}
         >
-          {lang === "de" ? `Basis & Saucen (${bases.length})` : `Bases & sauces (${bases.length})`}
+          {lang === "de" ? `Basis & Saucen (${bases.length})` : `高汤酱料 (${bases.length})`}
         </button>
         <button
           type="button"
@@ -167,7 +173,7 @@ export function PreppenPage() {
           onClick={() => { setTab("konserve"); setCuisine("Alle"); }}
           aria-pressed={tab === "konserve"}
         >
-          {lang === "de" ? `Konservieren & Einlegen (${konserven.length})` : `Preserving & pickling (${konserven.length})`}
+          {lang === "de" ? `Konservieren & Einlegen (${konserven.length})` : `腌制保存 (${konserven.length})`}
         </button>
         <button
           type="button"
@@ -175,12 +181,12 @@ export function PreppenPage() {
           onClick={() => { setTab("baby"); setCuisine("Alle"); }}
           aria-pressed={tab === "baby"}
         >
-          {lang === "de" ? `Baby-Beikost (${babies.length})` : `Baby food (${babies.length})`}
+          {lang === "de" ? `Baby-Beikost (${babies.length})` : `宝宝辅食 (${babies.length})`}
         </button>
 
         {tab !== "baby" && (
           <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="prep-select">
-            <option value="Alle">{lang === "de" ? "Alle Küchen" : "All cuisines"}</option>
+            <option value="Alle">{lang === "de" ? "Alle Küchen" : "所有菜系"}</option>
             {cuisines.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
@@ -193,7 +199,7 @@ export function PreppenPage() {
           <p>
             {lang === "de"
               ? "Beikost ist erst ab ca. 6 Monaten nötig — Muttermilch/Pre-Nahrung deckt den Bedarf davor allein. Kein Ersatz für die Beratung durch Kinderarzt/Hebamme."
-              : "Solid food isn't needed before ~6 months — breast milk/formula alone covers everything before that. Not a substitute for advice from a pediatrician/midwife."}
+              : "约6个月前不需要辅食，母乳或配方奶就够了。本页不能代替儿科医生或助产士的建议。"}
           </p>
         </div>
       )}
