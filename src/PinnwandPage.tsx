@@ -30,15 +30,15 @@ export function PinnwandPage({ plans }: { plans: any[] }) {
     <div className="main-inner pinboard-page">
       <header className="pinboard-header">
         <div>
-          <h1>{lang === 'de' ? 'Pinnwand' : 'Pinboard'}</h1>
+          <h1>{lang === 'de' ? 'Pinnwand' : '收藏板'}</h1>
           <p>
-            {bookmarkLists.length} {lang === 'de' ? 'Listen' : 'lists'} · {totalBookmarks}{' '}
-            {lang === 'de' ? 'Rezepte' : 'recipes'}
+            {bookmarkLists.length} {lang === 'de' ? 'Listen' : '个列表'} · {totalBookmarks}{' '}
+            {lang === 'de' ? 'Rezepte' : '道食谱'}
           </p>
         </div>
         <Link className="pinboard-header-link" to="/bookmarks">
           <span aria-hidden="true">★</span>
-          {lang === 'de' ? 'Merkliste' : 'Bookmarks'}
+          {lang === 'de' ? 'Merkliste' : '我的收藏'}
         </Link>
       </header>
 
@@ -47,16 +47,16 @@ export function PinnwandPage({ plans }: { plans: any[] }) {
           type="text"
           value={newListName}
           onChange={(e) => setNewListName(e.target.value)}
-          placeholder={lang === 'de' ? 'Neue Liste' : 'New list'}
+          placeholder={lang === 'de' ? 'Neue Liste' : '新列表名称'}
         />
-        <button type="submit">{lang === 'de' ? 'Erstellen' : 'Create'}</button>
+        <button type="submit">{lang === 'de' ? 'Erstellen' : '新建'}</button>
       </form>
 
       {bookmarkLists.length === 0 ? (
         <section className="pinboard-empty">
           <div className="pinboard-empty-icon" aria-hidden="true">☆</div>
-          <h2>{lang === 'de' ? 'Noch keine Pinnwände' : 'No pinboards yet'}</h2>
-          <p>{lang === 'de' ? 'Erstelle eine Liste und sammle Rezepte nach Thema.' : 'Create a list and collect recipes by theme.'}</p>
+          <h2>{lang === 'de' ? 'Noch keine Pinnwände' : '还没有收藏板'}</h2>
+          <p>{lang === 'de' ? 'Erstelle eine Liste und sammle Rezepte nach Thema.' : '新建一个列表，按主题收藏食谱。'}</p>
         </section>
       ) : (
         <section className="pinboard-grid">
@@ -66,15 +66,15 @@ export function PinnwandPage({ plans }: { plans: any[] }) {
                 <div>
                   <h2>{list.name}</h2>
                   <span>
-                    {list.bookmarks.length} {lang === 'de' ? 'Rezepte' : 'recipes'}
+                    {list.bookmarks.length} {lang === 'de' ? 'Rezepte' : '道食谱'}
                   </span>
                 </div>
                 <button
                   type="button"
                   className="pinboard-delete-list"
                   onClick={() => deleteList(list.id)}
-                  title={lang === 'de' ? 'Liste löschen' : 'Delete list'}
-                  aria-label={lang === 'de' ? `${list.name} löschen` : `Delete ${list.name}`}
+                  title={lang === 'de' ? 'Liste löschen' : '删除列表'}
+                  aria-label={lang === 'de' ? `${list.name} löschen` : `删除${list.name}`}
                 >
                   ×
                 </button>
@@ -82,7 +82,7 @@ export function PinnwandPage({ plans }: { plans: any[] }) {
 
               {list.bookmarks.length === 0 ? (
                 <p className="pinboard-list-empty">
-                  {lang === 'de' ? 'Noch keine Rezepte in dieser Liste.' : 'No recipes in this list yet.'}
+                  {lang === 'de' ? 'Noch keine Rezepte in dieser Liste.' : '这个列表里还没有食谱。'}
                 </p>
               ) : (
                 <ul className="pinboard-recipes">
@@ -95,8 +95,8 @@ export function PinnwandPage({ plans }: { plans: any[] }) {
                       <button
                         type="button"
                         onClick={() => removeFromList(list.id, bookmark.planSlug, bookmark.recipeId)}
-                        title={lang === 'de' ? 'Aus Liste entfernen' : 'Remove from list'}
-                        aria-label={lang === 'de' ? `${bookmark.recipeTitle} entfernen` : `Remove ${bookmark.recipeTitle}`}
+                        title={lang === 'de' ? 'Aus Liste entfernen' : '从列表中移除'}
+                        aria-label={lang === 'de' ? `${bookmark.recipeTitle} entfernen` : `移除${bookmark.recipeTitle}`}
                       >
                         ×
                       </button>

@@ -147,7 +147,7 @@ export function PreppenPage() {
 
       <Link to="/vorkochen" className="roll-teaser">
         <span aria-hidden="true">備え</span>
-        {lang === "de" ? "Vorkochplan: vier Wochenenden mit Einkaufszetteln →" : "备餐计划 →"}
+        {lang === "de" ? "Vorkochplan: vier Wochenenden mit Einkaufszetteln →" : "备餐计划：四个周末，附购物清单 →"}
       </Link>
 
       <div className="prep-tabs">
@@ -207,7 +207,7 @@ export function PreppenPage() {
       {/* Mini-Register: Kapitelübersicht mit Sprunglinks, bevor die eigentlichen Karten kommen —
           gleiche Idee wie das 一·二·三-Register im Hauptmenü, nur für Preppen-Kapitel. */}
       {activeGroupsArr.length > 1 && (
-        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "Chapters"}>
+        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "章节"}>
           {activeGroupsArr.map(([type], i) => (
             <a
               key={type}

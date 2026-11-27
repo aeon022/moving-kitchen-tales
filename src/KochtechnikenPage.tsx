@@ -34,27 +34,27 @@ function TechniqueCard({ t, lang }: { t: Technique; lang: "de" | "zh" }) {
 
       {!open ? (
         <button type="button" className="prep-card-toggle" onClick={() => setOpen(true)}>
-          {lang === "de" ? "Details ansehen" : "Show details"}
+          {lang === "de" ? "Details ansehen" : "查看详情"}
         </button>
       ) : (
         <div className="prep-card-full">
           <button type="button" className="prep-card-close" onClick={() => setOpen(false)}>
-            {lang === "de" ? "Schließen ×" : "Close ×"}
+            {lang === "de" ? "Schließen ×" : "收起 ×"}
           </button>
           <div className="prep-card-full-grid">
             <div>
-              <div className="prep-card-label">{lang === "de" ? "Methode" : "Method"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Methode" : "方法"}</div>
               <ol className="prep-steps">
                 {t.method.map((s, idx) => <li key={idx}>{s}</li>)}
               </ol>
             </div>
             <div>
-              <div className="prep-card-label">{lang === "de" ? "Tipps" : "Tips"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Tipps" : "小窍门"}</div>
               <ol className="prep-steps">
                 {t.tips.map((s, idx) => <li key={idx}>{s}</li>)}
               </ol>
               <div className="prep-meta-box">
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Verwendet in" : "Used in"}</span>{t.usedIn}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Verwendet in" : "适用于"}</span>{t.usedIn}</div>
               </div>
             </div>
           </div>
@@ -92,18 +92,18 @@ export function KochtechnikenPage() {
   return (
     <div className="main-inner" style={{ padding: "0 20px" }}>
       <header className="prep-header">
-        <div className="prep-kicker">技法 · Technik</div>
-        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Kochtechniken" : "Cooking Techniques"}</h1>
+        <div className="prep-kicker">{lang === "de" ? "技法 · Technik" : "技法 · 基本功"}</div>
+        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Kochtechniken" : "烹饪技法"}</h1>
         <p style={{ color: "var(--muted)" }}>
           {lang === "de"
             ? "Wiederkehrende Handgriffe der chinesischen, japanischen und koreanischen Küche — Marinieren, Zart machen, Blanchieren und mehr, einmal erklärt statt in jedem Rezept neu."
-            : "Recurring techniques from Chinese, Japanese and Korean cooking — marinating, tenderizing, blanching and more, explained once instead of in every recipe."}
+            : "中餐、日餐和韩餐里常用的手法：腌制、嫩肉、焯水等等，在这里一次讲清，不必在每道菜谱里重复。"}
         </p>
       </header>
 
       <div className="prep-tabs">
         <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="prep-select">
-          <option value="Alle">{lang === "de" ? "Alle Küchen" : "All cuisines"}</option>
+          <option value="Alle">{lang === "de" ? "Alle Küchen" : "所有菜系"}</option>
           {cuisines.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -111,7 +111,7 @@ export function KochtechnikenPage() {
       </div>
 
       {groupsArr.length > 1 && (
-        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "Chapters"}>
+        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "章节"}>
           {groupsArr.map(([category], i) => (
             <a
               key={category}

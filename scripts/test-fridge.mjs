@@ -1,6 +1,7 @@
 // node --experimental-strip-types scripts/test-fridge.mjs
 import assert from "node:assert/strict";
 import { canonical, matchRecipes } from "../src/utils/fridgeMatch.ts";
+import { buildDictionary, toGerman, zhName } from "../src/utils/fridgeZh.ts";
 
 assert.equal(canonical("Eier 2 Stück"), "ei");
 assert.equal(canonical("Möhren"), "karotte");
@@ -55,5 +56,16 @@ assert.deepEqual(one(["Lachsfilet 200 g", "Ingwer 5 g"], ["Kabeljau"], "Lachs �
 assert.deepEqual(one(["Tofu 200 g"], ["Kabeljau"], "Tofu ↔ Hähnchen oder Kabeljau").open, []);
 assert.deepEqual(one(["Karotte 1 Stück", "Pastinake 100 g"], ["Karotte"]).open, ["Pastinake"]);
 assert.deepEqual(one(["Salz & Pfeffer 1 Prise", "Neutrales Öl 1 EL", "Eier 2 Stück"], ["Ei"]).missing, []);
+
+// Chinesische Eingaben
+const pair = { de: { ingredients: ["Eier 2 Stück", "Reis (roh) 90 g", "Shiitake getrocknet 20 g"] }, zh: { ingredients: ["鸡蛋 2 个", "米 90 g", "干香菇 20 g"] } };
+const dict = buildDictionary([pair]);
+assert.equal(toGerman("鸡蛋", dict), "Eier");
+assert.equal(toGerman("干香菇", dict), "Shiitake getrocknet");
+assert.equal(toGerman("Tofu", dict), "Tofu");
+assert.equal(toGerman("火龙果", dict), null);
+assert.equal(zhName("Eier", pair), "鸡蛋");
+assert.equal(zhName("Shiitake getrocknet", pair), "干香菇");
+assert.deepEqual(matchRecipes([{ title: "x", ingredients: pair.de.ingredients }], [toGerman("鸡蛋", dict), toGerman("香菇", dict)])[0].missing, []);
 
 console.log("fridgeMatch ok");

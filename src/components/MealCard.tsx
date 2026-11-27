@@ -1,5 +1,6 @@
 import React from 'react';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { useLang } from '../App';
 
 interface Meal {
   id: string;
@@ -37,6 +38,8 @@ export function BookmarkMenuButton({ planSlug, recipeId, recipeTitle, planTitle 
   const { isBookmarked, toggleBookmark, bookmarkLists, toggleInList } = useBookmarks();
   const bookmarked = isBookmarked(planSlug, recipeId);
   const [showOptions, setShowOptions] = React.useState(false);
+  const { lang } = useLang();
+  const t = (de: string, zh: string) => (lang === "de" ? de : zh);
 
   const bookmark = {
     planSlug,
@@ -61,7 +64,7 @@ export function BookmarkMenuButton({ planSlug, recipeId, recipeTitle, planTitle 
           justifyContent: "center",
           color: bookmarked ? "#fff" : "var(--text)"
         }}
-        title={bookmarked ? "Bookmark entfernen" : "Bookmark hinzufügen"}
+        title={bookmarked ? t("Lesezeichen entfernen", "取消收藏") : t("Lesezeichen hinzufügen", "添加收藏")}
       >
         {bookmarked ? "★" : "☆"}
       </button>
@@ -95,7 +98,7 @@ export function BookmarkMenuButton({ planSlug, recipeId, recipeTitle, planTitle 
               borderRadius: 4
             }}
           >
-            {bookmarked ? "Aus Merkliste entfernen" : "Zu Merkliste hinzufügen"}
+            {bookmarked ? t("Aus Merkliste entfernen", "从收藏中移除") : t("Zu Merkliste hinzufügen", "加入我的收藏")}
           </button>
           {bookmarkLists.length > 0 && (
             <>
@@ -135,6 +138,8 @@ export function BookmarkMenuButton({ planSlug, recipeId, recipeTitle, planTitle 
 }
 
 export function SharedMealCard({ meal, meta, cardPanelStyle, ImageBanner, tagChip, viralChip }: MealCardProps) {
+  const { lang } = useLang();
+  const t = (de: string, zh: string) => (lang === "de" ? de : zh);
   return (
     <div className="meal-card" style={cardPanelStyle} id={`meal-${meal.id}`}>
       <ImageBanner meal={meal} />
@@ -151,32 +156,32 @@ export function SharedMealCard({ meal, meta, cardPanelStyle, ImageBanner, tagChi
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {meal.isViral && viralChip ? viralChip() : null}
           {tagChip(meal.target)}
-          {meal.riceCooker?.enabled ? tagChip("🍚 Reiskocher") : null}
+          {meal.riceCooker?.enabled ? tagChip(t("🍚 Reiskocher", "🍚 电饭煲")) : null}
         </div>
       </div>
       {meal.desc ? <p style={{ marginTop: 8, color: "var(--muted)", fontStyle: "italic" }}>{meal.desc}</p> : null}
       {meal.story ? <p style={{ marginTop: 4, color: "var(--text)", fontSize: "0.9em" }}>{meal.story}</p> : null}
 
-      <h4>Zutaten (2 Personen)</h4>
+      <h4>{t("Zutaten (2 Personen)", "食材（2人份）")}</h4>
       <ul>{meal.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
 
-      <h4>Zubereitung</h4>
+      <h4>{t("Zubereitung", "做法")}</h4>
       <ol>{meal.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
 
       <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--chip-bg)", borderRadius: 12 }}>
-        <p style={{margin:"0 0 4px"}}><strong>Hinweise:</strong> {meal.checks}</p>
-        <p style={{margin:"0 0 4px"}}><strong>Austausche:</strong> {meal.swaps}</p>
-        <p style={{margin:0}}><strong>Beilage:</strong> {meal.side}</p>
+        <p style={{margin:"0 0 4px"}}><strong>{t("Hinweise:", "注意：")}</strong> {meal.checks}</p>
+        <p style={{margin:"0 0 4px"}}><strong>{t("Austausche:", "替换：")}</strong> {meal.swaps}</p>
+        <p style={{margin:0}}><strong>{t("Beilage:", "配餐：")}</strong> {meal.side}</p>
       </div>
 
       {meal.riceCooker?.enabled ? (
         <div style={{ marginTop: 12 }}>
           <details>
-            <summary style={{cursor:"pointer", fontWeight:600}}>Reiskocher-Details</summary>
+            <summary style={{cursor:"pointer", fontWeight:600}}>{t("Reiskocher-Details", "电饭煲设置")}</summary>
             <ul style={{marginTop:8}}>
-              <li><strong>Programm:</strong> {meal.riceCooker.program}</li>
-              <li><strong>Wasser:</strong> {meal.riceCooker.water}</li>
-              {meal.riceCooker.notes ? <li><strong>Info:</strong> {meal.riceCooker.notes}</li> : null}
+              <li><strong>{t("Programm:", "程序：")}</strong> {meal.riceCooker.program}</li>
+              <li><strong>{t("Wasser:", "水量：")}</strong> {meal.riceCooker.water}</li>
+              {meal.riceCooker.notes ? <li><strong>{t("Info:", "说明：")}</strong> {meal.riceCooker.notes}</li> : null}
             </ul>
           </details>
         </div>

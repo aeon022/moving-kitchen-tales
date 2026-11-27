@@ -76,11 +76,11 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
   return (
     <div className="main-inner" style={{ padding: "0 20px" }}>
       <header style={{ marginBottom: 20 }}>
-        <h1 style={{ marginBottom: 4 }}>{t("📚 Rezept-Datenbank", "📚 Recipe database")}</h1>
+        <h1 style={{ marginBottom: 4 }}>{t("📚 Rezept-Datenbank", "📚 食谱库")}</h1>
         <p style={{ color: "var(--muted)" }}>
           {t(
             `Alle Rezepte aus allen Wochen durchsuchen und filtern (${allRows.length} gefunden).`,
-            `Search and filter every recipe across all weeks (${allRows.length} found).`
+            `搜索和筛选所有周菜单中的食谱（共 ${allRows.length} 道）。`
           )}
         </p>
       </header>
@@ -90,7 +90,7 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("Titel, Zutaten...", "Title, ingredients...")}
+          placeholder={t("Titel, Zutaten…", "菜名、食材…")}
           style={{
             flex: "1 1 220px",
             padding: "8px 12px",
@@ -102,28 +102,28 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
         />
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
           <input type="checkbox" checked={riceCookerOnly} onChange={(e) => setRiceCookerOnly(e.target.checked)} />
-          🍚 {t("Nur Reiskocher", "Rice cooker only")}
+          🍚 {t("Nur Reiskocher", "只看电饭煲菜")}
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
           <input type="checkbox" checked={viralOnly} onChange={(e) => setViralOnly(e.target.checked)} />
-          🔥 {t("Nur virale Trends", "Viral trends only")}
+          🔥 {t("Nur virale Trends", "只看网红菜")}
         </label>
         <select
           value={mealType}
           onChange={(e) => setMealType(e.target.value as any)}
           style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--panel)", color: "var(--text)" }}
         >
-          <option value="all">{t("Alle Mahlzeiten", "All meals")}</option>
-          <option value="f">{t("Frühstück", "Breakfast")}</option>
-          <option value="m">{t("Mittag", "Lunch")}</option>
-          <option value="a">{t("Abend", "Dinner")}</option>
+          <option value="all">{t("Alle Mahlzeiten", "所有餐次")}</option>
+          <option value="f">{t("Frühstück", "早餐")}</option>
+          <option value="m">{t("Mittag", "午餐")}</option>
+          <option value="a">{t("Abend", "晚餐")}</option>
         </select>
       </div>
 
       {loading ? (
-        <p style={{ color: "var(--muted)" }}>{t("Lädt alle Rezepte…", "Loading all recipes…")}</p>
+        <p style={{ color: "var(--muted)" }}>{t("Lädt alle Rezepte…", "正在加载全部食谱…")}</p>
       ) : filtered.length === 0 ? (
-        <p style={{ color: "var(--muted)" }}>{t("Keine Treffer.", "No matches.")}</p>
+        <p style={{ color: "var(--muted)" }}>{t("Keine Treffer.", "没有找到结果。")}</p>
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
           {filtered.slice(0, 200).map(({ plan, recipe }) => (
@@ -153,7 +153,7 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
           ))}
           {filtered.length > 200 && (
             <p style={{ color: "var(--muted)", fontSize: 13 }}>
-              {t(`+ ${filtered.length - 200} weitere — Suche eingrenzen für mehr Übersicht.`, `+ ${filtered.length - 200} more — narrow your search.`)}
+              {t(`+ ${filtered.length - 200} weitere — Suche eingrenzen für mehr Übersicht.`, `还有 ${filtered.length - 200} 道，请缩小搜索范围。`)}
             </p>
           )}
         </div>

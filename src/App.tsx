@@ -11,12 +11,13 @@ import { RecipeDatabasePage } from "./RecipeDatabasePage";
 import { KuehlschrankPage } from "./KuehlschrankPage";
 import { VorratskammerPage } from "./VorratskammerPage";
 import { VorkochenPage } from "./VorkochenPage";
+import { HomePage } from "./HomePage";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
 type Lang = "de" | "zh";
 const LANG_KEY = "mkt.lang";
-const SUPPORT_URL = "https://buy.polar.sh/polar_cl_IMvSv9smK6P0o45BtZE0XHi4CHkRhOnKB1EKL4DXUVZ";
+export const SUPPORT_URL = "https://buy.polar.sh/polar_cl_IMvSv9smK6P0o45BtZE0XHi4CHkRhOnKB1EKL4DXUVZ";
 
 type Recipe = {
   id: string;
@@ -51,7 +52,7 @@ export async function loadPlanData(record: PlanRecord): Promise<PlanModule> {
   planDataCache.set(record.slug, mod);
   return mod;
 }
-function usePlanData(record: PlanRecord | null | undefined): PlanModule | null {
+export function usePlanData(record: PlanRecord | null | undefined): PlanModule | null {
   const [mod, setMod] = useState<PlanModule | null>(record ? planDataCache.get(record.slug) ?? null : null);
   useEffect(() => {
     if (!record) { setMod(null); return; }
@@ -93,6 +94,7 @@ function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
 
 // --- Back to Top Komponente ---
 function BackToTop() {
+  const { lang } = useLang();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 300);
@@ -104,8 +106,8 @@ function BackToTop() {
     <button
       className={`back-to-top ${visible ? "visible" : ""}`}
       onClick={scrollToTop}
-      title="Nach oben"
-      aria-label="Nach oben scrollen"
+      title={lang === "de" ? "Nach oben" : "回到顶部"}
+      aria-label={lang === "de" ? "Nach oben scrollen" : "回到顶部"}
     >
       <span className="arrow-up" />
     </button>
@@ -152,7 +154,12 @@ function getPlanQuarter(startDateStr: string): number {
   if (m === 12 && d >= 29) return 1;
   return Math.ceil(m / 3);
 }
-const QUARTER_LABEL: Record<number, string> = { 1: "Q1 · Jan–Mär", 2: "Q2 · Apr–Jun", 3: "Q3 · Jul–Sep", 4: "Q4 · Okt–Dez" };
+const QUARTER_LABEL: Record<number, { de: string, zh: string }> = {
+  1: { de: "Q1 · Jan–Mär", zh: "第一季度 · 1–3月" },
+  2: { de: "Q2 · Apr–Jun", zh: "第二季度 · 4–6月" },
+  3: { de: "Q3 · Jul–Sep", zh: "第三季度 · 7–9月" },
+  4: { de: "Q4 · Okt–Dez", zh: "第四季度 · 10–12月" },
+};
 const QUARTER_SEASON: Record<number, { de: string, zh: string }> = {
   1: { de: "Winter", zh: "冬季" },
   2: { de: "Frühling", zh: "春季" },
@@ -176,7 +183,7 @@ function quarterDescription(weeks: PlanRecord[]): string {
   return picks.join(" · ");
 }
 
-function pickCurrent(plans: PlanRecord[], lang: Lang): PlanRecord | null {
+export function pickCurrent(plans: PlanRecord[], lang: Lang): PlanRecord | null {
   // Chinesisch folgt dem deutschen Kalender: dieselbe Woche, falls übersetzt, sonst die nächste übersetzte.
   if (lang === "zh") {
     const de = pickCurrent(plans, "de");
@@ -375,7 +382,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
     <aside className="index-overlay">
       <button type="button" className="index-overlay-close" onClick={onClose}>
         <span aria-hidden="true">←</span>
-        <span>{lang === "de" ? "Zurück" : "Back"}</span>
+        <span>{lang === "de" ? "Zurück" : "返回"}</span>
       </button>
 
         {/* Titel mit Span für Ausblenden */}
@@ -384,11 +391,11 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           <span className="brand-text">MovingKitchenTales</span>
         </div>
         <p className="index-overlay-stats">
-          {filtered.length} {lang === "de" ? "Wochen" : "weeks"} · {years.length} {lang === "de" ? "Jahre" : "years"} · {bookmarkLists.length} {lang === "de" ? "Pinnwände" : "boards"}
+          {filtered.length} {lang === "de" ? "Wochen" : "周"} · {years.length} {lang === "de" ? "Jahre" : "年"} · {bookmarkLists.length} {lang === "de" ? "Pinnwände" : "个收藏板"}
         </p>
 
         <div className="index-overlay-content">
-        <div className="index-section-label">一 · 导航 · Navigation</div>
+        <div className="index-section-label">{lang === "de" ? "一 · 导航 · Navigation" : "一 · 导航"}</div>
         <ul className="nav-list">
           <li>
             <Link to="/" onClick={handleLinkClick} className="nav-row">
@@ -408,7 +415,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
                 className="nav-row"
               >
                 <span className="nav-icon"><NavIcon name="arrow-right" /></span>
-                <span className="nav-body"><span className="nav-title">{lang === "de" ? "Zum aktuellen Plan" : "Jump to current plan"}</span></span>
+                <span className="nav-body"><span className="nav-title">{lang === "de" ? "Zum aktuellen Plan" : "跳到本周菜单"}</span></span>
               </button>
             </li>
           )}
@@ -427,7 +434,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           <li>
             <Link to="/vorratskammer" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="jar" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorratskammer" : "常备食材"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorratskammer" : "储藏室"}</span></span>
             </Link>
           </li>
           <li>
@@ -445,31 +452,31 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           <li>
             <Link to="/preppen" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="box" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Preppen" : "Meal Prep"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Preppen" : "备餐"}</span></span>
             </Link>
           </li>
           <li>
             <Link to="/kalte-gerichte" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="snowflake" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kalte Gerichte" : "Cold Dishes"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kalte Gerichte" : "凉菜"}</span></span>
             </Link>
           </li>
           <li>
             <Link to="/festtagsgerichte" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="gift" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Festtagsgerichte" : "Festive Dishes"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Festtagsgerichte" : "节日菜"}</span></span>
             </Link>
           </li>
           <li>
             <Link to="/kochtechniken" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="book-open" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kochtechniken" : "Cooking Techniques"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kochtechniken" : "烹饪技法"}</span></span>
             </Link>
           </li>
           <li>
             <Link to="/rezepte" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="database" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezept-Datenbank" : "Recipe database"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezept-Datenbank" : "食谱库"}</span></span>
             </Link>
           </li>
         </ul>
@@ -482,9 +489,9 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             data-lang={lang}
             data-active={lang === "zh"}
             onClick={toggleLang}
-            title="Sprache umschalten / Switch Language"
+            title={lang === "de" ? "Sprache umschalten" : "切换语言"}
           >
-            <div className="lang-toggle-handle" data-text={lang.toUpperCase()} />
+            <div className="lang-toggle-handle" data-text={lang === "de" ? "DE" : "中"} />
           </div>
           <span className="lang-label" style={{fontSize: 13, fontWeight: 500}}>
             {lang === "de" ? "Deutsch" : "中文"}
@@ -495,7 +502,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
         <div className="sidebar-nav-item" style={{ padding: "0 12px 12px" }}>
           <input
             type="search"
-            placeholder={lang === "de" ? "Rezepte suchen..." : "搜索食谱..."}
+            placeholder={lang === "de" ? "Rezepte suchen…" : "搜索食谱…"}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -513,10 +520,10 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <div style={{ marginTop: 8, maxHeight: "300px", overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--panel)" }}>
               {searchLoading ? (
                 <div style={{ padding: 8, fontSize: 13, color: "var(--muted)" }}>
-                  {lang === "de" ? "Lädt Rezepte…" : "Loading recipes…"}
+                  {lang === "de" ? "Lädt Rezepte…" : "正在加载食谱…"}
                 </div>
               ) : searchResults.length === 0 ? (
-                <div style={{ padding: 8, fontSize: 13, color: "var(--muted)" }}>Keine Treffer</div>
+                <div style={{ padding: 8, fontSize: 13, color: "var(--muted)" }}>{lang === "de" ? "Keine Treffer" : "没有找到结果"}</div>
               ) : (
                 searchResults.map((res, idx) => (
                   <Link
@@ -538,15 +545,15 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
         </div>
 
         <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
-        <div className="index-section-label">二 · 收藏 · Pinnwand</div>
+        <div className="index-section-label">{lang === "de" ? "二 · 收藏 · Pinnwand" : "二 · 收藏"}</div>
 
         {/* Pinnwand-Listen */}
         <details className="year" open>
-          <summary>{lang === "de" ? "Pinnwand" : "Pinboard"}</summary>
+          <summary>{lang === "de" ? "Pinnwand" : "收藏板"}</summary>
           {bookmarkLists.length === 0 ? (
             <div style={{ padding: "8px", fontSize: 13, color: "var(--muted)" }}>
               <Link to="/pinnwand" onClick={handleLinkClick}>
-                {lang === "de" ? "Listen verwalten" : "Manage lists"}
+                {lang === "de" ? "Listen verwalten" : "管理列表"}
               </Link>
             </div>
           ) : (
@@ -557,7 +564,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
                     <span className="nav-lead">{list.bookmarks.length}</span>
                     <span className="nav-body">
                       <span className="nav-title">{list.name}</span>
-                      <span className="nav-sub">{lang === "de" ? "Rezepte" : "recipes"}</span>
+                      <span className="nav-sub">{lang === "de" ? "Rezepte" : "道食谱"}</span>
                     </span>
                   </Link>
                 </li>
@@ -567,7 +574,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
         </details>
 
         <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
-        <div className="index-section-label">三 · 索引 · Wochen</div>
+        <div className="index-section-label">{lang === "de" ? "三 · 索引 · Wochen" : "三 · 每周菜单"}</div>
 
         <div className="year-controls">
           <button className="small-btn" onClick={() => {
@@ -594,7 +601,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
               {y}
               {currentPlan && y !== getPlanYear(currentPlan.startDate) && (
                 <span style={{ marginLeft: 8, fontSize: 11, color: "var(--muted)", fontWeight: 400 }}>
-                  {lang === "de" ? "Archiv" : "Archive"}
+                  {lang === "de" ? "Archiv" : "往年"}
                 </span>
               )}
             </summary>
@@ -615,10 +622,10 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
                   <summary>
                     <div className="quarter-head">
                       <span className="quarter-title">
-                        {QUARTER_LABEL[q]}
-                        <span className="quarter-season">· {lang === "de" ? QUARTER_SEASON[q].de : QUARTER_SEASON[q].zh}</span>
+                        {QUARTER_LABEL[q][lang]}
+                        <span className="quarter-season">· {QUARTER_SEASON[q][lang]}</span>
                       </span>
-                      <span className="quarter-count">{weeksInQuarter.length} {lang === "de" ? "Wochen" : "weeks"}</span>
+                      <span className="quarter-count">{weeksInQuarter.length} {lang === "de" ? "Wochen" : "周"}</span>
                     </div>
                     {quarterDescription(weeksInQuarter) && (
                       <div className="quarter-desc">{quarterDescription(weeksInQuarter)}</div>
@@ -697,9 +704,9 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
   if (bookmarkedRecipes.length === 0) {
     return (
       <div className="main-inner" style={{ textAlign: "center", padding: "40px 20px" }}>
-        <h2>Deine Merkliste ist noch leer</h2>
-        <p style={{ color: "var(--muted)" }}>Pinne Rezepte mit dem Stern-Symbol, um sie hier zu sammeln.</p>
-        <Link to="/" style={{ color: "var(--accent-2)", fontWeight: 600 }}>Zurück zu den Plänen</Link>
+        <h2>{lang === "de" ? "Deine Merkliste ist noch leer" : "收藏夹还是空的"}</h2>
+        <p style={{ color: "var(--muted)" }}>{lang === "de" ? "Pinne Rezepte mit dem Stern-Symbol, um sie hier zu sammeln." : "点击星形图标收藏食谱，收藏的内容会显示在这里。"}</p>
+        <Link to="/" style={{ color: "var(--accent-2)", fontWeight: 600 }}>{lang === "de" ? "Zurück zu den Plänen" : "返回每周菜单"}</Link>
       </div>
     );
   }
@@ -708,7 +715,7 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
     <div className="main-inner" style={{ padding: isMobile() ? "0 8px" : "0 20px" }}>
       <div style={{ marginBottom: isMobile() ? 16 : 32, padding: "0 8px" }}>
         <h1 style={{ fontSize: isMobile() ? "20px" : "32px", marginBottom: 4 }}>{lang === "de" ? "Meine Merkliste" : "我的收藏"}</h1>
-        <p style={{ color: "var(--muted)", fontSize: isMobile() ? "13px" : "16px" }}>{bookmarkedRecipes.length} Rezepte gespeichert</p>
+        <p style={{ color: "var(--muted)", fontSize: isMobile() ? "13px" : "16px" }}>{lang === "de" ? `${bookmarkedRecipes.length} Rezepte gespeichert` : `已收藏 ${bookmarkedRecipes.length} 道食谱`}</p>
       </div>
       <div style={{ display: "grid", gap: isMobile() ? 12 : 24 }}>
         {bookmarkedRecipes.map(({ plan, recipe, bookmark }) => {
@@ -742,7 +749,7 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
                     alignItems: "center",
                     justifyContent: "center"
                   }}
-                  title="Entfernen"
+                  title={lang === "de" ? "Entfernen" : "移除"}
                 >
                   ✕
                 </button>
@@ -764,7 +771,7 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
                     fontSize: isMobile() ? "12px" : "14px"
                   }}
                 >
-                  Öffnen →
+                  {lang === "de" ? "Öffnen →" : "打开 →"}
                 </Link>
               </div>
             </div>
@@ -775,265 +782,6 @@ function BookmarkPage({ plans }: { plans: PlanRecord[] }) {
   );
 }
 
-// Ein Plan deckt 7 Tage ab; danach zeigt die Startseite den letzten bekannten Plan als
-// "aktuell" an, auch wenn seine Woche längst vorbei ist (siehe pickCurrent) — ohne Warnung
-// fällt eine Planungslücke wie bei Woche 26->36 sonst niemandem auf.
-function daysSincePlanWeekEnded(startDate: string): number {
-  const [y, m, d] = startDate.split("-").map(Number);
-  const weekEnd = new Date(y, (m ?? 1) - 1, (d ?? 1) + 7);
-  const diffMs = Date.now() - weekEnd.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
-}
-
-function StalePlanBanner({ plan }: { plan: PlanRecord | null }) {
-  const { lang } = useLang();
-  if (!plan) return null;
-  const staleDays = daysSincePlanWeekEnded(plan.startDate);
-  if (staleDays <= 0) return null;
-  return (
-    <div
-      role="status"
-      style={{
-        margin: "0 0 16px",
-        padding: "10px 16px",
-        borderRadius: 10,
-        background: "rgba(245, 158, 11, 0.15)",
-        border: "1px solid rgba(245, 158, 11, 0.4)",
-        color: "var(--text)",
-        fontSize: 14,
-      }}
-    >
-      ⚠️ {lang === "zh" ? `最新的菜单是${plan.meta.title}（${plan.startDate} 开始），之后还没有新菜单。` : <>Der neueste Plan ist {plan.meta.title ?? plan.meta.id} (Start {plan.startDate}) — seine Woche ist seit {staleDays}{" "}
-      Tag{staleDays === 1 ? "" : "en"} vorbei, es gibt noch keinen neueren.</>}
-    </div>
-  );
-}
-
-function HomePage({ plans }: { plans: PlanRecord[] }) {
-  const { lang } = useLang();
-  const navigate = useNavigate();
-  const t = (de: string, zh: string) => (lang === "de" ? de : zh);
-  // Klick hält das aufgemorphte Titelbild offen (auch ohne Hover, für Touch-Geräte) — Hover
-  // selbst läuft rein über CSS, das hier steuert nur den zusätzlichen "geklickt"-Zustand.
-  const [portraitOpen, setPortraitOpen] = useState(false);
-  const currentPlan = useMemo(() => pickCurrent(plans, lang), [plans, lang]);
-  const currentPlanMod = usePlanData(currentPlan);
-  const currentPlanPreview = currentPlanMod?.DATA?.slice(0, 3) ?? [];
-  const latestPlans = useMemo(() => {
-    return plans
-      .filter((plan) => plan.lang === lang && plan.slug !== currentPlan?.slug)
-      .sort((a, b) => b.startDate.localeCompare(a.startDate))
-      .slice(0, 4);
-  }, [plans, lang, currentPlan?.slug]);
-
-  // Just the small teaser row on the homepage (4 plans) — worth the load, unlike bulk-searching all plans.
-  const [, setTeaserVersion] = useState(0);
-  useEffect(() => {
-    const missing = latestPlans.filter(p => !planDataCache.has(p.slug));
-    if (missing.length === 0) return;
-    Promise.all(missing.map(p => loadPlanData(p))).then(() => setTeaserVersion(v => v + 1));
-  }, [latestPlans]);
-
-  return (
-    <div className="home-page">
-      <StalePlanBanner plan={currentPlan} />
-      {/* Cover Section — Buchtitelseite: Hanko oben links, Band-Label oben rechts, zentrierte
-          Komposition (sepia Rundbild, kursiver Titel, Trennstrich, Subtitle), Tategaki am
-          rechten Rand. Nahezu 1:1 nach dem Nutzer-Entwurf, CTA-Buttons als notwendige Ergänzung
-          (der Entwurf hatte keine, die App braucht Navigation). */}
-      <section className="cover">
-        <div className="cover-header">
-          <span className="seal-mark" aria-hidden="true"><span>厨</span><span>房</span></span>
-          <span className="cover-volume" lang="zh-CN" title="Gesamtwerk in einem Band">全一册</span>
-        </div>
-        <div className="cover-center">
-          <div
-            className={`cover-portrait${portraitOpen ? " is-open" : ""}`}
-            onClick={() => setPortraitOpen((v) => !v)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={portraitOpen}
-            aria-label={lang === "de" ? "Titelbild vollständig anzeigen" : "Show full title image"}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPortraitOpen((v) => !v); } }}
-          >
-            <img src={`${import.meta.env.BASE_URL}hero-bg.webp`} alt="" />
-          </div>
-          <h1 className="cover-title">Moving Kitchen Tales</h1>
-          <div className="cover-rule" aria-hidden="true" />
-          <p className="cover-subtitle">
-            {t("Wo Wochenpläne nach Filmnacht, Streetfood", "让每周菜单有电影之夜、街头小吃")}<br />{t("und Zuhause schmecken.", "和家的味道。")}
-            <span className="cover-kicker">{t("Ein Archiv der Wochen", "一周一周的厨房档案")}</span>
-          </p>
-          <div className="hero-btns">
-            {currentPlan && (
-              <button
-                className="btn-primary"
-                onClick={() => navigate(`/plan/${currentPlan.slug}?lang=${lang}`)}
-              >
-                {t("Zum aktuellen Plan", "查看本周菜单")}
-              </button>
-            )}
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                const classics = plans.find(p => p.meta.title?.includes("Woche 1") && p.lang === lang);
-                if (classics) navigate(`/plan/${classics.slug}?lang=${lang}`);
-              }}
-            >
-              {t("Entdecke die Klassiker", "翻看经典菜单")}
-            </button>
-            <a
-              className="btn-support"
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("Projekt unterstützen", "支持项目")}
-            </a>
-          </div>
-          <div className="cover-tategaki" aria-hidden="true">流动厨房的故事</div>
-        </div>
-      </section>
-
-      <section className="how-it-works">
-        <div className="section-kicker">{t("So funktioniert's", "使用方法")}</div>
-        <h2>{t("Plan auf, Hunger an, loskochen.", "打开菜单，开始做饭。")}</h2>
-        <div className="steps-grid">
-          <div className="step-card">
-            <span>1</span>
-            <h3>{t("Woche auswählen", "选择一周")}</h3>
-            <p>{t("Spring in den aktuellen Plan oder stöbere durch alte Küchenkapitel.", "直接看本周菜单，或翻看以前的章节。")}</p>
-          </div>
-          <div className="step-card">
-            <span>2</span>
-            <h3>{t("Gericht kochen", "动手做菜")}</h3>
-            <p>{t("Frühstück, Lunch, Dinner: mit klaren Zutaten, Alltagstempo und genug Story.", "早、午、晚餐：食材清楚，节奏日常，还有小故事。")}</p>
-          </div>
-          <div className="step-card">
-            <span>3</span>
-            <h3>{t("Favoriten pinnen", "收藏喜欢的菜")}</h3>
-            <p>{t("Sammle Lieblinge in Merkliste und Pinnwand, damit gute Ideen nicht verschwinden.", "把喜欢的菜放进收藏和收藏板，好点子不丢失。")}</p>
-          </div>
-        </div>
-      </section>
-
-      {currentPlan ? (
-        <section className="current-plan-section">
-          <div className="current-plan-copy">
-            <div className="section-kicker">{t("Aktueller Wochenplan", "本周菜单")}</div>
-            <h2>{currentPlan.meta.title} <span>{currentPlan.startDate}</span></h2>
-            <p>
-              {t("Ein kompletter Plan mit drei Mahlzeiten pro Tag, viel Asia-Comfort, Reiskocher-Ideen", "每天三餐的完整菜单，亚洲家常味、电饭煲做法，")}
-              {t("und genug Abwechslung, damit die Woche nicht nach Routine schmeckt.", "花样丰富，一周不单调。")}
-            </p>
-            <button
-              className="btn-primary"
-              onClick={() => navigate(`/plan/${currentPlan.slug}?lang=${lang}`)}
-            >
-              {t("Aktuellen Plan öffnen", "打开本周菜单")}
-            </button>
-          </div>
-          <div className="current-plan-recipes">
-            {currentPlanPreview.map((recipe) => (
-              <Link key={recipe.id} to={`/plan/${currentPlan.slug}#meal-${recipe.id}`}>
-                <strong>{recipe.title}</strong>
-                {recipe.desc ? <span>{recipe.desc}</span> : null}
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {latestPlans.length > 0 ? (
-        <section className="latest-plans-section">
-          <div className="latest-plans-head">
-            <div>
-              <div className="section-kicker">{t("Frisch aus der Küche", "新鲜出炉")}</div>
-              <h2>{t("Neue Kapitel, wenn du direkt weiterkochen willst.", "想继续做饭？看看新章节。")}</h2>
-            </div>
-            <span>{latestPlans.length} {t("Vorschläge", "个推荐")}</span>
-          </div>
-          <div className="latest-plans-grid">
-            {latestPlans.map((plan) => {
-              const teaserRecipe = planDataCache.get(plan.slug)?.DATA?.[0];
-              return (
-                <Link key={plan.slug} className="latest-plan-card" to={`/plan/${plan.slug}?lang=${lang}`}>
-                  <span>{plan.startDate}</span>
-                  <h3>{plan.meta.title ?? plan.meta.id}</h3>
-                  {teaserRecipe ? <p>{teaserRecipe.title}</p> : null}
-                  <strong>{t("Plan öffnen", "打开菜单")}</strong>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {/* Categories */}
-      <section className="categories">
-        <div className="cat-card">
-          <div className="cat-icon">🎬</div>
-          <h3>{t("Studio Classics", "动画经典")}</h3>
-          <p>{t("Gerichte mit dieser warmen Filmküchen-Energie: dampfende Schalen, knusprige Toasts und Essen, das sofort nach Szene klingt.", "像动画厨房一样温暖：热气腾腾的碗、香脆的吐司。")}</p>
-        </div>
-        <div className="cat-card">
-          <div className="cat-icon">🔥</div>
-          <h3>{t("Viral Asia-Hits", "亚洲网红菜")}</h3>
-          <p>{t("TikTok-Tricks mit Substanz: Rice-Paper-Hacks, knusprige Airfryer-Ideen und schnelle Bowls mit echter Alltagstauglichkeit.", "实用的网红做法：米纸、空气炸锅和快手盖饭。")}</p>
-        </div>
-        <div className="cat-card">
-          <div className="cat-icon">⏲️</div>
-          <h3>{t("The 10-Minute Pantry", "十分钟储备菜")}</h3>
-          <p>{t("Für Tage mit wenig Energie und großem Hunger: Vorratsküche, Reiskocher, ein paar Handgriffe, fertig ist das Kapitel.", "累了又饿的日子：储备食材、电饭煲，几步就好。")}</p>
-        </div>
-      </section>
-
-      <section className="pinboard-teaser">
-        <div>
-          <div className="section-kicker">{t("Merkliste & Pinnwand", "收藏与收藏板")}</div>
-          <h2>{t("Deine Lieblingsgerichte bekommen einen festen Platz.", "给喜欢的菜一个固定的位置。")}</h2>
-          <p>
-            {lang === "zh" ? <>用星标收藏食谱，或分到自己的收藏板：快手午餐、电饭煲菜、周末菜、待客菜。</> : <>
-            Markiere Rezepte mit dem Stern oder sortiere sie in eigene Pinnwände:
-            schnelle Lunches, Reiskocher-Favoriten, Comfort Food, Wochenende, Gäste.
-            </>}
-          </p>
-        </div>
-        <Link className="btn-secondary" to="/pinnwand">
-          {t("Pinnwand öffnen", "打开收藏板")}
-        </Link>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="about-section">
-        <div className="about-content">
-          <p className="quote">
-            {lang === "zh" ? <>“有些菜让人记得，是因为它们讲的不只是做法：还有家、出发、安慰，和餐桌上的小冒险。”</> : <>
-            "Manche Gerichte bleiben im Kopf, weil sie mehr erzählen als ein Rezept: von Zuhause, Aufbruch, Trost und kleinen Abenteuern am Küchentisch."
-            </>}
-          </p>
-          <p>
-            {lang === "zh" ? <><strong>Moving Kitchen Tales</strong> 不是枯燥的菜谱库，而是一个不断长大的厨房小世界：每周三餐菜单，灵感来自亚洲家常菜、动画里的美食瞬间和下班后也做得到的网红点子。</> : <>
-            <strong>Moving Kitchen Tales</strong> ist kein trockenes Kocharchiv, sondern ein wachsendes Küchen-Universum:
-            Wochenpläne mit Frühstück, Mittagessen und Abendessen, inspiriert von asiatischer Hausmannskost,
-            animierten Food-Momenten und viralen Ideen, die auch nach Feierabend noch machbar bleiben.
-            </>}
-          </p>
-          <div className="teaser">{lang === "zh" ? "挑一个菜单，收藏喜欢的菜，拼出属于自己的小小厨房之旅。" : "Such dir einen Plan aus, pinne deine Favoriten und bau dir deine eigene kleine Küchenreise zusammen."}</div>
-        </div>
-      </section>
-
-      <footer className="home-footer">
-        <p><em>{lang === "zh" ? "“一周一份菜单，一盘一种心情，一个接一个的故事。”" : "\"Ein Plan für die Woche. Ein Teller für die Stimmung. Eine Geschichte nach der anderen.\""}</em></p>
-        <div className="home-footer-links">
-          <a href="https://abteilung83.at" target="_blank" rel="noreferrer">
-            Made with love by abteilung83.at & Imprint
-          </a>
-        </div>
-      </footer>
-    </div>
-  );
-}
 
 function PlanPage({ plans }: { plans: PlanRecord[] }) {
   const { slug = "" } = useParams();
@@ -1058,7 +806,7 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
     }
   }, [hash, slug, mod]);
 
-  if (!current) return <div className="main-inner">Plan nicht gefunden: {slug}</div>;
+  if (!current) return <div className="main-inner">{lang === "de" ? "Plan nicht gefunden" : "找不到该菜单"}: {slug}</div>;
   if (current.lang !== lang) {
     const sibling = plans.find(p => p.baseId === current.baseId && p.lang === lang);
     if (sibling) {
@@ -1066,15 +814,9 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
       return null;
     }
   }
-  if (!mod) return <div className="main-inner">{lang === "de" ? "Lädt Plan…" : "Loading plan…"}</div>;
+  if (!mod) return <div className="main-inner">{lang === "de" ? "Lädt Plan…" : "正在加载菜单…"}</div>;
   const Cmp = mod.default;
   return (<div className="main-inner"><Cmp /></div>);
-}
-
-function HomeRedirect({ plans }: { plans: PlanRecord[] }) {
-  const currentDE = pickCurrent(plans, "de");
-  if (!currentDE) return <div className="main-inner">Keine DE-Pläne gefunden.</div>;
-  return <Navigate to={`/plan/${currentDE.slug}?lang=de`} replace />;
 }
 
 // Shiori — mehrere farbige Lesezeichenbänder, an der Buchkante gestapelt, statt eines einzelnen

@@ -7,6 +7,7 @@ import { CANON as DEFAULT_CANON } from "./canon";
 import { riceAlternative } from "../utils/riceAlternative";
 import { ExportBar } from "../components/ExportBar";
 import { TEXTS } from "./planTexts";
+import { DishArt } from "../components/DishArt";
 import { ZH_LABELS } from "./canon.zh";
 
 // Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
@@ -98,32 +99,6 @@ const tagChip = (text) => (
   </span>
 );
 
-// War fest auf die helle Palette codiert (SVG-data-URI, kann keine CSS-Variablen auflösen) —
-// im Dark Mode leuchtete jeder Platzhalter als greller cremefarbener Block. Liest die aktuell
-// gesetzten Root-Variablen zum Aufrufzeitpunkt aus (die stehen schon vor jedem JS-Effekt fest,
-// dank der reinen @media(prefers-color-scheme:dark)-Regeln in app.css).
-function animePlaceholder(title, subtitle = "") {
-  const esc = (s) =>
-    String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const cs = typeof document !== "undefined" ? getComputedStyle(document.documentElement) : null;
-  const bg = cs?.getPropertyValue("--bg")?.trim() || "#EDE7D8";
-  const text = cs?.getPropertyValue("--text")?.trim() || "#1C1B19";
-  const muted = cs?.getPropertyValue("--muted")?.trim() || "#837C6E";
-  const seal = cs?.getPropertyValue("--seal")?.trim() || "#B7282E";
-  const svg = `
-  <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'>
-    <rect width='1200' height='675' fill='${bg}'/>
-    <rect x='0' y='0' width='1200' height='675' fill='none' stroke='${text}' stroke-opacity='0.12' stroke-width='2'/>
-    <rect x='1120' y='40' width='40' height='40' fill='${seal}'/>
-    <g font-family='Georgia, "Noto Serif SC", serif'>
-      <text x='40' y='120' font-size='40' fill='${text}'>${esc(title)}</text>
-      <text x='40' y='168' font-size='16' fill='${muted}' letter-spacing='1'>ILLUSTRATION PLACEHOLDER</text>
-      <text x='40' y='630' font-size='14' fill='${muted}'>Moving Kitchen Tales</text>
-    </g>
-  </svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-
 // Einkaufsliste aggregieren
 function aggregateList(data, CANON) {
   const totals = {};
@@ -167,24 +142,22 @@ function weekFolderFromMeta(meta) {
   return m ? `kw${m[1]}` : "kw1";
 }
 
-function ImageBanner({ meal, year, weekFolder = "kw1" }) {
+// Eigenes Bild unter public/plan-art/{jahr}/{kw}/{id}.jpg gewinnt, sonst die Tuschezeichnung.
+function ImageBanner({ meal, source = meal, year, weekFolder = "kw1" }) {
   const [src, setSrc] = useState("");
   useEffect(() => {
-    const preferred = meal.image ?? `/plan-art/${year}/${weekFolder}/${meal.id}.jpg`;
-    const fallback = animePlaceholder(meal.title);
-    if (!preferred) return setSrc(fallback);
+    setSrc("");
+    const preferred = meal.image ?? `${import.meta.env.BASE_URL}plan-art/${year}/${weekFolder}/${meal.id}.jpg`;
     const img = new Image();
     img.onload = () => setSrc(preferred);
-    img.onerror = () => setSrc(fallback);
     img.src = preferred;
   }, [meal, year, weekFolder]);
 
   return (
-    <div className="mkt-art" style={{ position: "relative", borderRadius: 0, overflow: "hidden", marginBottom: 12 }}>
-      <img src={src || animePlaceholder(meal.title)} alt={meal.title} style={{ width: "100%", height: "auto", display: "block", aspectRatio: "16/9" }} loading="lazy" />
-      <div style={{ position: "absolute", right: 10, bottom: 10, background: "rgba(0,0,0,.35)", color: "#fff", padding: "4px 10px", borderRadius: 0, fontSize: 12 }}>
-        {src?.startsWith("/plan-art") ? "Artwork" : "Placeholder"}
-      </div>
+    <div className="mkt-art" style={{ marginBottom: 12, border: "1px solid var(--border)" }}>
+      {src
+        ? <img src={src} alt={meal.title} style={{ width: "100%", height: "auto", display: "block", aspectRatio: "16/9" }} loading="lazy" />
+        : <DishArt title={source.title} ingredients={source.ingredients} />}
     </div>
   );
 }
@@ -200,7 +173,7 @@ function MealCard({ meal, source = meal, year, meta }) {
 
   return (
     <div className="meal-card" style={cardPanelStyle} id={`meal-${meal.id}`}>
-      <ImageBanner meal={meal} year={year} weekFolder={weekFolder} />
+      <ImageBanner meal={meal} source={source} year={year} weekFolder={weekFolder} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ position: "relative" }}>
@@ -345,7 +318,7 @@ function DaySection({ dayKey, meals, sources, dayName, meta }) {
         {dayName.replace(/\s*\(.+\)$/, "")} <span className="mkt-date-paren" style={{fontSize:"0.7em", color:"var(--muted)", fontWeight:400}}>{dayName.match(/\(.+\)$/)?.[0] ?? ""}</span>
       </h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }}>
-        {meals.map((m) => <MealCard key={m.id} meal={m} source={sources?.find((s) => s.id === m.id)} year={new Date().getFullYear()} meta={meta} />)}
+        {meals.map((m) => <MealCard key={m.id} meal={m} source={sources?.find((s) => s.id === m.id)} year={meta.startDate.slice(0, 4)} meta={meta} />)}
       </div>
     </section>
   );
@@ -633,7 +606,7 @@ export default function PlanTemplate({
         <div className="mkt-hero-inner" style={{ background: "var(--grad-hero)", borderRadius: 0, padding: 14, marginBottom: 12, display: "grid", gap: 8 }}>
           <h1 style={{ margin: 0 }}>{uiTitles.main}</h1>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {tagChip(`Start: ${meta.startDate}`)}
+            {tagChip(`${zh ? "开始" : "Start"}: ${meta.startDate}`)}
             {(heroChips ?? ["Mahlzeiten/Woche: 21", "Salzarm · mild · alles durchgegart", "Täglich 1× 🍚 Reiskocher"]).map((c) => tagChip(c))}
           </div>
         </div>
@@ -656,7 +629,7 @@ export default function PlanTemplate({
             <button type="button" onClick={() => doPrint()} className="mkt-tab" style={{ padding: "8px 12px" }}>🖨️ {T.print}</button>
 
             <div className="mkt-theme-switch" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: 6, border: "1px solid var(--btn-border)", background: "var(--panel)" }}>
-              <button type="button" className="mkt-tab" aria-pressed={mode === "auto"} onClick={() => setMode(mode === "auto" ? (effectiveDark ? "dark" : "light") : "auto")} style={{ padding: "6px 10px" }}>Auto</button>
+              <button type="button" className="mkt-tab" aria-pressed={mode === "auto"} onClick={() => setMode(mode === "auto" ? (effectiveDark ? "dark" : "light") : "auto")} style={{ padding: "6px 10px" }}>{zh ? "自动" : "Auto"}</button>
               <label className="mkt-switch" title={effectiveDark ? T.dark : T.light}>
                 <input type="checkbox" checked={effectiveDark} onChange={(e) => setMode(e.target.checked ? "dark" : "light")} disabled={mode === "auto"} />
                 <span className="mkt-slider" />

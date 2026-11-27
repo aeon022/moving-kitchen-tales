@@ -34,28 +34,28 @@ function ColdDishCard({ r, lang }: { r: ColdDish; lang: "de" | "zh" }) {
 
       {!open ? (
         <button type="button" className="prep-card-toggle" onClick={() => setOpen(true)}>
-          {lang === "de" ? "Details ansehen" : "Show details"}
+          {lang === "de" ? "Details ansehen" : "查看详情"}
         </button>
       ) : (
         <div className="prep-card-full">
           <button type="button" className="prep-card-close" onClick={() => setOpen(false)}>
-            {lang === "de" ? "Schließen ×" : "Close ×"}
+            {lang === "de" ? "Schließen ×" : "收起 ×"}
           </button>
           <div className="prep-card-full-grid">
             <div>
               <div className="prep-card-batch">{r.batchSize}</div>
-              <div className="prep-card-label">{lang === "de" ? "Zutaten" : "Ingredients"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Zutaten" : "食材"}</div>
               <div className="prep-ingredients">
                 {r.ingredients.map((i, idx) => <span key={idx} className="prep-ingredient-chip">{i}</span>)}
               </div>
               <div className="prep-meta-box">
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Vorbereitung" : "Prep"}</span>{r.freezeMethod}</div>
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "Keeps"}</span>{r.freezerLife}</div>
-                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Servieren" : "Serve"}</span>{r.reheat}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Vorbereitung" : "准备"}</span>{r.freezeMethod}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Haltbarkeit" : "保存期限"}</span>{r.freezerLife}</div>
+                <div className="prep-meta-row"><span className="prep-meta-label">{lang === "de" ? "Servieren" : "食用方法"}</span>{r.reheat}</div>
               </div>
             </div>
             <div>
-              <div className="prep-card-label">{lang === "de" ? "Zubereitung" : "Method"}</div>
+              <div className="prep-card-label">{lang === "de" ? "Zubereitung" : "做法"}</div>
               <ol className="prep-steps">
                 {r.steps.map((s, idx) => <li key={idx}>{s}</li>)}
               </ol>
@@ -95,18 +95,18 @@ export function KalteGerichtePage() {
   return (
     <div className="main-inner" style={{ padding: "0 20px" }}>
       <header className="prep-header">
-        <div className="prep-kicker">涼拌 · Kalte Küche</div>
-        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Kalte Gerichte" : "Cold Dishes"}</h1>
+        <div className="prep-kicker">{lang === "de" ? "涼拌 · Kalte Küche" : "凉拌 · 冷盘"}</div>
+        <h1 style={{ marginBottom: 4 }}>{lang === "de" ? "Kalte Gerichte" : "凉菜"}</h1>
         <p style={{ color: "var(--muted)" }}>
           {lang === "de"
             ? "Fertig-kalt servierte Salate und Beilagen aus China, Japan und Korea — meist in wenigen Minuten vorbereitet, unabhängig von der Wochenplanung."
-            : "Ready-to-serve cold salads and side dishes from China, Japan and Korea — usually a few minutes of prep, independent of the weekly plans."}
+            : "来自中国、日本和韩国的凉拌菜和小菜，通常几分钟就能做好，独立于每周菜单。"}
         </p>
       </header>
 
       <div className="prep-tabs">
         <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="prep-select">
-          <option value="Alle">{lang === "de" ? "Alle Küchen" : "All cuisines"}</option>
+          <option value="Alle">{lang === "de" ? "Alle Küchen" : "所有菜系"}</option>
           {cuisines.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -114,7 +114,7 @@ export function KalteGerichtePage() {
       </div>
 
       {groupsArr.length > 1 && (
-        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "Chapters"}>
+        <nav className="prep-index" aria-label={lang === "de" ? "Kapitel" : "章节"}>
           {groupsArr.map(([type], i) => (
             <a
               key={type}
