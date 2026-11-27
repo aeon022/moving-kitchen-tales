@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { PANTRY_GROUPS } from "./plans/pantry";
 import { STORES } from "./utils/shoppingList";
-import { CopyButton } from "./components/CopyButton";
+import { ExportBar } from "./components/ExportBar";
 
 const STORE_KEY = "mkt.pantry.buy";
 
@@ -42,7 +42,7 @@ export function VorratskammerPage() {
         <div className="prep-notice" style={{ marginTop: 0 }}>
           <p><strong>Nachkaufen ({wanted.length})</strong></p>
           <pre className="pantry-list">{text}</pre>
-          <CopyButton text={text} />{" "}
+          <ExportBar lines={wanted.map((i) => `${i.name} (${i.store})`)} />
           <button type="button" className="prep-card-toggle" onClick={() => setBuy([])}>Liste leeren</button>
         </div>
       )}

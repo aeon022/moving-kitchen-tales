@@ -1,6 +1,6 @@
 // node --experimental-strip-types scripts/test-shopping.mjs
 import assert from "node:assert/strict";
-import { shoppingList, formatLine } from "../src/utils/shoppingList.ts";
+import { shoppingList, formatLine, reminderText, taskctlCommands } from "../src/utils/shoppingList.ts";
 import { PREP_RECIPES, PREP_SCHEDULE } from "../src/plans/prep/preppen.ts";
 
 const l = shoppingList([
@@ -17,4 +17,6 @@ for (const w of PREP_SCHEDULE) for (const it of w.items) {
   assert.ok(r, it.id);
   for (const x of Object.values(shoppingList([r])).flat()) assert.ok(x.qty > 0, `${it.id}: ${x.name}`);
 }
+assert.equal(reminderText(["a", "b"]), "a\nb");
+assert.equal(taskctlCommands(["Mom's $(x)"]), `taskctl add 'Mom'\\''s $(x)' --list 'Einkäufe'`);
 console.log("shoppingList ok");

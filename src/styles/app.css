@@ -1450,10 +1450,49 @@ details.prep-notice ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-
 
 /* --- Vorkochplan & Vorratskammer --- */
 .prep-use { color: var(--muted); font-size: 12.5px; }
-details.prep-shop { margin-top: 8px; }
-details.prep-shop .prep-card-label { margin-top: 12px; }
 .check-row { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: 13.5px; cursor: pointer; }
 .check-row input { margin-top: 3px; }
 .check-row input:checked + span { color: var(--accent); }
 .check-row small { display: block; color: var(--muted); font-size: 12px; }
 .pantry-list { white-space: pre-wrap; font: 13.5px/1.6 var(--font-ui); margin: 6px 0; }
+
+/* --- Vorkochen als Buchrolle --- */
+.roll-teaser { display: flex; gap: 14px; align-items: center; margin-bottom: 24px; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid var(--seal); background: var(--panel); color: var(--text); text-decoration: none; }
+.roll-teaser span { font-size: 22px; color: var(--seal); }
+.roll-progress { height: 4px; background: var(--border); margin-top: 18px; }
+.roll-progress span { display: block; height: 100%; background: var(--seal); transition: width .4s ease; }
+.export-msg { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 8px 0; }
+.export-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.export-bar .export-msg { flex-basis: 100%; margin: 0; }
+.roll { list-style: none; margin: 8px 0 32px; padding: 0; }
+.roll-station { position: relative; padding: 0 0 34px 62px; }
+/* Faden der Buchbindung */
+.roll-station::before { content: ""; position: absolute; left: 20px; top: 0; bottom: 0; border-left: 2px dotted var(--muted); opacity: .55; }
+.roll-station:last-child::before { bottom: auto; height: 24px; }
+.roll-node { position: absolute; left: 0; top: 0; width: 42px; height: 42px; display: grid; place-items: center; font-size: 20px; border: 1px solid var(--muted); border-radius: 50%; background: var(--bg); }
+.roll-station.is-current .roll-node { border: 2px solid var(--accent); color: var(--accent); }
+.roll-station.is-complete .roll-node { background: var(--text); border-color: var(--text); color: var(--bg); }
+.roll-station h2 { display: flex; align-items: center; gap: 12px; margin: 0; min-height: 42px; }
+.roll-station h2 button { flex: 1; display: grid; grid-template-columns: 1fr auto; gap: 0 12px; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 0 0 10px; cursor: pointer; color: var(--text); font: inherit; }
+.roll-when { font-size: 24px; }
+.roll-focus { grid-column: 1; font: italic 14px var(--font-ui); color: var(--muted); }
+.roll-count { grid-column: 2; grid-row: 1 / span 2; align-self: center; font: 14px var(--font-ui); color: var(--muted); }
+.roll-stamp { display: grid; place-items: center; width: 46px; height: 46px; border: 2px solid var(--seal); color: var(--seal); font-size: 24px; transform: rotate(-8deg); animation: stamp .35s ease-out; }
+@keyframes stamp { from { transform: rotate(-8deg) scale(1.8); opacity: 0; } }
+.roll-body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 26px; align-items: start; padding-top: 12px; }
+.roll-dishes { list-style: none; margin: 0; padding: 0; }
+.roll-dish { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.roll-dish label { flex: 1 1 200px; display: flex; gap: 10px; cursor: pointer; }
+.roll-dish input { margin-top: 4px; accent-color: var(--seal); }
+.roll-dish small { display: block; color: var(--muted); font-size: 12.5px; }
+.roll-dish-title { font-size: 14.5px; line-height: 1.45; }
+.roll-dish.is-done .roll-dish-title { text-decoration: line-through; color: var(--muted); }
+.roll-recipe { flex-basis: 100%; font-size: 13.5px; line-height: 1.55; }
+/* Einkaufszettel: abgerissener Papierstreifen */
+.roll-slip { background: var(--panel); border: 1px solid var(--border); border-top: 2px dashed var(--muted); padding: 14px 16px; }
+.roll-slip h3 { margin: 0 0 8px; font-size: 17px; }
+.roll-slip h3 span { color: var(--seal); margin-right: 6px; }
+.roll-slip .prep-card-label { margin: 12px 0 4px; }
+@media (max-width: 820px) { .roll-body { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .roll-station { padding-left: 38px; } .roll-station::before { left: 13px; } .roll-node { width: 28px; height: 28px; font-size: 14px; top: 6px; } .roll-when { font-size: 20px; } }
+@media (prefers-reduced-motion: reduce) { .roll-stamp { animation: none; } .roll-progress span { transition: none; } }

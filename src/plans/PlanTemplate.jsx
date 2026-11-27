@@ -5,6 +5,7 @@ import { buildEmbedCss } from "@/utils/embedCss";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { CANON as DEFAULT_CANON } from "./canon";
 import { riceAlternative } from "../utils/riceAlternative";
+import { ExportBar } from "../components/ExportBar";
 
 // Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
 // nicht gerendert, nur als String im Code vorgehalten (Konvention aus Woche-1). Ergebnis-Datei
@@ -604,6 +605,7 @@ export default function PlanTemplate({
             ⬇️ Als Text herunterladen
           </button>
         </div>
+        <ExportBar lines={Object.values(listGroups).flat().map((it) => `${it.label} ${Math.round(it.qty * 10) / 10} ${it.unit}`)} />
         <Group name="Protein/Fisch/Tofu" items={listGroups["Protein/Fisch/Tofu"]} />
         <Group name="Gemüse/Pilze" items={listGroups["Gemüse/Pilze"]} />
         <Group name="Reis/Nudeln/Sättigung" items={listGroups["Reis/Nudeln/Sättigung"]} />

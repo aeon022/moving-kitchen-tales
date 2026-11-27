@@ -57,3 +57,12 @@ export function shoppingList(recipes: { ingredients: string[]; factor?: number }
 
 export const formatLine = (l: ShopLine) =>
   l.qty ? `${l.name}: ${String(Math.ceil(l.qty * 10) / 10).replace(".", ",")} ${l.unit}` : l.name;
+
+/** Eine Zeile je Artikel – in Apple Erinnerungen eingefügt wird daraus je ein Eintrag. */
+export const reminderText = (lines: string[]) => lines.join("\n");
+
+const quote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
+
+/** Fürs Terminal: taskctl legt die Einträge direkt in Apple Erinnerungen an. */
+export const taskctlCommands = (lines: string[], list = "Einkäufe") =>
+  lines.map((l) => `taskctl add ${quote(l)} --list ${quote(list)}`).join("\n");

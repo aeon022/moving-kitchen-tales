@@ -2960,19 +2960,19 @@ export const PREP_RECIPES: PrepRecipe[] = [
 ];
 
 /**
- * Vorkochplan, Geburtstermin 28.12.2026, abgestimmt auf "Woche 53 · Wochenbett" und Woche 1/2027.
- * Haltbares zuerst (2 Monate), Breie, Reis und Rohmariniertes erst im Dezember (1 Monat).
+ * Vorkochplan, abgestimmt auf die Wochenbett-Pläne. Ohne Datum: die Termine stehen im privaten Kalender.
+ * Haltbares zuerst (2 Monate), Breie, Reis und Rohmariniertes zuletzt (1 Monat).
  * factor = wie oft die Rezeptmenge gekocht wird.
  */
-export const PREP_SCHEDULE: { when: string; focus: string; items: { id: string; factor: number; use: string }[] }[] = [
-  { when: "28./29. November", focus: "Brühen und Suppen, lange haltbar", items: [
+export const PREP_SCHEDULE: { title: string; focus: string; items: { id: string; factor: number; use: string }[] }[] = [
+  { title: "Wochenende 1", focus: "Brühen und Suppen, lange haltbar", items: [
     { id: "huehnerbruehe-basis", factor: 1, use: "Basis für das Sesamöl-Huhn – zuerst kochen" },
     { id: "wb-dakgomtang", factor: 2, use: "Festtage Mo + Fr, Woche 1 Sa" },
     { id: "wb-sesamoel-huhn", factor: 1, use: "Festtage Di, Rest als Reserve" },
     { id: "wb-sogogi-muguk", factor: 1, use: "Festtage Di, Rest als Reserve" },
     { id: "wb-fanqie-niurou-tang", factor: 1, use: "Festtage Mi, Rest als Reserve" },
   ] },
-  { when: "5./6. Dezember", focus: "Schmorgerichte und Suppen", items: [
+  { title: "Wochenende 2", focus: "Schmorgerichte und Suppen", items: [
     { id: "korea-miyeokguk-rind", factor: 0.5, use: "Festtage Mo, Woche 1 Mo (halbe Menge reicht, Jod)" },
     { id: "japan-nikudango-suppe", factor: 1, use: "Silvester, Woche 1 Do" },
     { id: "wb-hongzao-huhn-suppe", factor: 1, use: "Woche 1 Mo, Rest als Reserve" },
@@ -2980,7 +2980,7 @@ export const PREP_SCHEDULE: { when: string; focus: string; items: { id: string; 
     { id: "wb-sunhan-dakjjim", factor: 1, use: "Festtage Fr, Rest als Reserve" },
     { id: "wb-tori-soboro", factor: 1, use: "Woche 1 Fr, Rest als Reserve" },
   ] },
-  { when: "12./13. Dezember", focus: "Suppen, Fladen, Marinade", items: [
+  { title: "Wochenende 3", focus: "Suppen, Fladen, Marinade", items: [
     { id: "wb-tonjiru", factor: 1, use: "Festtage Sa" },
     { id: "wb-tori-daikon-soup", factor: 1, use: "Neujahr" },
     { id: "wb-sigeumchi-doenjangguk", factor: 1, use: "Festtage Do" },
@@ -2988,7 +2988,7 @@ export const PREP_SCHEDULE: { when: string; focus: string; items: { id: string; 
     { id: "wb-shoga-pork-bag", factor: 1, use: "Festtage So" },
     { id: "wb-oyakodon-basis", factor: 1, use: "Festtage Mi" },
   ] },
-  { when: "19./20. Dezember", focus: "Breie, Reis, Suppenpaket (1 Monat haltbar)", items: [
+  { title: "Wochenende 4", focus: "Breie, Reis, Suppenpaket (1 Monat haltbar)", items: [
     { id: "wb-hirse-dattel-brei", factor: 1, use: "Festtage Mo, Woche 1 Mo" },
     { id: "wb-sake-gayu", factor: 1, use: "Festtage Di" },
     { id: "wb-dakjuk", factor: 1, use: "Festtage Mi, Woche 1 Mi" },

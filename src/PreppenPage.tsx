@@ -1,10 +1,9 @@
 // src/PreppenPage.tsx
 import React, { useMemo, useState } from "react";
 import { useLang } from "./App";
-import { PREP_RECIPES, PREP_SCHEDULE, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
+import { PREP_RECIPES, PrepRecipe, PrepCategory } from "./plans/prep/preppen";
 import { riceAlternative } from "./utils/riceAlternative";
-import { shoppingList, formatLine, STORES } from "./utils/shoppingList";
-import { CopyButton } from "./components/CopyButton";
+import { Link } from "react-router-dom";
 
 // Kapitel-Nummerierung wie im Register (一·二·三…) statt nackter Sektions-Labels — Preppen
 // bekommt so das gleiche "Buch"-Gefühl, nicht nur eine Filter-Seite.
@@ -96,52 +95,6 @@ function TypeSection({ index, type, recipes, lang }: { index: number; type: stri
 // tags[0] ist bei jedem Preppen-Rezept die Küche (siehe preppen.ts) — kein eigenes Feld nötig.
 const cuisineOf = (r: PrepRecipe) => r.tags[0] ?? "";
 
-// Vorkochplan mit Einkaufsliste je Wochenende (aus den Rezeptdaten berechnet).
-function PrepScheduleView({ lang }: { lang: "de" | "zh" }) {
-  const weeks = useMemo(
-    () =>
-      PREP_SCHEDULE.map((w) => {
-        const items = w.items.map((it) => ({ ...it, recipe: PREP_RECIPES.find((r) => r.id === it.id)! }));
-        const list = shoppingList(items.map((i) => ({ ingredients: i.recipe.ingredients, factor: i.factor })));
-        const text = [`Einkauf ${w.when}`, ...STORES.filter((s) => list[s].length).flatMap((s) => ["", s, ...list[s].map((l) => `- ${formatLine(l)}`)])].join("\n");
-        return { ...w, items, list, text };
-      }),
-    []
-  );
-  return (
-    <details className="prep-notice">
-      <summary>{lang === "de" ? "Vorkochplan fürs Wochenbett mit Einkaufslisten (ab 28.11.)" : "Prep plan with shopping lists"}</summary>
-      <p>Für „Woche 53 · Wochenbett“ und Woche 1/2027. Saucen, Gewürze, Öle, Miso, Doenjang und Katsuobushi stehen nicht auf den Listen (siehe Vorratskammer). Frische Beilagen wie Reis, Eier oder Sojamilch stehen auf der Einkaufsliste des jeweiligen Wochenplans.</p>
-      {weeks.map((w) => (
-        <section key={w.when}>
-          <h4>{w.when} · {w.focus}</h4>
-          <ul>
-            {w.items.map((i) => (
-              <li key={i.id}>
-                {i.factor !== 1 && <strong>{String(i.factor).replace(".", ",")}× </strong>}
-                {i.recipe.title} <span className="prep-use">— {i.use}</span>
-              </li>
-            ))}
-          </ul>
-          <details className="prep-shop">
-            <summary>Einkaufsliste {w.when}</summary>
-            {STORES.filter((s) => w.list[s].length).map((s) => (
-              <div key={s}>
-                <div className="prep-card-label">{s}</div>
-                {w.list[s].map((l) => (
-                  <label key={l.name + l.unit} className="check-row"><input type="checkbox" /> {formatLine(l)}</label>
-                ))}
-              </div>
-            ))}
-            <CopyButton text={w.text} />
-          </details>
-        </section>
-      ))}
-      <p>Asia-Shop-Artikel gibt es teils auch bei Interspar; was fehlt, online bestellen. Alles beschriften, rasch abkühlen, nur einmal auftauen und durchgehend heiß erhitzen. Kommt das Baby früher, entfallen die späteren Wochenenden.</p>
-    </details>
-  );
-}
-
 export function PreppenPage() {
   const { lang } = useLang();
   const [tab, setTab] = useState<PrepCategory>("gericht");
@@ -186,7 +139,10 @@ export function PreppenPage() {
         </p>
       </header>
 
-      <PrepScheduleView lang={lang} />
+      <Link to="/vorkochen" className="roll-teaser">
+        <span aria-hidden="true">備え</span>
+        {lang === "de" ? "Vorkochplan: vier Wochenenden mit Einkaufszetteln →" : "Prep plan →"}
+      </Link>
 
       <div className="prep-tabs">
         <button
