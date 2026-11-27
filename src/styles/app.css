@@ -1447,3 +1447,13 @@ details.prep-notice { margin-top: 0; }
 details.prep-notice summary { cursor: pointer; font-weight: 600; }
 details.prep-notice h4 { margin: 14px 0 4px; }
 details.prep-notice ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.6; }
+
+/* --- Vorkochplan & Vorratskammer --- */
+.prep-use { color: var(--muted); font-size: 12.5px; }
+details.prep-shop { margin-top: 8px; }
+details.prep-shop .prep-card-label { margin-top: 12px; }
+.check-row { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: 13.5px; cursor: pointer; }
+.check-row input { margin-top: 3px; }
+.check-row input:checked + span { color: var(--accent); }
+.check-row small { display: block; color: var(--muted); font-size: 12px; }
+.pantry-list { white-space: pre-wrap; font: 13.5px/1.6 var(--font-ui); margin: 6px 0; }

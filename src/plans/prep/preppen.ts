@@ -1483,7 +1483,7 @@ export const PREP_RECIPES: PrepRecipe[] = [
       "Vollständig abkühlen lassen, portionsweise einfrieren.",
     ],
     freezeMethod: "Fertig gegart, portioniert in Dosen.",
-    freezerLife: "bis zu 3 Monate",
+    freezerLife: "bis zu 2 Monate",
     reheat: "Portion direkt gefroren im Topf langsam erhitzen, bis durchgehend heiß.",
     tags: ["Korea", "Jod (Algen) sparsam dosieren", "Diabetes: mageres Fleisch, natriumarm"],
   },
@@ -1715,7 +1715,7 @@ export const PREP_RECIPES: PrepRecipe[] = [
       "Frühlingszwiebel, fein gehackt 2 Stück",
       "Ei 1 Stück",
       "Maisstärke 1 EL",
-      "Dashi-Brühe 800 ml",
+      "Dashi aus Katsuobushi 800 ml",
       "Sojasauce natriumarm 1 EL",
     ],
     steps: [
@@ -1725,7 +1725,7 @@ export const PREP_RECIPES: PrepRecipe[] = [
       "Bällchen mitsamt Brühe portionsweise einfrieren.",
     ],
     freezeMethod: "Fertig gegart, mitsamt der Brühe portioniert in Dosen.",
-    freezerLife: "bis zu 3 Monate",
+    freezerLife: "bis zu 2 Monate",
     reheat: "Portion direkt gefroren im Topf langsam erhitzen, bis Bällchen und Brühe durchgehend heiß sind.",
     tags: ["Japan", "Schwangerschaft: Ei/Hack vollständig durchgegart", "Diabetes: proteinreich, natriumarm"],
   },
@@ -2959,10 +2959,42 @@ export const PREP_RECIPES: PrepRecipe[] = [
   },
 ];
 
-/** Vorkochplan, Geburtstermin 28.12.2026: Haltbares zuerst, Rohmariniertes und Reis zuletzt (1 Monat). */
-export const PREP_SCHEDULE: { when: string; focus: string; ids: string[] }[] = [
-  { when: "28./29. November", focus: "Suppen und Aromen, lange haltbar", ids: ["huehnerbruehe-basis", "wb-sesamoel-huhn", "wb-sogogi-muguk", "ingwer-knoblauch-fruehlingszwiebel-paste"] },
-  { when: "5./6. Dezember", focus: "Teigtaschen", ids: ["china-jiaozi-fuellung-huhn-kohl", "china-wonton-fuellung-garnelen", "china-wonton-suppe-komplett-freezerpack"] },
-  { when: "12./13. Dezember", focus: "Marinaden und Saucenbasis", ids: ["wb-shoga-pork-bag", "wb-oyakodon-basis", "bulgogi-marinade-bag"] },
-  { when: "19./20. Dezember", focus: "Frühstück, Snacks, Suppenpaket", ids: ["wb-hirse-dattel-brei", "wb-yaki-onigiri", "wb-rippchen-lotos-kit"] },
+/**
+ * Vorkochplan, Geburtstermin 28.12.2026, abgestimmt auf "Woche 53 · Wochenbett" und Woche 1/2027.
+ * Haltbares zuerst (2 Monate), Breie, Reis und Rohmariniertes erst im Dezember (1 Monat).
+ * factor = wie oft die Rezeptmenge gekocht wird.
+ */
+export const PREP_SCHEDULE: { when: string; focus: string; items: { id: string; factor: number; use: string }[] }[] = [
+  { when: "28./29. November", focus: "Brühen und Suppen, lange haltbar", items: [
+    { id: "huehnerbruehe-basis", factor: 1, use: "Basis für das Sesamöl-Huhn – zuerst kochen" },
+    { id: "wb-dakgomtang", factor: 2, use: "Festtage Mo + Fr, Woche 1 Sa" },
+    { id: "wb-sesamoel-huhn", factor: 1, use: "Festtage Di, Rest als Reserve" },
+    { id: "wb-sogogi-muguk", factor: 1, use: "Festtage Di, Rest als Reserve" },
+    { id: "wb-fanqie-niurou-tang", factor: 1, use: "Festtage Mi, Rest als Reserve" },
+  ] },
+  { when: "5./6. Dezember", focus: "Schmorgerichte und Suppen", items: [
+    { id: "korea-miyeokguk-rind", factor: 0.5, use: "Festtage Mo, Woche 1 Mo (halbe Menge reicht, Jod)" },
+    { id: "japan-nikudango-suppe", factor: 1, use: "Silvester, Woche 1 Do" },
+    { id: "wb-hongzao-huhn-suppe", factor: 1, use: "Woche 1 Mo, Rest als Reserve" },
+    { id: "wb-fanqie-roujiang", factor: 1, use: "Festtage So, Rest als Reserve" },
+    { id: "wb-sunhan-dakjjim", factor: 1, use: "Festtage Fr, Rest als Reserve" },
+    { id: "wb-tori-soboro", factor: 1, use: "Woche 1 Fr, Rest als Reserve" },
+  ] },
+  { when: "12./13. Dezember", focus: "Suppen, Fladen, Marinade", items: [
+    { id: "wb-tonjiru", factor: 1, use: "Festtage Sa" },
+    { id: "wb-tori-daikon-soup", factor: 1, use: "Neujahr" },
+    { id: "wb-sigeumchi-doenjangguk", factor: 1, use: "Festtage Do" },
+    { id: "wb-conghua-danbing", factor: 1, use: "Festtage Sa" },
+    { id: "wb-shoga-pork-bag", factor: 1, use: "Festtage So" },
+    { id: "wb-oyakodon-basis", factor: 1, use: "Festtage Mi" },
+  ] },
+  { when: "19./20. Dezember", focus: "Breie, Reis, Suppenpaket (1 Monat haltbar)", items: [
+    { id: "wb-hirse-dattel-brei", factor: 1, use: "Festtage Mo, Woche 1 Mo" },
+    { id: "wb-sake-gayu", factor: 1, use: "Festtage Di" },
+    { id: "wb-dakjuk", factor: 1, use: "Festtage Mi, Woche 1 Mi" },
+    { id: "wb-hongdou-zhou", factor: 1, use: "Festtage Do" },
+    { id: "wb-hobakjuk", factor: 1, use: "Festtage So" },
+    { id: "wb-yaki-onigiri", factor: 1, use: "Neujahr, Woche 1 Sa" },
+    { id: "wb-rippchen-lotos-kit", factor: 1, use: "Festtage Sa" },
+  ] },
 ];
