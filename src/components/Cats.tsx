@@ -1,3 +1,5 @@
+import { createContext, useContext } from "react";
+
 // Finn und Fleur im Tuschestil, dazu die Pinsel-Grundformen, die auch DishArt nutzt.
 const INK = "var(--text)";
 const PAPER = "var(--panel)";
@@ -66,16 +68,25 @@ const oval = (x: number, y: number, rx: number, ry: number) =>
 
 
 type Who = "finn" | "fleur";
-export type CatPose<W extends Who = Who> = { finn: "sit" | "doze" | "peek" | "angle"; fleur: "sit" | "doze" | "peek" | "tilt" | "jump" }[W];
+export type CatPose<W extends Who = Who> = {
+  finn: "sit" | "doze" | "peek" | "angle" | "stretch" | "onpaper";
+  fleur: "sit" | "doze" | "peek" | "tilt" | "jump" | "stretch" | "puzzled";
+}[W];
 type CatProps = { [W in Who]: { who: W; pose: CatPose<W> } }[Who];
+type Eyes = "open" | "closed" | "happy" | "wide" | "wink";
+type Mouth = "smile" | "o" | "yawn";
+type Face = { eyes?: Eyes; mouth?: Mouth };
+
+/** Neujahrs-Halstuch: gilt für alle Köpfe innerhalb einer CatFigure. */
+const Festive = createContext(false);
 
 const FUR = 0.2;
-const Strokes = ({ d, w = 4, o = 0.85, c = INK }: { d: string[]; w?: number; o?: number; c?: string }) => (
+export const Strokes = ({ d, w = 4, o = 0.85, c = INK }: { d: string[]; w?: number; o?: number; c?: string }) => (
   <>{d.map((s) => <B key={s} d={s} w={w} o={o} c={c} />)}</>
 );
 
 /** Geringelter Schwanz: Papiermaske, Fellton, Ringe, dunkle Spitze. d = ein Pfad, tip = letztes Stück. */
-const Tail = ({ d, tip, w }: { d: string; tip: string; w: number }) => (
+export const Tail = ({ d, tip, w }: { d: string; tip: string; w: number }) => (
   <g style={{ fill: "none", strokeLinecap: "round" }}>
     <path d={d} style={{ stroke: INK, strokeWidth: w + 3, opacity: 0.7 }} />
     <path d={d} style={{ stroke: PAPER, strokeWidth: w }} />
@@ -86,7 +97,7 @@ const Tail = ({ d, tip, w }: { d: string; tip: string; w: number }) => (
 );
 
 /** Bein: Kontur, Fell, helle Pfote am Ende (x,y) */
-const Limb = ({ d, x, y, w = 11 }: { d: string; x: number; y: number; w?: number }) => (
+export const Limb = ({ d, x, y, w = 11 }: { d: string; x: number; y: number; w?: number }) => (
   <g style={{ fill: "none", strokeLinecap: "round" }}>
     <path d={d} style={{ stroke: INK, strokeWidth: w + 4.5, opacity: 0.85 }} />
     <path d={d} style={{ stroke: PAPER, strokeWidth: w }} />
@@ -96,7 +107,7 @@ const Limb = ({ d, x, y, w = 11 }: { d: string; x: number; y: number; w?: number
 );
 
 /** Pfote mit zwei Zehenstrichen, (x,y) = Unterkante Mitte */
-const Paw = ({ x, y, r }: { x: number; y: number; r: number }) => (
+export const Paw = ({ x, y, r }: { x: number; y: number; r: number }) => (
   <>
     <path d={`M${x - r} ${y}C${x - r * 1.1} ${y - r * 1.25} ${x + r * 1.1} ${y - r * 1.25} ${x + r} ${y}Z`} style={{ fill: LIGHT }} />
     <B d={`${x - r} ${y} ${x - r * 1.2} ${y - r * 1.3} ${x + r * 1.2} ${y - r * 1.3} ${x + r} ${y}`} w={r * 0.28} />
@@ -108,7 +119,7 @@ const Paw = ({ x, y, r }: { x: number; y: number; r: number }) => (
 );
 
 /** Finn: kräftiger, etwas breiterer Schädel, Wangenfell, Augen halb zu. */
-function FinnHead({ closed = false }: { closed?: boolean }) {
+function FinnHead({ eyes = "open", mouth = "smile" }: Face) {
   const skull = "M-34 -14L-35 -38Q-24 -36 -15 -27Q0 -31 15 -27Q24 -36 35 -38L34 -14C42 -2 46 8 38 14L40 17C28 30 12 32 0 32C-12 32 -28 30 -40 17L-38 14C-46 8 -42 -2 -34 -14Z";
   return (
     <>
@@ -120,8 +131,13 @@ function FinnHead({ closed = false }: { closed?: boolean }) {
       {/* M und Wangenstreifen */}
       <Strokes w={3.6} o={0.95} d={["-14 -10 -13 -16 -11 -20 -9 -25", "-9 -24 -6 -20 -3 -17 0 -13", "0 -13 3 -17 6 -20 9 -24", "9 -25 11 -20 13 -16 14 -10", "-40 0 -34 1 -29 3 -24 6", "-40 8 -35 9 -32 11 -28 13", "40 0 34 1 29 3 24 6", "40 8 35 9 32 11 28 13"]} />
       {[-15, 15].map((x) =>
-        closed ? (
-          <B key={x} d={`${x - 8} -1 ${x - 4} 4 ${x + 3} 4 ${x + 8} -1`} w={3} />
+        eyes === "closed" || eyes === "happy" ? (
+          <B key={x} d={eyes === "happy" ? `${x - 8} 4 ${x - 4} -3 ${x + 3} -3 ${x + 8} 4` : `${x - 8} -1 ${x - 4} 4 ${x + 3} 4 ${x + 8} -1`} w={3.4} />
+        ) : eyes === "wide" ? (
+          <g key={x}>
+            <path d={oval(x, 1, 9, 9)} style={{ fill: LIGHT, stroke: DARK, strokeWidth: 2.4 }} />
+            <Dot x={x} y={1} r={2.8} c={DARK} o={1} />
+          </g>
         ) : (
           <g key={x}>
             <path d={`M${x - 8} -1H${x + 8}C${x + 7} 9 ${x - 7} 9 ${x - 8} -1Z`} style={{ fill: LIGHT }} />
@@ -132,15 +148,25 @@ function FinnHead({ closed = false }: { closed?: boolean }) {
         ),
       )}
       <path d="M-5 10Q0 8 5 10L0 15Z" style={{ fill: DARK }} />
-      {/* leicht schiefes Schmunzeln */}
-      <Strokes w={2.2} c={DARK} d={["0 15 -1 21 -7 23 -12 19", "0 15 2 21 9 23 14 17"]} />
+      {mouth === "yawn" ? (
+        <>
+          <path d="M-11 17C-6 14 6 14 11 17C13 36 -13 36 -11 17Z" style={{ fill: DARK }} />
+          <path d="M-6 28C-3 23 3 23 6 28C3 32 -3 32 -6 28Z" style={{ fill: LIGHT, opacity: 0.6 }} />
+          <path d="M-8 17L-5.5 22L-3.5 16.5ZM8 17L5.5 22L3.5 16.5Z" style={{ fill: LIGHT }} />
+        </>
+      ) : mouth === "o" ? (
+        <path d={oval(0, 21, 4, 5)} style={{ fill: DARK }} />
+      ) : (
+        // leicht schiefes Schmunzeln
+        <Strokes w={2.2} c={DARK} d={["0 15 -1 21 -7 23 -12 19", "0 15 2 21 9 23 14 17"]} />
+      )}
       <Strokes w={1.5} o={0.7} d={["-17 17 -30 15 -42 16 -56 21", "-16 21 -28 23 -38 27 -48 34", "17 17 30 15 42 16 56 21", "16 21 28 23 38 27 48 34"]} />
     </>
   );
 }
 
 /** Fleur: schmales Dreiecksgesicht, große Ohren, große wache Augen. */
-function FleurHead({ closed = false }: { closed?: boolean }) {
+function FleurHead({ eyes = "open", mouth = "smile" }: Face) {
   const skull = "M-23 -9L-29 -43Q-16 -36 -8 -22Q0 -24 8 -22Q16 -36 29 -43L23 -9C28 4 22 12 12 18Q0 28 -12 18C-22 12 -28 4 -23 -9Z";
   return (
     <>
@@ -151,8 +177,14 @@ function FleurHead({ closed = false }: { closed?: boolean }) {
       <Strokes w={3.6} d={["-23 -10 -29 4 -24 12 -12 18", "-14 16 -8 22 -3 24 2 23", "23 -10 29 4 24 12 12 18", "14 16 9 21 5 23 1 24"]} />
       <Strokes w={2.7} o={0.95} d={["-10 -8 -9 -13 -8 -16 -6 -20", "-6 -19 -4 -16 -2 -14 0 -10", "0 -10 2 -14 4 -16 6 -19", "6 -20 8 -16 9 -13 10 -8", "-26 4 -22 4 -19 5 -16 7", "26 4 22 4 19 5 16 7"]} />
       {[-11, 11].map((x) =>
-        closed ? (
+        eyes === "closed" || (eyes === "wink" && x < 0) ? (
           <B key={x} d={`${x - 6} 0 ${x - 3} 4 ${x + 2} 4 ${x + 6} -1`} w={2.4} />
+        ) : eyes === "wide" ? (
+          <g key={x}>
+            <path d={oval(x, 0, 9, 9)} style={{ fill: LIGHT, stroke: DARK, strokeWidth: 1.8 }} />
+            <Dot x={x} y={0.5} r={3.4} c={DARK} o={1} />
+            <Dot x={x + 1.2} y={-1} r={1.1} c={LIGHT} o={1} />
+          </g>
         ) : (
           <g key={x}>
             <path d={oval(x, 0, 7, 6.5)} style={{ fill: LIGHT, stroke: DARK, strokeWidth: 1.8 }} />
@@ -163,29 +195,50 @@ function FleurHead({ closed = false }: { closed?: boolean }) {
         ),
       )}
       <path d="M-3.5 9Q0 7.5 3.5 9L0 12.5Z" style={{ fill: DARK }} />
-      <Strokes w={1.7} c={DARK} d={["0 12 -1 16 -4 18 -7 15", "0 12 1 16 4 18 7 15"]} />
+      {mouth === "o" ? (
+        <path d={oval(0, 17, 2.6, 3.2)} style={{ fill: DARK }} />
+      ) : (
+        <Strokes w={1.7} c={DARK} d={["0 12 -1 16 -4 18 -7 15", "0 12 1 16 4 18 7 15"]} />
+      )}
       <Strokes w={1.3} o={0.7} d={["-11 12 -22 9 -32 8 -44 10", "-11 15 -20 17 -29 20 -38 26", "11 12 22 9 32 8 44 10", "11 15 20 17 29 20 38 26"]} />
     </>
   );
 }
 
-const Head = ({ who, x, y, a = 0, closed }: { who: Who; x: number; y: number; a?: number; closed?: boolean }) => (
-  <g transform={`translate(${x} ${y}) rotate(${a})`}>
-    {who === "finn" ? (
-      <g transform="scale(0.8 0.88)">
-        <FinnHead closed={closed} />
-      </g>
-    ) : (
-      <FleurHead closed={closed} />
-    )}
-  </g>
-);
+/** Rotes Halstuch unter dem Kinn; low = liegende Posen, kürzerer Zipfel. Wird vom Kopf überdeckt. */
+const Scarf = ({ who, low }: { who: Who; low?: boolean }) => {
+  const [w, y, tip] = who === "finn" ? [30, 17, 54] : [18, 9, 40];
+  const t = low ? y + (tip - y) * 0.6 : tip;
+  return (
+    <>
+      <path d={`M${-w} ${y}C${-w / 2} ${y + 14} ${w / 2} ${y + 14} ${w} ${y}Q${w * 0.55} ${t - 8} 3 ${t}Q${-w * 0.6} ${t - 10} ${-w} ${y}Z`} style={{ fill: "var(--seal)" }} />
+      <B d={`${w - 3} ${y + 4} ${w + 6} ${y + 6} ${w + 9} ${y + 12} ${w + 8} ${y + 20}`} w={5} c="var(--seal)" o={1} />
+      <Dot x={0} y={t - (t - y) * 0.32} r={2.2} c={LIGHT} o={0.9} />
+    </>
+  );
+};
+
+export const Head = ({ who, x, y, a = 0, low, ...face }: Face & { who: Who; x: number; y: number; a?: number; low?: boolean }) => {
+  const festive = useContext(Festive);
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${a})`}>
+      {festive && <Scarf who={who} low={low} />}
+      {who === "finn" ? (
+        <g transform="scale(0.8 0.88)">
+          <FinnHead {...face} />
+        </g>
+      ) : (
+        <FleurHead {...face} />
+      )}
+    </g>
+  );
+};
 
 const Floor = ({ x = 20, len = 160, y = 183 }) => (
   <B d={`${x} ${y} ${x + len * 0.3} ${y + 4} ${x + len * 0.7} ${y - 2} ${x + len} ${y + 1}`} w={3} o={0.28} />
 );
 
-function FinnSit() {
+function FinnSit({ face }: { face?: Face }) {
   return (
     <>
       <Floor x={36} len={140} />
@@ -206,12 +259,12 @@ function FinnSit() {
       <Paw x={87} y={180} r={12} />
       <Paw x={113} y={180} r={12} />
       <Tail d="M140 168C168 174 170 188 138 187C118 186 100 190 82 186" tip="M90 187L82 186" w={11} />
-      <Head who="finn" x={100} y={64} />
+      <Head who="finn" x={100} y={64} {...face} />
     </>
   );
 }
 
-function FleurSit({ tilt = false }) {
+function FleurSit({ tilt = false, puzzled = false, face }: { tilt?: boolean; puzzled?: boolean; face?: Face }) {
   return (
     <>
       <Floor x={48} len={116} />
@@ -233,12 +286,13 @@ function FleurSit({ tilt = false }) {
       ) : (
         <Paw x={110} y={180} r={8.5} />
       )}
-      <Head who="fleur" x={tilt ? 95 : 100} y={tilt ? 92 : 90} a={tilt ? -22 : 0} />
+      <Head who="fleur" x={tilt ? 95 : puzzled ? 106 : 100} y={tilt || puzzled ? 92 : 90} a={tilt ? -22 : puzzled ? 24 : 0} {...(puzzled ? { eyes: "wide", mouth: "o" } : face)} />
+      {puzzled && <Strokes w={3} o={0.6} d={["62 62 56 58 52 54 48 48", "58 80 52 80 46 79 40 76", "76 46 74 40 72 36 68 30"]} />}
     </>
   );
 }
 
-function FinnDoze() {
+function FinnDoze({ stir }: { stir?: boolean }) {
   return (
     <>
       <Floor x={14} len={176} />
@@ -250,14 +304,14 @@ function FinnDoze() {
       <B d="168 138 142 134 130 158 148 176" w={4.5} />
       <Strokes w={5.5} d={["100 114 103 122 102 130 97 137", "117 121 119 130 117 139 111 146", "154 114 156 121 154 127 149 132", "172 124 172 132 169 139 163 143"]} />
       <Tail d="M178 166C190 186 156 186 122 182" tip="M131 183L122 182" w={11} />
-      <Head who="finn" x={66} y={147} a={-6} closed />
+      <Head who="finn" x={66} y={147} a={stir ? -12 : -6} eyes="closed" mouth={stir ? "yawn" : "smile"} low />
       <Paw x={46} y={182} r={11} />
       <Paw x={82} y={183} r={11} />
     </>
   );
 }
 
-function FleurDoze() {
+function FleurDoze({ stir }: { stir?: boolean }) {
   return (
     <>
       <Floor x={36} len={134} />
@@ -266,7 +320,9 @@ function FleurDoze() {
       <B d="76 144 92 114 156 122 152 166" w={5} />
       <B d="152 164 140 180 114 182 92 180" w={3} />
       <Strokes w={4.2} d={["104 127 108 136 106 144 100 150", "122 129 128 138 127 148 121 155", "139 139 146 146 146 156 140 164"]} />
-      <Head who="fleur" x={80} y={160} a={-14} closed />
+      <Head who="fleur" x={80} y={160} a={-14} eyes={stir ? "wink" : "closed"} low />
+      {/* gespitztes Ohr */}
+      {stir && <Strokes w={2.6} o={0.7} d={["106 118 110 114 113 111 118 109", "109 128 114 126 118 125 123 126"]} />}
       <Tail d="M148 164C156 188 112 188 74 182C62 180 56 176 54 170" tip="M57 175L54 170" w={8} />
     </>
   );
@@ -284,7 +340,7 @@ function Peek({ who }: { who: Who }) {
           <Strokes w={4.5} d={["60 128 66 128 70 131 73 136", "140 128 134 128 130 131 127 136"]} />
         </>
       )}
-      <Head who={who} x={100} y={finn ? 114 : 119} a={finn ? 0 : 7} />
+      <Head who={who} x={100} y={finn ? 114 : 119} a={finn ? 0 : 7} low />
       <Shape d="M10 144H190V164H10Z" />
       <B d="12 144 60 140 140 148 190 143" w={6} />
       <B d="30 156 70 154 110 160 150 156" w={2} o={0.35} />
@@ -316,7 +372,7 @@ function FinnAngle() {
       <g transform="rotate(180 41 164)">
         <Paw x={41} y={171} r={11} />
       </g>
-      <Head who="finn" x={90} y={100} a={-12} />
+      <Head who="finn" x={90} y={100} a={-12} low />
     </>
   );
 }
@@ -343,17 +399,82 @@ function FleurJump() {
   );
 }
 
+/** Morgen-Strecken: Brust am Boden, Vorderbeine weit voraus, Hinterteil hoch. */
+function Stretch({ who }: { who: Who }) {
+  const finn = who === "finn";
+  const w = finn ? 14 : 9;
+  const top = finn ? 98 : 104;
+  return (
+    <>
+      <Floor x={14} len={176} />
+      <Tail d={`M158 ${top + 8}C184 ${top - 4} 186 70 170 54C164 46 170 36 182 40`} tip="M175 38L182 40" w={finn ? 11 : 8} />
+      {/* hintere Beine, aufrecht */}
+      <Limb d={`M136 ${top + 28}C130 150 140 160 132 178`} x={132} y={178} w={w - 1} />
+      <Limb d={`M154 ${top + 22}C166 146 150 162 156 180`} x={156} y={180} w={w} />
+      <Shape
+        d={
+          finn
+            ? "M62 128C86 128 112 126 130 106C146 90 176 96 172 122C170 142 148 146 130 140C112 144 104 172 78 174C56 172 52 140 62 128Z"
+            : "M64 134C88 138 114 128 132 108C146 96 170 102 166 122C164 138 144 138 130 130C112 138 100 170 80 170C62 168 54 144 64 134Z"
+        }
+        o={FUR}
+      />
+      <B d={finn ? "76 122 108 134 128 80 158 98" : "80 134 110 136 126 96 152 103"} w={finn ? 6 : 4.5} />
+      <B d={finn ? "150 98 178 104 178 138 152 144" : "146 103 170 108 170 132 150 136"} w={finn ? 6 : 4.5} />
+      <B d={finn ? "134 142 116 142 108 168 88 174" : "134 132 116 136 108 164 90 170"} w={finn ? 4.5 : 3.4} />
+      <Strokes w={finn ? 5.5 : 4} d={[`112 ${top + 24} 116 ${top + 32} 116 ${top + 40} 111 ${top + 48}`, `128 ${top + 10} 134 ${top + 17} 135 ${top + 25} 131 ${top + 33}`, `146 ${top + 1} 152 ${top + 8} 153 ${top + 16} 150 ${top + 23}`]} />
+      <Limb d="M88 162C70 168 54 178 34 178" x={34} y={178} w={w - 1} />
+      <Head who={who} x={finn ? 66 : 68} y={finn ? 130 : 134} a={-10} eyes="closed" low />
+      <Limb d="M80 174C60 178 40 184 18 183" x={18} y={183} w={w} />
+      <Paw x={34} y={183} r={w * 0.55} />
+      <Paw x={19} y={189} r={w * 0.65} />
+    </>
+  );
+}
+
+/** Finn breit und zufrieden mitten auf dem Rezeptblatt. */
+function FinnOnPaper() {
+  return (
+    <>
+      <Shape d="M12 150L170 138L196 188L30 198Z" o={0.04} />
+      <Strokes w={2.6} d={["12 150 60 145 120 142 170 138", "170 138 180 156 188 172 196 188", "196 188 140 190 80 196 30 198", "30 198 24 182 18 166 12 150"]} />
+      <Strokes w={2} o={0.4} d={["126 188 140 186 158 187 176 183", "52 192 66 189 84 191 100 188", "22 158 28 156 34 157 40 154"]} />
+      <Shape d="M52 168C48 132 76 108 104 112C120 114 128 122 142 118C170 112 188 140 178 168C150 182 84 182 52 168Z" o={FUR} />
+      <B d="76 120 100 102 120 122 140 119" w={6} />
+      <B d="138 119 166 108 192 142 178 169" w={6} />
+      <B d="178 168 146 182 100 182 56 170" w={5} />
+      <B d="166 136 138 130 128 154 148 172" w={4.5} />
+      <Strokes w={5.5} d={["106 113 109 121 108 129 103 136", "124 119 126 128 124 137 118 144", "152 114 154 121 152 127 147 132", "172 124 172 132 169 139 163 143"]} />
+      <Tail d="M176 158C196 172 178 184 140 180" tip="M149 181L140 180" w={11} />
+      <Head who="finn" x={70} y={112} a={5} eyes="happy" low />
+      <Limb d="M70 154C60 164 52 172 40 175" x={40} y={175} w={13} />
+      <Limb d="M96 158C94 168 88 176 78 180" x={78} y={180} w={13} />
+      <Paw x={40} y={181} r={8.5} />
+      <Paw x={78} y={186} r={8.5} />
+    </>
+  );
+}
+
 /** Katze als SVG-Gruppe im Feld 200 x 200 (Boden bei y=182, Kante beim Spähen/Angeln bei y=144/128).
  *  Beide teilen den Maßstab; Finn ist etwa 15 % größer und kräftiger gebaut. */
-export function CatFigure({ who, pose }: CatProps) {
-  if (pose === "peek") return <Peek who={who} />;
-  if (who === "finn") return pose === "doze" ? <FinnDoze /> : pose === "angle" ? <FinnAngle /> : <FinnSit />;
-  return pose === "doze" ? <FleurDoze /> : pose === "jump" ? <FleurJump /> : <FleurSit tilt={pose === "tilt"} />;
+export function CatFigure({ who, pose, festive = false, stir, face }: CatProps & { festive?: boolean; stir?: boolean; face?: Face }) {
+  const art = () => {
+    if (pose === "peek") return <Peek who={who} />;
+    if (pose === "stretch") return <Stretch who={who} />;
+    if (who === "finn") {
+      if (pose === "doze") return <FinnDoze stir={stir} />;
+      if (pose === "onpaper") return <FinnOnPaper />;
+      return pose === "angle" ? <FinnAngle /> : <FinnSit face={face} />;
+    }
+    if (pose === "doze") return <FleurDoze stir={stir} />;
+    return pose === "jump" ? <FleurJump /> : <FleurSit tilt={pose === "tilt"} puzzled={pose === "puzzled"} face={face} />;
+  };
+  return <Festive.Provider value={festive}>{art()}</Festive.Provider>;
 }
 
 const NAME = { finn: "Finn", fleur: "Fleur" };
 
-export function Cat({ className, ...cat }: CatProps & { className?: string }) {
+export function Cat({ className, ...cat }: CatProps & { className?: string; festive?: boolean }) {
   return (
     <svg className={className} viewBox="0 0 200 200" role="img" aria-label={NAME[cat.who]} style={{ display: "block", width: "100%", height: "auto" }}>
       <CatFigure {...cat} />
@@ -361,26 +482,64 @@ export function Cat({ className, ...cat }: CatProps & { className?: string }) {
   );
 }
 
-export function CatPair({ className }: { className?: string }) {
+export function CatPair({ className, festive, mood = "sit" }: { className?: string; festive?: boolean; mood?: "sit" | "stretch" }) {
+  const stretch = mood === "stretch";
   return (
     <svg className={className} viewBox="0 0 360 200" role="img" aria-label="Finn und Fleur" style={{ display: "block", width: "100%", height: "auto" }}>
-      <g transform="translate(28 0)">
-        <CatFigure who="finn" pose="sit" />
+      <g transform={`translate(${stretch ? -6 : 28} 0)`}>
+        <CatFigure who="finn" pose={mood} festive={festive} />
       </g>
-      <g transform="translate(142 0)">
-        <CatFigure who="fleur" pose="tilt" />
+      <g transform={`translate(${stretch ? 170 : 142} 0)`}>
+        <CatFigure who="fleur" pose={stretch ? "stretch" : "tilt"} festive={festive} />
       </g>
     </svg>
   );
 }
 
-/** Beide schlafen aneinandergekuschelt, für die Fußzeile. */
-export function CatsAsleep({ className }: { className?: string }) {
+/** Beide schlafen aneinandergekuschelt, für die Fußzeile. stir: Fleur blinzelt, Finn gähnt. */
+export function CatsAsleep({ className, stir, festive }: { className?: string; stir?: boolean; festive?: boolean }) {
   return (
-    <svg className={className} viewBox="6 92 284 100" role="img" aria-label="Finn und Fleur schlafen" style={{ display: "block", width: "100%", height: "auto" }}>
-      <CatFigure who="finn" pose="doze" />
+    <svg className={className} viewBox="6 92 284 108" role="img" aria-label="Finn und Fleur schlafen" style={{ display: "block", width: "100%", height: "auto" }}>
+      <CatFigure who="finn" pose="doze" stir={stir} festive={festive} />
       <g transform="translate(116 0)">
-        <CatFigure who="fleur" pose="doze" />
+        <CatFigure who="fleur" pose="doze" stir={stir} festive={festive} />
+      </g>
+    </svg>
+  );
+}
+
+/** Roter Lampion */
+export function Lantern({ className }: { className?: string }) {
+  const red = "var(--seal)";
+  return (
+    <svg className={className} viewBox="0 0 100 160" aria-hidden="true" style={{ display: "block", width: "100%", height: "auto" }}>
+      <B d="50 2 48 12 52 20 50 30" w={2.6} />
+      <path d="M50 34C76 32 92 50 92 70C92 92 74 108 50 108C26 108 8 92 8 70C8 50 24 32 50 34Z" style={{ fill: red, opacity: 0.86 }} />
+      <B d="40 35 14 48 14 94 40 107" w={2.6} />
+      <B d="60 35 86 48 86 94 60 107" w={2.6} />
+      <B d="50 35 46 58 46 86 50 107" w={1.8} o={0.6} />
+      <B d="12 52 4 66 6 84 22 98" w={4} />
+      <B d="32 31 44 27 58 28 70 32" w={9} />
+      <B d="33 109 44 113 58 113 69 108" w={9} />
+      <B d="50 113 52 118 48 122 50 127" w={2.4} />
+      <Dot x={50} y={129} r={4.5} c={red} o={1} />
+      {[-7, -2, 3, 8].map((x) => (
+        <B key={x} d={`${50 + x * 0.4} 131 ${50 + x} 139 ${49 + x} 148 ${50 + x * 1.5} 156`} w={3} c={red} o={0.9} />
+      ))}
+    </svg>
+  );
+}
+
+/** Pfotenabdruck als roter Stempel */
+export function PawPrint({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 40 40" aria-hidden="true" style={{ display: "block", width: "100%", height: "auto" }}>
+      <g style={{ fill: "var(--seal)", opacity: 0.9 }}>
+        <path d="M20 19C26 18.5 28 24 32 28C35 33 31 37.5 26 35.5C22 34 19 34 15 35.8C9.5 37.5 5.5 33 8.5 28C12 24.5 14 19.5 20 19Z" />
+        <ellipse cx="7" cy="18.5" rx="3.8" ry="5" transform="rotate(-28 7 18.5)" />
+        <ellipse cx="15" cy="9" rx="4.1" ry="5.6" transform="rotate(-8 15 9)" />
+        <ellipse cx="26" cy="9.3" rx="4" ry="5.5" transform="rotate(10 26 9.3)" />
+        <ellipse cx="33.6" cy="19" rx="3.6" ry="4.8" transform="rotate(30 33.6 19)" />
       </g>
     </svg>
   );

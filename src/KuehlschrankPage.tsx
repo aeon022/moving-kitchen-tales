@@ -13,6 +13,7 @@ import { matchRecipes, Match, Ingredient } from "./utils/fridgeMatch";
 import { riceAlternative } from "./utils/riceAlternative";
 import { buildDictionary, toGerman, zhName, Pairable } from "./utils/fridgeZh";
 import { localizedRecipes } from "./plans/prep/localized";
+import { Cat } from "./components/Cats";
 
 type Entry = {
   key: string;
@@ -198,6 +199,15 @@ export function KuehlschrankPage({ plans }: { plans: PlanRecord[] }) {
           {t("Zutaten eingeben, mit Komma trennen. Die Suche nimmt Rezepte aus allen Wochen und Sammlungen.", "输入家里的食材，用逗号分开。会在已翻译的每周菜单和备餐食谱里查找。")}
         </p>
       </header>
+
+      {/* Kühlschrank-Wächter: bei Fisch taucht Finn auf, ohne Treffer ist Fleur ratlos. */}
+      <div className="fridge-guard" aria-hidden="true">
+        {terms.some((x) => /fisch|lachs|kabeljau|garnele/i.test(x)) ? (
+          <Cat who="finn" pose="peek" />
+        ) : (
+          <Cat who="fleur" pose={!loading && fridge.length > 0 && matches.length === 0 ? "puzzled" : "peek"} />
+        )}
+      </div>
 
       <form className="fridge-form" onSubmit={(e) => { e.preventDefault(); add(input); }}>
         <input

@@ -10,6 +10,7 @@ import { PREP_RECIPES, PREP_SCHEDULE, PrepRecipe } from "./plans/prep/preppen";
 import { shoppingList, formatLine, STORES } from "./utils/shoppingList";
 import { useStoredSet } from "./hooks/useStoredSet";
 import { ExportBar } from "./components/ExportBar";
+import { PawPrint } from "./components/Cats";
 
 const NUM = ["一", "二", "三", "四"];
 // "Festtage Di, Rest als Reserve" → Chinesisch
@@ -108,6 +109,7 @@ export function VorkochenPage() {
                   <span className="roll-count">{n} / {s.dishes.length}</span>
                 </button>
                 {complete && <span className="roll-stamp" role="img" aria-label={t("erledigt", "完成")}>済</span>}
+                {complete && <span className="roll-paw"><PawPrint /></span>}
               </h2>
               {open && (
                 <div className="roll-body">

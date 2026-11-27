@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLang, usePlanData, pickCurrent, PlanRecord, SUPPORT_URL } from "./App";
-import { CatPair } from "./components/Cats";
+import { CatPair, CatsAsleep, Lantern } from "./components/Cats";
+import { dayTime, isNewYear } from "./utils/catMood";
 
 const DAY_IDS = ["so", "mo", "di", "mi", "do", "fr", "sa"];
 const MEALS: [string, string, string][] = [["f", "Morgen", "早"], ["m", "Mittag", "中"], ["a", "Abend", "晚"]];
@@ -63,6 +64,9 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
   const day = isThisWeek ? DAY_IDS[now.getDay()] : "mo";
   const today = MEALS.map(([m, de, zh]) => ({ label: t(de, zh), recipe: data.find((r) => r.id === `${day}-${m}`) })).filter((x) => x.recipe);
 
+  const mood = dayTime(now);
+  const festive = isNewYear(now);
+
   const planPath = plan ? `/plan/${plan.slug}?lang=${lang}` : "/";
   const chapters: { to: string; title: Pair; text: Pair }[] = [
     { to: planPath, title: ["Wochenplan", "本周菜单"], text: ["Drei Mahlzeiten am Tag, mit Einkaufsliste", "一日三餐和购物清单"] },
@@ -73,9 +77,10 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
     { to: "/festtagsgerichte", title: ["Festtagsgerichte", "节日菜"], text: ["Wenn es etwas Besonderes sein darf", "想吃点特别的时候"] },
     { to: "/kalte-gerichte", title: ["Kalte Gerichte", "凉菜"], text: ["Salate, Eingelegtes, Beilagen", "凉拌、腌菜、小菜"] },
     { to: "/kochtechniken", title: ["Kochtechniken", "烹饪技法"], text: ["Wie es gelingt", "怎样做得好"] },
+    { to: "/katzen", title: ["Finn & Fleur", "Finn 和 Fleur"], text: ["Ein kleines Bilderbuch", "一本小绘本"] },
     { to: "/bookmarks", title: ["Merkliste", "我的收藏"], text: ["Deine Lieblinge", "你喜欢的菜"] },
   ];
-  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
+  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
   return (
     <div className="home-page">
@@ -120,8 +125,12 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
           ))}
         </ol>
         <figure className="story-cats">
-          <CatPair />
-          <figcaption>{t("Finn, sieben Kilo Ruhe und heimlicher Schelm. Fleur, flink und der Kopf der Bande.", "Finn：七公斤的淡定，偷偷调皮。Fleur：身手敏捷，是出主意的那个。")}</figcaption>
+          {festive && <span className="story-lantern"><Lantern /></span>}
+          {mood === "night" ? <CatsAsleep festive={festive} /> : <CatPair mood={mood === "morning" ? "stretch" : "sit"} festive={festive} />}
+          <figcaption>
+            {t("Finn, sieben Kilo Ruhe und heimlicher Schelm. Fleur, flink und der Kopf der Bande.", "Finn：七公斤的淡定，偷偷调皮。Fleur：身手敏捷，是出主意的那个。")}{" "}
+            <Link to="/katzen">{t("Ihre Abenteuer →", "他们的历险记 →")}</Link>
+          </figcaption>
         </figure>
       </section>
 

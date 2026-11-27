@@ -13,7 +13,10 @@ import { VorratskammerPage } from "./VorratskammerPage";
 import { VorkochenPage } from "./VorkochenPage";
 import { HomePage } from "./HomePage";
 import { BackToTop } from "./components/BackToTop";
-import { CatsAsleep } from "./components/Cats";
+import { SleepingCats } from "./components/SleepingCats";
+import { CatTip } from "./components/CatTip";
+import { KatzenPage } from "./KatzenPage";
+import { NotFoundPage } from "./NotFoundPage";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -419,6 +422,12 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             </Link>
           </li>
           <li>
+            <Link to="/katzen" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="book-open" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Finn & Fleur" : "Finn 和 Fleur"}</span></span>
+            </Link>
+          </li>
+          <li>
             <Link to="/datenschutz" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="list" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Datenschutz" : "隐私说明"}</span></span>
@@ -787,7 +796,7 @@ function PlanPage({ plans }: { plans: PlanRecord[] }) {
     }
   }, [hash, slug, mod]);
 
-  if (!current) return <div className="main-inner">{lang === "de" ? "Plan nicht gefunden" : "找不到该菜单"}: {slug}</div>;
+  if (!current) return <NotFoundPage />;
   if (current.lang !== lang) {
     const sibling = plans.find(p => p.baseId === current.baseId && p.lang === lang);
     if (sibling) {
@@ -908,17 +917,19 @@ export default function App() {
                   <Route path="/kochtechniken" element={<KochtechnikenPage />} />
                   <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
-                  <Route path="*" element={<HomePage plans={plans} />} />
+                  <Route path="/katzen" element={<KatzenPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               )}
               </div>
               {/* Finn und Fleur schlafen am Ende jeder Seite */}
-              <div className="page-end" aria-hidden="true"><CatsAsleep /></div>
+              <SleepingCats />
             </main>
           </div>
         </div>
 
         <BackToTop />
+        <CatTip />
         <CookieNotice />
       </div>
     </LangProvider>
