@@ -107,7 +107,7 @@ const Paw = ({ x, y, r }: { x: number; y: number; r: number }) => (
   </>
 );
 
-/** Finn: breiter Schädel, kleine weit stehende Ohren, Wangenfell, Augen halb zu. */
+/** Finn: kräftiger, etwas breiterer Schädel, Wangenfell, Augen halb zu. */
 function FinnHead({ closed = false }: { closed?: boolean }) {
   const skull = "M-34 -14L-35 -38Q-24 -36 -15 -27Q0 -31 15 -27Q24 -36 35 -38L34 -14C42 -2 46 8 38 14L40 17C28 30 12 32 0 32C-12 32 -28 30 -40 17L-38 14C-46 8 -42 -2 -34 -14Z";
   return (
@@ -170,7 +170,15 @@ function FleurHead({ closed = false }: { closed?: boolean }) {
 }
 
 const Head = ({ who, x, y, a = 0, closed }: { who: Who; x: number; y: number; a?: number; closed?: boolean }) => (
-  <g transform={`translate(${x} ${y}) rotate(${a})`}>{who === "finn" ? <FinnHead closed={closed} /> : <FleurHead closed={closed} />}</g>
+  <g transform={`translate(${x} ${y}) rotate(${a})`}>
+    {who === "finn" ? (
+      <g transform="scale(0.8 0.88)">
+        <FinnHead closed={closed} />
+      </g>
+    ) : (
+      <FleurHead closed={closed} />
+    )}
+  </g>
 );
 
 const Floor = ({ x = 20, len = 160, y = 183 }) => (
@@ -180,19 +188,25 @@ const Floor = ({ x = 20, len = 160, y = 183 }) => (
 function FinnSit() {
   return (
     <>
-      <Floor x={14} len={176} />
-      <Shape d="M70 88C44 104 28 142 38 166C46 184 154 184 162 166C172 142 156 104 130 88Z" o={FUR} />
-      <path d="M80 100C84 122 92 134 100 138C108 134 116 122 120 100Z" style={{ fill: LIGHT }} />
-      <B d="70 90 40 104 20 160 48 176" w={7} />
-      <B d="130 90 160 104 180 158 154 176" w={7} />
-      <Strokes w={7} d={["42 126 52 126 60 132 66 142", "36 146 48 146 55 152 60 162", "158 126 148 126 140 132 134 142", "164 146 152 146 145 152 140 162"]} />
-      <Strokes w={4} c={DARK} d={["86 108 92 114 108 114 114 108", "90 121 95 126 105 126 110 121"]} />
-      {/* stämmige Vorderbeine */}
-      <Strokes w={5} d={["70 126 70 142 68 156 66 168", "99 140 98 152 99 160 99 170", "130 126 130 142 132 156 134 168"]} />
-      <Paw x={82} y={178} r={17} />
-      <Paw x={118} y={178} r={17} />
-      <Tail d="M154 164C184 178 168 186 128 185C104 184 84 188 62 183" tip="M70 185L62 183" w={15} />
-      <Head who="finn" x={100} y={66} />
+      <Floor x={36} len={140} />
+      {/* Schultern breit, Taille schmal, kräftige Hinterhand */}
+      <Shape d="M82 82C78 94 66 98 66 114C66 128 76 132 74 142C58 148 54 168 66 178C80 184 120 184 134 178C146 168 142 148 126 142C124 132 134 128 134 114C134 98 122 94 118 82Z" o={FUR} />
+      <path d="M88 92C90 108 95 118 100 124C105 118 110 108 112 92Z" style={{ fill: LIGHT }} />
+      <B d="83 84 78 96 62 98 66 118 68 128 74 132 75 142" w={6} />
+      <B d="117 84 122 96 138 98 134 118 132 128 126 132 125 142" w={6} />
+      {/* Oberschenkel */}
+      <B d="76 140 56 142 48 172 68 179" w={6} />
+      <B d="124 140 144 142 152 172 132 179" w={6} />
+      <Strokes w={5} d={["68 108 74 109 79 113 82 119", "70 122 75 123 79 127 81 132", "58 156 65 155 69 159 72 165", "132 108 126 109 121 113 118 119", "130 122 125 123 121 127 119 132", "142 156 135 155 131 159 128 165"]} />
+      <Strokes w={3.4} c={DARK} d={["92 101 96 105 104 105 108 101", "94 111 97 114 103 114 106 111"]} />
+      {/* gerade, stämmige Vorderbeine */}
+      <Strokes w={4.5} d={["81 122 81 142 79 160 77 172", "119 122 119 142 121 160 123 172", "100 132 99 148 99 160 99 174"]} />
+      <Paw x={65} y={180} r={8} />
+      <Paw x={135} y={180} r={8} />
+      <Paw x={87} y={180} r={12} />
+      <Paw x={113} y={180} r={12} />
+      <Tail d="M140 168C168 174 170 188 138 187C118 186 100 190 82 186" tip="M90 187L82 186" w={11} />
+      <Head who="finn" x={100} y={64} />
     </>
   );
 }
@@ -227,16 +241,18 @@ function FleurSit({ tilt = false }) {
 function FinnDoze() {
   return (
     <>
-      <Floor x={12} len={180} />
-      {/* Brotlaib */}
-      <Shape d="M42 170C36 118 82 96 120 100C166 102 192 138 182 170C170 186 58 186 42 170Z" o={FUR} />
-      <B d="62 118 84 90 168 88 184 150" w={7} />
-      <B d="183 146 194 178 140 182 96 180" w={5} />
-      <Strokes w={7} d={["108 101 110 112 108 122 102 130", "132 102 138 114 138 128 132 138", "156 112 164 122 166 138 160 150"]} />
-      <Tail d="M178 164C190 186 150 186 116 181" tip="M125 182L116 181" w={15} />
-      <Head who="finn" x={70} y={140} a={-6} closed />
-      <Paw x={52} y={182} r={13} />
-      <Paw x={90} y={183} r={13} />
+      <Floor x={14} len={176} />
+      {/* lang ausgestreckt: Schulter, Taille, Hinterhand */}
+      <Shape d="M60 172C56 134 76 112 98 112C112 112 118 124 130 124C140 122 148 112 160 114C182 120 188 150 178 174C150 184 90 184 60 172Z" o={FUR} />
+      <B d="72 126 92 100 112 118 130 124" w={6} />
+      <B d="128 124 144 118 152 108 168 118 184 130 186 154 177 174" w={6} />
+      <B d="178 176 150 182 120 181 92 180" w={4} />
+      <B d="168 138 142 134 130 158 148 176" w={4.5} />
+      <Strokes w={5.5} d={["100 114 103 122 102 130 97 137", "117 121 119 130 117 139 111 146", "154 114 156 121 154 127 149 132", "172 124 172 132 169 139 163 143"]} />
+      <Tail d="M178 166C190 186 156 186 122 182" tip="M131 183L122 182" w={11} />
+      <Head who="finn" x={66} y={147} a={-6} closed />
+      <Paw x={46} y={182} r={11} />
+      <Paw x={82} y={183} r={11} />
     </>
   );
 }
@@ -260,12 +276,20 @@ function Peek({ who }: { who: Who }) {
   const finn = who === "finn";
   return (
     <>
-      <Head who={who} x={100} y={finn ? 112 : 119} a={finn ? 0 : 7} />
+      {finn && (
+        <>
+          <Shape d="M56 144C58 124 74 112 100 112C126 112 142 124 144 144Z" o={FUR} />
+          <B d="55 144 58 124 68 116 82 113" w={5.5} />
+          <B d="145 144 142 124 132 116 118 113" w={5.5} />
+          <Strokes w={4.5} d={["60 128 66 128 70 131 73 136", "140 128 134 128 130 131 127 136"]} />
+        </>
+      )}
+      <Head who={who} x={100} y={finn ? 114 : 119} a={finn ? 0 : 7} />
       <Shape d="M10 144H190V164H10Z" />
       <B d="12 144 60 140 140 148 190 143" w={6} />
       <B d="30 156 70 154 110 160 150 156" w={2} o={0.35} />
-      {(finn ? [56, 144] : [80, 120]).map((x) => (
-        <Paw key={x} x={x} y={finn ? 155 : 151} r={finn ? 16 : 9} />
+      {(finn ? [64, 136] : [80, 120]).map((x) => (
+        <Paw key={x} x={x} y={finn ? 153 : 151} r={finn ? 12 : 9} />
       ))}
     </>
   );
@@ -274,23 +298,25 @@ function Peek({ who }: { who: Who }) {
 function FinnAngle() {
   return (
     <>
-      <Tail d="M166 106C194 100 192 66 176 60C166 56 160 62 162 70" tip="M161 64L162 70" w={14} />
-      {/* flach auf der Kante */}
-      <Shape d="M60 126C58 86 96 74 128 80C168 82 184 106 178 126Z" o={FUR} />
-      <B d="92 86 126 68 186 82 178 124" w={7} />
-      <Strokes w={7} d={["118 80 120 92 117 100 111 108", "140 83 146 94 145 106 139 114", "160 92 168 102 169 112 164 120"]} />
+      <Tail d="M168 108C194 100 192 68 176 62C166 58 160 64 162 72" tip="M161 66L162 72" w={11} />
+      {/* geduckt auf der Kante: Schulter hoch, Taille eingezogen, Hinterhand rund */}
+      <Shape d="M66 126C62 94 84 80 108 82C124 84 128 96 140 94C150 90 156 82 166 86C182 94 184 112 174 126Z" o={FUR} />
+      <B d="82 90 104 72 120 94 140 94" w={6} />
+      <B d="138 94 150 88 158 78 170 90 180 100 182 112 174 125" w={6} />
+      <B d="164 102 142 100 134 114 142 125" w={4} />
+      <Strokes w={5.5} d={["108 82 111 91 109 99 103 105", "126 91 128 99 126 107 120 113", "159 85 161 92 159 99 153 104"]} />
       <B d="12 128 70 124 130 132 192 126" w={6} />
-      <Paw x={142} y={128} r={13} />
+      <Paw x={132} y={128} r={11} />
       {/* der lange Angelarm über die Kante */}
-      <path d="M72 112C48 116 42 138 40 158" style={{ fill: "none", stroke: PAPER, strokeWidth: 21, strokeLinecap: "round" }} />
-      <path d="M72 112C48 116 42 138 40 158" style={{ fill: "none", stroke: INK, strokeWidth: 21, strokeLinecap: "round", opacity: FUR }} />
-      <B d="74 100 40 100 30 128 29 158" w={5} />
-      <B d="76 124 58 128 52 142 51 160" w={4} />
-      <Strokes w={4.5} d={["34 130 40 130 45 133 49 138", "30 146 37 145 43 147 49 152"]} />
-      <g transform="rotate(180 40 164)">
-        <Paw x={40} y={172} r={13} />
+      <path d="M74 112C50 114 42 138 41 160" style={{ fill: "none", stroke: PAPER, strokeWidth: 16, strokeLinecap: "round" }} />
+      <path d="M74 112C50 114 42 138 41 160" style={{ fill: "none", stroke: INK, strokeWidth: 16, strokeLinecap: "round", opacity: FUR }} />
+      <B d="76 102 46 100 31 128 32 159" w={5} />
+      <B d="78 122 58 126 49 142 50 160" w={3.6} />
+      <Strokes w={4} d={["36 130 41 130 45 133 48 137", "33 146 39 145 43 147 47 152"]} />
+      <g transform="rotate(180 41 164)">
+        <Paw x={41} y={171} r={11} />
       </g>
-      <Head who="finn" x={92} y={92} a={-12} />
+      <Head who="finn" x={90} y={100} a={-12} />
     </>
   );
 }
@@ -318,7 +344,7 @@ function FleurJump() {
 }
 
 /** Katze als SVG-Gruppe im Feld 200 x 200 (Boden bei y=182, Kante beim Spähen/Angeln bei y=144/128).
- *  Beide teilen den Maßstab, Finn ist also von selbst der Größere. */
+ *  Beide teilen den Maßstab; Finn ist etwa 15 % größer und kräftiger gebaut. */
 export function CatFigure({ who, pose }: CatProps) {
   if (pose === "peek") return <Peek who={who} />;
   if (who === "finn") return pose === "doze" ? <FinnDoze /> : pose === "angle" ? <FinnAngle /> : <FinnSit />;
@@ -338,9 +364,23 @@ export function Cat({ className, ...cat }: CatProps & { className?: string }) {
 export function CatPair({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 360 200" role="img" aria-label="Finn und Fleur" style={{ display: "block", width: "100%", height: "auto" }}>
-      <CatFigure who="finn" pose="sit" />
-      <g transform="translate(158 0)">
+      <g transform="translate(28 0)">
+        <CatFigure who="finn" pose="sit" />
+      </g>
+      <g transform="translate(142 0)">
         <CatFigure who="fleur" pose="tilt" />
+      </g>
+    </svg>
+  );
+}
+
+/** Beide schlafen aneinandergekuschelt, für die Fußzeile. */
+export function CatsAsleep({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="6 92 284 100" role="img" aria-label="Finn und Fleur schlafen" style={{ display: "block", width: "100%", height: "auto" }}>
+      <CatFigure who="finn" pose="doze" />
+      <g transform="translate(116 0)">
+        <CatFigure who="fleur" pose="doze" />
       </g>
     </svg>
   );

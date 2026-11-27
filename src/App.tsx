@@ -13,7 +13,7 @@ import { VorratskammerPage } from "./VorratskammerPage";
 import { VorkochenPage } from "./VorkochenPage";
 import { HomePage } from "./HomePage";
 import { BackToTop } from "./components/BackToTop";
-import { Cat } from "./components/Cats";
+import { CatsAsleep } from "./components/Cats";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -912,8 +912,8 @@ export default function App() {
                 </Routes>
               )}
               </div>
-              {/* Finn döst am Ende jeder Seite */}
-              <div className="page-end" aria-hidden="true"><Cat who="finn" pose="doze" /></div>
+              {/* Finn und Fleur schlafen am Ende jeder Seite */}
+              <div className="page-end" aria-hidden="true"><CatsAsleep /></div>
             </main>
           </div>
         </div>

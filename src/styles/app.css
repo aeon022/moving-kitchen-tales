@@ -536,7 +536,7 @@ a { color: inherit; }
 }
 @media (prefers-reduced-motion: reduce) { .enso-ink { transition: none; } }
 @media print { .back-to-top, .page-end { display: none; } }
-.page-end { width: 150px; margin: 24px auto 0; opacity: .9; }
+.page-end { width: min(260px, 70%); margin: 24px auto 0; opacity: .9; }
 .story-cats { margin: 18px auto 0; max-width: 380px; text-align: center; }
 .story-cats figcaption { margin-top: 10px; color: var(--muted); font-size: 13.5px; line-height: 1.6; }
 
