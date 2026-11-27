@@ -17,6 +17,10 @@ import { SleepingCats } from "./components/SleepingCats";
 import { CatTip } from "./components/CatTip";
 import { KatzenPage } from "./KatzenPage";
 import { NotFoundPage } from "./NotFoundPage";
+import { GefrierschrankPage } from "./GefrierschrankPage";
+import { TeilenPage } from "./TeilenPage";
+import { HelferPage } from "./HelferPage";
+import { SammlungPage } from "./SammlungPage";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -422,6 +426,18 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             </Link>
           </li>
           <li>
+            <Link to="/familie" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="gift" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Familienrezepte" : "家传菜谱"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/reisen" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="book-open" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Reisetagebuch" : "美食游记"}</span></span>
+            </Link>
+          </li>
+          <li>
             <Link to="/katzen" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="book-open" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Finn & Fleur" : "Finn 和 Fleur"}</span></span>
@@ -437,6 +453,18 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <Link to="/vorkochen" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="pot" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorkochen" : "备餐计划"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/gefrierschrank" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="snowflake" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Gefrierschrank" : "冷冻室"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/helfer" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="list" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Helfer-Zettel" : "帮厨单"}</span></span>
             </Link>
           </li>
           <li>
@@ -918,6 +946,11 @@ export default function App() {
                   <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
                   <Route path="/katzen" element={<KatzenPage />} />
+                  <Route path="/gefrierschrank" element={<GefrierschrankPage />} />
+                  <Route path="/teilen" element={<TeilenPage />} />
+                  <Route path="/helfer" element={<HelferPage plans={plans} />} />
+                  <Route path="/familie" element={<SammlungPage kind="familie" />} />
+                  <Route path="/reisen" element={<SammlungPage kind="reisen" />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               )}

@@ -9,6 +9,8 @@ import { SHOP_ZH } from "./plans/prep/shop.zh";
 import { PREP_RECIPES, PREP_SCHEDULE, PrepRecipe } from "./plans/prep/preppen";
 import { shoppingList, formatLine, STORES } from "./utils/shoppingList";
 import { useStoredSet } from "./hooks/useStoredSet";
+import { useFreezer } from "./hooks/useFreezer";
+import { isoDay, monthsOf, portionsOf } from "./utils/freezer";
 import { ExportBar } from "./components/ExportBar";
 import { PawPrint } from "./components/Cats";
 
@@ -57,6 +59,14 @@ export function VorkochenPage() {
   const shop = (s: string) => (zh ? SHOP_ZH[s] ?? s : s);
   const cooked = useStoredSet("mkt.vorkochen.done");
   const bought = useStoredSet("mkt.vorkochen.bought");
+  const freezer = useFreezer();
+  // Gekocht abhaken legt das Gericht in den Gefrierschrank, Haken weg nimmt es wieder heraus.
+  const toggleCooked = (id: string, factor: number) => {
+    const r = PREP_RECIPES.find((x) => x.id === id)!;
+    if (cooked.has(id)) freezer.remove(id);
+    else freezer.add({ id, name: r.title, portions: portionsOf(r.batchSize, factor), frozenOn: isoDay(new Date()), months: monthsOf(r.freezerLife) });
+    cooked.toggle(id);
+  };
 
   const stations = useMemo(
     () =>
@@ -92,6 +102,8 @@ export function VorkochenPage() {
         <p className="export-msg">{t(`${done} von ${total} gekocht`, `已做${done} / ${total}`)}</p>
       </header>
 
+      <p className="export-msg"><Link to="/gefrierschrank">{t("Gekochtes liegt im Gefrierschrank →", "做好的菜在冷冻室 →")}</Link></p>
+
       <ol className="roll">
         {stations.map((s, i) => {
           const n = doneIn(s);
@@ -115,7 +127,7 @@ export function VorkochenPage() {
                 <div className="roll-body">
                   <ul className="roll-dishes">
                     {s.dishes.map((d) => (
-                      <Dish key={d.id} recipe={d.recipe} factor={d.factor} use={t(d.use, zhUse(d.use))} done={cooked.has(d.id)} onToggle={() => cooked.toggle(d.id)} />
+                      <Dish key={d.id} recipe={d.recipe} factor={d.factor} use={t(d.use, zhUse(d.use))} done={cooked.has(d.id)} onToggle={() => toggleCooked(d.id, d.factor)} />
                     ))}
                   </ul>
                   <aside className="roll-slip">

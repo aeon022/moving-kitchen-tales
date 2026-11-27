@@ -36,13 +36,13 @@ export function DatenschutzPage() {
   const sections: [string, string][] = lang === "de"
     ? [
         ["Cookies und Tracking", "Diese Seite setzt keine Cookies, verwendet keine Analyse- oder Werbedienste und hat keine Konten oder Formulare, die Daten an uns senden."],
-        ["Speicherung im Browser", "Merkliste, Pinnwände, abgehakte Einträge, Kühlschrank-Zutaten, Spracheinstellung und die Bestätigung dieses Hinweises liegen im lokalen Speicher deines Browsers. Sie verlassen dein Gerät nicht. Du kannst sie über die Browser-Einstellungen („Websitedaten löschen“) entfernen."],
+        ["Speicherung im Browser", "Merkliste, Pinnwände, abgehakte Einträge, Kühlschrank-Zutaten, Spracheinstellung und die Bestätigung dieses Hinweises liegen im lokalen Speicher deines Browsers. Sie verlassen dein Gerät nur, wenn du selbst einen Teilen-Link verschickst. Für die Offline-Nutzung speichert der Browser außerdem eine Kopie der Seite. Du kannst sie über die Browser-Einstellungen („Websitedaten löschen“) entfernen."],
         ["Hosting", "Die Seite liegt bei GitHub Pages (GitHub, Inc., USA). Beim Aufruf verarbeitet GitHub technische Daten wie die IP-Adresse; Näheres in der Datenschutzerklärung von GitHub."],
         ["Externe Dienste", "Schriften werden von dieser Seite selbst geladen. Nur beim Erzeugen eines PDF wird eine Programmbibliothek von cdnjs (Cloudflare) geladen. Der Link „Projekt unterstützen“ führt zu Polar; dort gelten deren Bedingungen."],
       ]
     : [
         ["Cookie 与追踪", "本网站不使用 Cookie，没有分析或广告服务，也没有向我们发送数据的账户或表单。"],
-        ["浏览器本地保存", "收藏、清单、勾选项、冰箱食材、语言设置以及本提示的确认，只保存在您浏览器的本地存储中，不会离开您的设备。可在浏览器设置中清除网站数据。"],
+        ["浏览器本地保存", "收藏、清单、勾选项、冰箱食材、语言设置以及本提示的确认，只保存在您浏览器的本地存储中，只有当您自己发送分享链接时才会离开设备。为了离线使用，浏览器还会保存一份网页副本。可在浏览器设置中清除网站数据。"],
         ["托管", "网站托管于 GitHub Pages（美国 GitHub, Inc.）。访问时 GitHub 会处理 IP 地址等技术数据，详见 GitHub 隐私声明。"],
         ["外部服务", "字体由本网站自行提供。只有在生成 PDF 时，才会从 cdnjs（Cloudflare）加载程序库。“支持项目”链接指向 Polar，适用其条款。"],
       ];

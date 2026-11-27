@@ -15,6 +15,11 @@ import "@fontsource/noto-serif-jp/500.css";
 import "@fontsource/noto-serif-jp/600.css";
 import "./styles/app.css";
 
+// Offline-Nutzung (nur im veröffentlichten Build).
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`));
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     {/* HashRouter braucht kein basename, er regelt das via Hash */}

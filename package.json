@@ -8,9 +8,9 @@
     "predev": "npm run manifest",
     "dev": "vite",
     "prebuild": "npm run manifest",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/gen-sw.mjs",
     "lint": "eslint .",
-    "check": "node --experimental-strip-types scripts/check-plans.mjs && node --experimental-strip-types scripts/test-fridge.mjs && node --experimental-strip-types scripts/test-rice.mjs && node --experimental-strip-types scripts/test-shopping.mjs && node --experimental-strip-types scripts/test-motif.mjs && node --experimental-strip-types scripts/test-cats.mjs",
+    "check": "node --experimental-strip-types scripts/check-plans.mjs && node --experimental-strip-types scripts/test-fridge.mjs && node --experimental-strip-types scripts/test-rice.mjs && node --experimental-strip-types scripts/test-shopping.mjs && node --experimental-strip-types scripts/test-motif.mjs && node --experimental-strip-types scripts/test-cats.mjs && node --experimental-strip-types scripts/test-freezer.mjs && node --experimental-strip-types scripts/test-thaw.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

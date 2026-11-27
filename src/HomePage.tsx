@@ -72,15 +72,19 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
     { to: planPath, title: ["Wochenplan", "本周菜单"], text: ["Drei Mahlzeiten am Tag, mit Einkaufsliste", "一日三餐和购物清单"] },
     { to: "/kuehlschrank", title: ["Kühlschrank", "冰箱找菜谱"], text: ["Was ist da? Das passende Rezept dazu", "家里有什么，就做什么"] },
     { to: "/vorkochen", title: ["Vorkochen", "提前备餐"], text: ["Vier Wochenenden mit Einkaufszettel", "四个周末和购物单"] },
+    { to: "/gefrierschrank", title: ["Gefrierschrank", "冷冻室"], text: ["Was im Eis liegt", "冷冻库存"] },
+    { to: "/helfer", title: ["Helfer-Zettel", "帮厨单"], text: ["Für alle, die einspringen", "给帮忙的人"] },
     { to: "/preppen", title: ["Preppen", "备餐食谱"], text: ["Einfrieren, einlegen, vorbereiten", "冷冻、腌制、预处理"] },
     { to: "/vorratskammer", title: ["Vorratskammer", "储藏室"], text: ["Was immer im Haus sein soll", "家里常备的东西"] },
     { to: "/festtagsgerichte", title: ["Festtagsgerichte", "节日菜"], text: ["Wenn es etwas Besonderes sein darf", "想吃点特别的时候"] },
     { to: "/kalte-gerichte", title: ["Kalte Gerichte", "凉菜"], text: ["Salate, Eingelegtes, Beilagen", "凉拌、腌菜、小菜"] },
     { to: "/kochtechniken", title: ["Kochtechniken", "烹饪技法"], text: ["Wie es gelingt", "怎样做得好"] },
+    { to: "/familie", title: ["Familienrezepte", "家传菜谱"], text: ["Mit ihrer Geschichte", "和它们的故事"] },
+    { to: "/reisen", title: ["Reisetagebuch", "美食游记"], text: ["Von unterwegs mitgebracht", "旅途带回来的味道"] },
     { to: "/katzen", title: ["Finn & Fleur", "Finn 和 Fleur"], text: ["Ein kleines Bilderbuch", "一本小绘本"] },
     { to: "/bookmarks", title: ["Merkliste", "我的收藏"], text: ["Deine Lieblinge", "你喜欢的菜"] },
   ];
-  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四"];
 
   return (
     <div className="home-page">
