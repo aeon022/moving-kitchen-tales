@@ -116,6 +116,7 @@ export const CANON = {
   "Passierte Tomaten": { group: "Gemüse/Pilze", label: "Passierte Tomaten", unitDefault: "EL" },
   "Pfirsich": { group: "Gemüse/Pilze", label: "Pfirsich", unitDefault: "Stück" },
   "Pomelo": { group: "Gemüse/Pilze", label: "Pomelo/Grapefruit", unitDefault: "Stück" },
+  "Datteln": { group: "Gemüse/Pilze", label: "Datteln (entsteint)", unitDefault: "g" },
   "Rote Datteln": { group: "Gemüse/Pilze", label: "Rote Datteln (Jujube)", unitDefault: "Stück" },
   "Salat": { group: "Gemüse/Pilze", label: "Gemischter Salat", unitDefault: "g" },
   "Schwarze Bohnen": { group: "Gemüse/Pilze", label: "Schwarze Bohnen", unitDefault: "g" },

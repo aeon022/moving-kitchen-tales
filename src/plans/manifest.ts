@@ -647,6 +647,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2026/Woche-52-2026-12-21.de.jsx"
   },
   {
+    "title": "Woche 53 · Wochenbett",
+    "startDate": "2026-12-28",
+    "id": "woche-53-2026-12-28-wochenbett",
+    "lang": "de",
+    "sidebar": "Woche 53 · Wochenbett (2026-12-28)",
+    "focus": "坐月子 🎍 · Festtage aus dem Gefrierfach · Wochenbett",
+    "path": "./plans/2026/Woche-53-2026-12-28-wochenbett.de.jsx"
+  },
+  {
     "title": "Woche 53",
     "startDate": "2026-12-28",
     "id": "woche-53-2026-12-28",

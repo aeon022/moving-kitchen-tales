@@ -17,13 +17,13 @@ for (const year of ["2026", "2027"]) {
   const dir = join(ROOT, year);
   if (!existsSync(dir)) continue;
   for (const name of readdirSync(dir)) {
-    const m = name.match(/^Woche-(\d+)-(\d{4}-\d{2}-\d{2})\.de\.jsx$/);
+    const m = name.match(/^Woche-(\d+)-(\d{4}-\d{2}-\d{2})(-wochenbett)?\.de\.jsx$/);
     if (!m || m[2] < FROM) continue;
     count++;
-    const [, week, start] = m;
+    const [, week, start, variant = ""] = m;
     const err = (s) => errors.push(`${name}: ${s}`);
     const src = readFileSync(join(dir, name), "utf8");
-    if (!src.includes(`id: "woche-${week}-${start}"`)) err("meta.id passt nicht zum Dateinamen");
+    if (!src.includes(`id: "woche-${week}-${start}${variant}"`)) err("meta.id passt nicht zum Dateinamen");
     if (!src.includes(`startDate: "${start}"`)) err("meta.startDate falsch");
     if (new Date(start + "T12:00:00Z").getUTCDay() !== 1) err("startDate ist kein Montag");
     for (let i = 0; i < 7; i++) {
@@ -60,6 +60,18 @@ for (const year of ["2026", "2027"]) {
     if (new Set(titles).size !== titles.length) err("doppelte Titel in der Woche");
   }
 }
+// Einfache Wochenbett-Vorratsrezepte (id "wb-…")
+const { PREP_RECIPES } = await import("../src/plans/prep/preppen.ts");
+const ids = PREP_RECIPES.map((r) => r.id);
+for (const id of ids.filter((x, i) => ids.indexOf(x) !== i)) errors.push(`preppen: doppelte id ${id}`);
+for (const r of PREP_RECIPES.filter((x) => x.id.startsWith("wb-"))) {
+  const e = (s) => errors.push(`preppen ${r.id}: ${s}`);
+  for (const k of ["type", "emoji", "title", "desc", "batchSize", "freezeMethod", "freezerLife", "reheat"]) if (!r[k]) e(`${k} fehlt`);
+  if (!(r.ingredients?.length >= 2 && r.steps?.length >= 3 && r.tags?.length)) e("Zutaten/Schritte/Tags unvollständig");
+  const bad = r.ingredients.join(" ").match(FORBIDDEN); // Titel darf "ohne Reiswein" sagen
+  if (bad) e(`verbotene Zutat: ${bad[0]}`);
+}
+
 if (errors.length) console.error(errors.join("\n"));
-console.log(`${count} Wochen geprüft, ${errors.length} Fehler`);
+console.log(`${count} Wochenpläne geprüft, ${errors.length} Fehler`);
 process.exit(errors.length ? 1 : 0);
