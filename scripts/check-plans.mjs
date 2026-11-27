@@ -72,6 +72,30 @@ for (const r of PREP_RECIPES.filter((x) => x.id.startsWith("wb-"))) {
   if (bad) e(`verbotene Zutat: ${bad[0]}`);
 }
 
+// Übersetzungen: gleiche Rezepte, gleiche Anzahl Zutaten/Schritte, gleiche Mengen wie das Original.
+const dataOf = (file) => eval(readFileSync(file, "utf8").match(/export const DATA = (\[[\s\S]*?\n\]);/)[1]);
+const numbers = (list) => list.map((s) => (s.match(/\d+([.,]\d+)?/g) ?? []).join("/").replaceAll(",", ".")).join("|");
+let translated = 0;
+for (const year of ["2026", "2027"]) {
+  const dir = join(ROOT, year);
+  for (const name of readdirSync(dir)) {
+    if (!name.endsWith(".zh.jsx") || !readFileSync(join(dir, name), "utf8").includes("sourceData=")) continue;
+    translated++;
+    const err = (s) => errors.push(`${name}: ${s}`);
+    const zh = dataOf(join(dir, name));
+    const de = dataOf(join(dir, name.replace(".zh.", ".de.")));
+    if (zh.map((r) => r.id).join() !== de.map((r) => r.id).join()) { err("Rezept-IDs weichen ab"); continue; }
+    zh.forEach((r, i) => {
+      const o = de[i];
+      if (numbers(r.ingredients) !== numbers(o.ingredients)) err(`${r.id}: Zutatenmengen weichen ab`);
+      if (r.steps.length !== o.steps.length) err(`${r.id}: Anzahl Schritte weicht ab`);
+      for (const k of ["title", "desc", "story", "target", "checks"]) if (!/\p{Script=Han}/u.test(r[k] ?? "")) err(`${r.id}: ${k} nicht übersetzt`);
+      if (r.remind !== o.remind || r.riceCooker?.enabled !== o.riceCooker?.enabled) err(`${r.id}: remind/riceCooker weicht ab`);
+    });
+  }
+}
+console.log(`${translated} Übersetzungen geprüft`);
+
 if (errors.length) console.error(errors.join("\n"));
 console.log(`${count} Wochenpläne geprüft, ${errors.length} Fehler`);
 process.exit(errors.length ? 1 : 0);

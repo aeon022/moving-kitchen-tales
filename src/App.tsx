@@ -11,6 +11,7 @@ import { RecipeDatabasePage } from "./RecipeDatabasePage";
 import { KuehlschrankPage } from "./KuehlschrankPage";
 import { VorratskammerPage } from "./VorratskammerPage";
 import { VorkochenPage } from "./VorkochenPage";
+import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
 type Lang = "de" | "zh";
@@ -202,10 +203,14 @@ function LangProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const nav = useNavigate();
   const isRoot = location.pathname === "/" || location.pathname === "/moving-kitchen-tales" || location.pathname === "/moving-kitchen-tales/";
-  const [lang, setLangState] = useState<Lang>(() => "de");
+  // ?lang=zh in der Adresse gewinnt, damit ein verschickter Link gleich chinesisch öffnet.
+  const [lang, setLangState] = useState<Lang>(() => normalizeLang(new URLSearchParams(location.search).get("lang")));
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "de";
+  }, [lang]);
 
   useEffect(() => {
-    if (isRoot) {
+    if (isRoot && !new URLSearchParams(location.search).has("lang")) {
       setLangState("de");
       localStorage.setItem(LANG_KEY, "de");
     }
@@ -409,6 +414,12 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             <Link to="/vorratskammer" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="jar" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorratskammer" : "常备食材"}</span></span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/datenschutz" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="list" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Datenschutz" : "隐私说明"}</span></span>
             </Link>
           </li>
           <li>
@@ -817,7 +828,7 @@ function HomePage({ plans }: { plans: PlanRecord[] }) {
       <section className="cover">
         <div className="cover-header">
           <span className="seal-mark" aria-hidden="true"><span>厨</span><span>房</span></span>
-          <span className="cover-volume">Band Eins — 完</span>
+          <span className="cover-volume" lang="zh-CN" title="Gesamtwerk in einem Band">全一册</span>
         </div>
         <div className="cover-center">
           <div
@@ -1119,6 +1130,7 @@ export default function App() {
                   <Route path="/kuehlschrank" element={<KuehlschrankPage plans={plans} />} />
                   <Route path="/vorratskammer" element={<VorratskammerPage />} />
                   <Route path="/vorkochen" element={<VorkochenPage />} />
+                  <Route path="/datenschutz" element={<DatenschutzPage />} />
                   <Route path="/preppen" element={<PreppenPage />} />
                   <Route path="/kalte-gerichte" element={<KalteGerichtePage />} />
                   <Route path="/festtagsgerichte" element={<FesttagsgerichtePage />} />
@@ -1134,6 +1146,7 @@ export default function App() {
         </div>
 
         <BackToTop />
+        <CookieNotice />
       </div>
     </LangProvider>
   );

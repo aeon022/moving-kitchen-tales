@@ -201,7 +201,7 @@ export const DATA = [
   {
     id: "fr-f",
     title: "Adzuki-Hirsebrei (紅豆小米粥)",
-    desc: "Roter, sanfter Brei; auf Vorrat einfrierbar. Reis innerhalb 1 Std. abkühlen und kühlen oder einfrieren, nur einmal durchgehend heiß erwärmen.",
+    desc: "Roter, sanfter Brei; auf Vorrat einfrierbar. Brei innerhalb 1 Std. abkühlen und kühlen oder einfrieren, nur einmal durchgehend heiß erwärmen.",
     story: "紅豆 sind in China ein beliebtes Winterfrühstück.",
     target: "≈69 g KH gesamt (2 P.) · Protein ≈21 g p. P.",
     ingredients: ["Goldhirse 45 g", "Adzukibohnen gegart 100 g", "Rote Datteln 4 Stück", "Eier 4 Stück", "Wasser 700 ml"],

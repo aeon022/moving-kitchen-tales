@@ -12,4 +12,5 @@ assert.match(alt(["Reisnudeln trocken 150 g"]), /Soba/);
 assert.match(alt(["Gekochter Reis"]), /Hälfte/);
 for (const s of ["Reisessig mild 2 EL", "Reismehl 50 g", "Reispapier 8 Stück", "Tteokbokki Reiskuchen 200 g", "Weizennudeln 100 g"])
   assert.equal(alt([s]), null, s);
+assert.match(alt(["Reis (roh) 150 g"], "", "zh"), /75克米加150克花椰菜米/);
 console.log("riceAlternative ok");

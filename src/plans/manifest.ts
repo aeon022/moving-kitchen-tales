@@ -656,6 +656,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2026/Woche-53-2026-12-28-wochenbett.de.jsx"
   },
   {
+    "title": "第53周 · 月子",
+    "startDate": "2026-12-28",
+    "id": "woche-53-2026-12-28-wochenbett",
+    "lang": "zh",
+    "sidebar": "第53周 · 月子 (2026-12-28)",
+    "focus": "坐月子 🎍 · 节日餐从冷冻室来 · 月子",
+    "path": "./plans/2026/Woche-53-2026-12-28-wochenbett.zh.jsx"
+  },
+  {
     "title": "Woche 53",
     "startDate": "2026-12-28",
     "id": "woche-53-2026-12-28",
@@ -674,6 +683,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2027/Woche-1-2027-01-04.de.jsx"
   },
   {
+    "title": "第1周",
+    "startDate": "2027-01-04",
+    "id": "woche-1-2027-01-04",
+    "lang": "zh",
+    "sidebar": "第1周 (2027-01-04)",
+    "focus": "坐月子 🍲 · 用热汤温和起步 · 月子",
+    "path": "./plans/2027/Woche-1-2027-01-04.zh.jsx"
+  },
+  {
     "title": "Woche 2",
     "startDate": "2027-01-11",
     "id": "woche-2-2027-01-11",
@@ -681,6 +699,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 2 (2027-01-11)",
     "focus": "산후조리 🥣 · Weich, warm und eisenreich · Wochenbett",
     "path": "./plans/2027/Woche-2-2027-01-11.de.jsx"
+  },
+  {
+    "title": "第2周",
+    "startDate": "2027-01-11",
+    "id": "woche-2-2027-01-11",
+    "lang": "zh",
+    "sidebar": "第2周 (2027-01-11)",
+    "focus": "坐月子 🥣 · 软、暖、补铁 · 月子",
+    "path": "./plans/2027/Woche-2-2027-01-11.zh.jsx"
   },
   {
     "title": "Woche 3",
@@ -692,6 +719,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2027/Woche-3-2027-01-18.de.jsx"
   },
   {
+    "title": "第3周",
+    "startDate": "2027-01-18",
+    "id": "woche-3-2027-01-18",
+    "lang": "zh",
+    "sidebar": "第3周 (2027-01-18)",
+    "focus": "坐月子 🌱 · 慢慢调养 · 月子",
+    "path": "./plans/2027/Woche-3-2027-01-18.zh.jsx"
+  },
+  {
     "title": "Woche 4",
     "startDate": "2027-01-25",
     "id": "woche-4-2027-01-25",
@@ -699,6 +735,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 4 (2027-01-25)",
     "focus": "坐月子 🥢 · Aufbauen mit Biss · Wochenbett",
     "path": "./plans/2027/Woche-4-2027-01-25.de.jsx"
+  },
+  {
+    "title": "第4周",
+    "startDate": "2027-01-25",
+    "id": "woche-4-2027-01-25",
+    "lang": "zh",
+    "sidebar": "第4周 (2027-01-25)",
+    "focus": "坐月子 🥢 · 有嚼头地补养 · 月子期",
+    "path": "./plans/2027/Woche-4-2027-01-25.zh.jsx"
   },
   {
     "title": "Woche 5",
@@ -710,6 +755,15 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "path": "./plans/2027/Woche-5-2027-02-01.de.jsx"
   },
   {
+    "title": "第5周",
+    "startDate": "2027-02-01",
+    "id": "woche-5-2027-02-01",
+    "lang": "zh",
+    "sidebar": "第5周 (2027-02-01)",
+    "focus": "春節 🧧 · 过新年（春节和韩国新年），滋补强身 · 月子期",
+    "path": "./plans/2027/Woche-5-2027-02-01.zh.jsx"
+  },
+  {
     "title": "Woche 6",
     "startDate": "2027-02-08",
     "id": "woche-6-2027-02-08",
@@ -717,5 +771,14 @@ export const PLAN_MANIFEST: PlanManifestEntry[] = [
     "sidebar": "Woche 6 (2027-02-08)",
     "focus": "산후조리 💪 · Kräftig in den Alltag · Wochenbett",
     "path": "./plans/2027/Woche-6-2027-02-08.de.jsx"
+  },
+  {
+    "title": "第6周",
+    "startDate": "2027-02-08",
+    "id": "woche-6-2027-02-08",
+    "lang": "zh",
+    "sidebar": "第6周 (2027-02-08)",
+    "focus": "산후조리 💪 · 养好身体，回归日常 · 月子期",
+    "path": "./plans/2027/Woche-6-2027-02-08.zh.jsx"
   }
 ];

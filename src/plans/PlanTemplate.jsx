@@ -6,6 +6,8 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { CANON as DEFAULT_CANON } from "./canon";
 import { riceAlternative } from "../utils/riceAlternative";
 import { ExportBar } from "../components/ExportBar";
+import { TEXTS } from "./planTexts";
+import { ZH_LABELS } from "./canon.zh";
 
 // Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
 // nicht gerendert, nur als String im Code vorgehalten (Konvention aus Woche-1). Ergebnis-Datei
@@ -187,12 +189,14 @@ function ImageBanner({ meal, year, weekFolder = "kw1" }) {
   );
 }
 
-function MealCard({ meal, year, meta }) {
+function MealCard({ meal, source = meal, year, meta }) {
+  const T = TEXTS[meta.lang === "zh" ? "zh" : "de"];
   const { isBookmarked, toggleBookmark, bookmarkLists, toggleInList } = useBookmarks();
   const bookmarked = isBookmarked(meta.id, meal.id);
   const [showOptions, setShowOptions] = React.useState(false);
   const weekFolder = weekFolderFromMeta(meta);
-  const riceAlt = riceAlternative(meal.ingredients, meal.title);
+  // Immer aus dem deutschen Original berechnet, Ausgabe in der Sprache des Plans.
+  const riceAlt = riceAlternative(source.ingredients, source.title, meta.lang);
 
   return (
     <div className="meal-card" style={cardPanelStyle} id={`meal-${meal.id}`}>
@@ -299,33 +303,33 @@ function MealCard({ meal, year, meta }) {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {meal.isViral ? tagChip("🔥 Viral") : null}
           {tagChip(meal.target)}
-          {meal.riceCooker?.enabled ? tagChip("🍚 Reiskocher") : null}
+          {meal.riceCooker?.enabled ? tagChip(`🍚 ${T.riceCooker}`) : null}
         </div>
       </div>
       {meal.desc ? <p style={{ marginTop: 8, color: "var(--muted)", fontStyle: "italic" }}>{meal.desc}</p> : null}
       
-      <h4>Zutaten (2 Personen)</h4>
+      <h4>{T.ingredients}</h4>
       <ul>{meal.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
       
-      {riceAlt ? <p className="rice-alt"><strong>Reis-Alternative:</strong> {riceAlt}</p> : null}
+      {riceAlt ? <p className="rice-alt"><strong>{T.riceAlt}</strong> {riceAlt}</p> : null}
 
-      <h4>Zubereitung</h4>
+      <h4>{T.steps}</h4>
       <ol>{meal.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
       
       <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--chip-bg)", borderRadius: 0 }}>
-        <p style={{margin:"0 0 4px"}}><strong>Hinweise:</strong> {meal.checks}</p>
-        <p style={{margin:"0 0 4px"}}><strong>Austausche:</strong> {meal.swaps}</p>
-        <p style={{margin:0}}><strong>Beilage & Getränke:</strong> {meal.side}</p>
+        <p style={{margin:"0 0 4px"}}><strong>{T.notes}</strong> {meal.checks}</p>
+        <p style={{margin:"0 0 4px"}}><strong>{T.swaps}</strong> {meal.swaps}</p>
+        <p style={{margin:0}}><strong>{T.side}</strong> {meal.side}</p>
       </div>
 
       {meal.riceCooker?.enabled ? (
         <div style={{ marginTop: 12 }}>
           <details>
-            <summary style={{cursor:"pointer", fontWeight:600}}>Reiskocher-Details</summary>
+            <summary style={{cursor:"pointer", fontWeight:600}}>{T.riceDetails}</summary>
             <ul style={{marginTop:8}}>
-              <li><strong>Programm:</strong> {meal.riceCooker.program}</li>
-              <li><strong>Wasserverhältnis:</strong> {meal.riceCooker.water}</li>
-              {meal.riceCooker.notes ? <li><strong>Hinweise:</strong> {meal.riceCooker.notes}</li> : null}
+              <li><strong>{T.program}</strong> {meal.riceCooker.program}</li>
+              <li><strong>{T.waterRatio}</strong> {meal.riceCooker.water}</li>
+              {meal.riceCooker.notes ? <li><strong>{T.notes}</strong> {meal.riceCooker.notes}</li> : null}
             </ul>
           </details>
         </div>
@@ -334,14 +338,14 @@ function MealCard({ meal, year, meta }) {
   );
 }
 
-function DaySection({ dayKey, meals, dayName, meta }) {
+function DaySection({ dayKey, meals, sources, dayName, meta }) {
   return (
     <section className="day-section" style={{ marginBottom: 40 }} id={`day-${dayKey}`}>
       <h2 style={{ marginBottom: 16, borderBottom:"2px solid var(--border)", paddingBottom:8 }}>
         {dayName.replace(/\s*\(.+\)$/, "")} <span className="mkt-date-paren" style={{fontSize:"0.7em", color:"var(--muted)", fontWeight:400}}>{dayName.match(/\(.+\)$/)?.[0] ?? ""}</span>
       </h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }}>
-        {meals.map((m) => <MealCard key={m.id} meal={m} year={new Date().getFullYear()} meta={meta} />)}
+        {meals.map((m) => <MealCard key={m.id} meal={m} source={sources?.find((s) => s.id === m.id)} year={new Date().getFullYear()} meta={meta} />)}
       </div>
     </section>
   );
@@ -363,7 +367,7 @@ function WeekOverview({ data, DAY_NAME_DE, meta, subtitle }) {
       <div style={{ ...cardPanelStyle, border: "none", borderBottom: "1px solid var(--border)" }}>
         <div style={{ marginBottom: 8 }}>
           <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11.5, letterSpacing: "0.14em", color: "var(--muted)", marginBottom: 8 }}>
-            索引 · Woche
+            {meta.lang === "zh" ? "索引 · 周" : "索引 · Woche"}
           </div>
           <h2 style={{ margin: 0 }}>
             {meta.title} <span style={{ color: "var(--muted)", fontWeight: 400 }}>({meta.startDate})</span>
@@ -399,7 +403,7 @@ function WeekOverview({ data, DAY_NAME_DE, meta, subtitle }) {
 
 // Separate Tages-Übersicht nur für Reiskocher-Gerichte — zusätzlich zu den Reiskocher-Details
 // pro Karte, damit man auf einen Blick sieht, welcher Tag KEIN Reiskocher-Gericht hat.
-function RiceCookerSection({ data, DAY_NAME_DE }) {
+function RiceCookerSection({ data, DAY_NAME_DE, T }) {
   const perDay = useMemo(() => {
     const map = { mo: null, di: null, mi: null, do: null, fr: null, sa: null, so: null };
     for (const r of data) {
@@ -412,20 +416,20 @@ function RiceCookerSection({ data, DAY_NAME_DE }) {
 
   return (
     <section style={{ marginTop: 32 }}>
-      <h2 style={{ borderBottom: "2px solid var(--border)", paddingBottom: 10, marginBottom: 20 }}>🍚 Reiskocher-Gerichte (Übersicht)</h2>
+      <h2 style={{ borderBottom: "2px solid var(--border)", paddingBottom: 10, marginBottom: 20 }}>🍚 {T.riceOverview}</h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
         {DAYS_ORDER.map((d) => {
           const r = perDay[d];
           return (
             <div key={d} style={cardPanelStyle}>
               <h3 style={{ marginTop: 0, fontSize: 16 }}>
-                {DAY_NAME_DE[d].split(" ")[0]} – {r ? r.title : "Kein Reiskocher-Gericht"}
+                {DAY_NAME_DE[d].split(" ")[0]} – {r ? r.title : T.noRice}
               </h3>
               {r ? (
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  <li><strong>Programm:</strong> {r.riceCooker.program}</li>
-                  <li><strong>Wasser:</strong> {r.riceCooker.water}</li>
-                  {r.riceCooker.notes ? <li><strong>Notiz:</strong> {r.riceCooker.notes}</li> : null}
+                  <li><strong>{T.program}</strong> {r.riceCooker.program}</li>
+                  <li><strong>{T.waterRatio}</strong> {r.riceCooker.water}</li>
+                  {r.riceCooker.notes ? <li><strong>{T.notes}</strong> {r.riceCooker.notes}</li> : null}
                 </ul>
               ) : null}
             </div>
@@ -469,6 +473,7 @@ async function exportPdfFromRoot(rootEl, filename) {
 export default function PlanTemplate({
   meta,
   data,
+  sourceData, // deutsches Original bei Übersetzungen: Einkaufsliste und Reis-Alternative
   canon = DEFAULT_CANON,
   dayNames,
   uiTitles = { main: "Moving Kitchen Tales – Woche", list: "Moving Kitchen Tales – Einkaufsliste" },
@@ -489,7 +494,10 @@ export default function PlanTemplate({
   }, [vars]);
 
   const [tab, setTab] = useState("kochbuch");
-  const listGroups = useMemo(() => aggregateList(data, canon), [data, canon]);
+  const zh = meta.lang === "zh";
+  const T = TEXTS[zh ? "zh" : "de"];
+  const listGroups = useMemo(() => aggregateList(sourceData ?? data, canon), [data, sourceData, canon]);
+  const itemText = (it) => `${(zh && ZH_LABELS[it.label]) || it.label} – ${Math.round(it.qty * 10) / 10} ${(zh && ZH_LABELS[it.unit]) || it.unit}`;
 
   const doExportPDF = async () => {
     const el = document.getElementById("kochbuch-root");
@@ -580,7 +588,7 @@ export default function PlanTemplate({
     return (
       <>
         {DAYS_ORDER.map((d) => (
-          <DaySection key={d} dayKey={d} meals={byDay[d]} dayName={dayNames[d]} meta={meta} />
+          <DaySection key={d} dayKey={d} sources={sourceData} meals={byDay[d]} dayName={dayNames[d]} meta={meta} />
         ))}
       </>
     );
@@ -589,23 +597,26 @@ export default function PlanTemplate({
   const ShoppingList = () => {
     const Group = ({ name, items }) => (
       <div style={{ marginBottom: 20 }}>
-        <h3>{name}</h3>
-        <ul>{items.map((it, idx) => <li key={idx}>{`${it.label} – ${Math.round(it.qty * 10) / 10} ${it.unit}`}</li>)}</ul>
+        <h3>{(zh && ZH_LABELS[name]) || name}</h3>
+        <ul>{items.map((it, idx) => <li key={idx}>{itemText(it)}</li>)}</ul>
       </div>
     );
-    const listTitle = `Einkaufsliste – ${meta?.title ?? ""}`.trim();
-    const asText = () => buildShoppingListText(listGroups, listTitle);
+    const listTitle = `${T.list} – ${meta?.title ?? ""}`.trim();
+    const asText = () =>
+      zh
+        ? [listTitle, ...Object.values(listGroups).flat().map((it) => `- ${itemText(it)}`)].join("\n")
+        : buildShoppingListText(listGroups, listTitle);
     return (
       <div>
         <div className="ghk-no-print" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
           <button type="button" className="ghk-tab" onClick={() => shareOrCopyText(asText(), listTitle)}>
-            📤 Teilen / Kopieren
+            📤 {T.share}
           </button>
           <button type="button" className="ghk-tab" onClick={() => downloadTextFile(asText(), `${listTitle}.txt`)}>
-            ⬇️ Als Text herunterladen
+            ⬇️ {T.download}
           </button>
         </div>
-        <ExportBar lines={Object.values(listGroups).flat().map((it) => `${it.label} ${Math.round(it.qty * 10) / 10} ${it.unit}`)} />
+        {!zh && <ExportBar lines={Object.values(listGroups).flat().map((it) => `${it.label} ${Math.round(it.qty * 10) / 10} ${it.unit}`)} />}
         <Group name="Protein/Fisch/Tofu" items={listGroups["Protein/Fisch/Tofu"]} />
         <Group name="Gemüse/Pilze" items={listGroups["Gemüse/Pilze"]} />
         <Group name="Reis/Nudeln/Sättigung" items={listGroups["Reis/Nudeln/Sättigung"]} />
@@ -628,7 +639,7 @@ export default function PlanTemplate({
         </div>
 
         <div className="mkt-no-print" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
-          <fieldset className="mkt-segment" role="radiogroup" aria-label="Ansicht wählen">
+          <fieldset className="mkt-segment" role="radiogroup" aria-label={T.view}>
             <label htmlFor="view-kochbuch">
               <input id="view-kochbuch" type="radio" name="mkt-view" value="kochbuch" checked={tab === "kochbuch"} onChange={() => setTab("kochbuch")} aria-controls="mkt-content" />
               <span>{uiTitles.main}</span>
@@ -642,15 +653,15 @@ export default function PlanTemplate({
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
             <button type="button" onClick={doExportPDF} className="mkt-tab" style={{ padding: "8px 12px" }}>⤓ PDF</button>
             <button type="button" onClick={doExportHTML} className="mkt-tab" style={{ padding: "8px 12px" }}>⤓ HTML</button>
-            <button type="button" onClick={() => doPrint()} className="mkt-tab" style={{ padding: "8px 12px" }}>🖨️ Drucken</button>
+            <button type="button" onClick={() => doPrint()} className="mkt-tab" style={{ padding: "8px 12px" }}>🖨️ {T.print}</button>
 
             <div className="mkt-theme-switch" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: 6, border: "1px solid var(--btn-border)", background: "var(--panel)" }}>
               <button type="button" className="mkt-tab" aria-pressed={mode === "auto"} onClick={() => setMode(mode === "auto" ? (effectiveDark ? "dark" : "light") : "auto")} style={{ padding: "6px 10px" }}>Auto</button>
-              <label className="mkt-switch" title={effectiveDark ? "Dunkel" : "Hell"}>
+              <label className="mkt-switch" title={effectiveDark ? T.dark : T.light}>
                 <input type="checkbox" checked={effectiveDark} onChange={(e) => setMode(e.target.checked ? "dark" : "light")} disabled={mode === "auto"} />
                 <span className="mkt-slider" />
               </label>
-              <span style={{ fontSize: 12, color: "var(--muted)" }}>{mode === "auto" ? "System" : effectiveDark ? "Dunkel" : "Hell"}</span>
+              <span style={{ fontSize: 12, color: "var(--muted)" }}>{mode === "auto" ? T.system : effectiveDark ? T.dark : T.light}</span>
             </div>
           </div>
         </div>
@@ -664,7 +675,7 @@ export default function PlanTemplate({
         <div id="mkt-content" data-view={tab}>
           <section id="mkt-pane-kochbuch" aria-hidden={tab !== "kochbuch"} hidden={tab !== "kochbuch"}>
             <Week />
-            <RiceCookerSection data={data} DAY_NAME_DE={dayNames} />
+            <RiceCookerSection data={data} DAY_NAME_DE={dayNames} T={T} />
           </section>
           <section id="mkt-pane-liste" aria-hidden={tab !== "liste"} hidden={tab !== "liste"}>
             <ShoppingList />
