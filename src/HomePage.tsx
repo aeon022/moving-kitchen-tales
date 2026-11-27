@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLang, usePlanData, pickCurrent, PlanRecord, SUPPORT_URL } from "./App";
+import { CatPair } from "./components/Cats";
 
 const DAY_IDS = ["so", "mo", "di", "mi", "do", "fr", "sa"];
 const MEALS: [string, string, string][] = [["f", "Morgen", "早"], ["m", "Mittag", "中"], ["a", "Abend", "晚"]];
@@ -118,6 +119,10 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
             </li>
           ))}
         </ol>
+        <figure className="story-cats">
+          <CatPair />
+          <figcaption>{t("Finn, sieben Kilo Ruhe und heimlicher Schelm. Fleur, flink und der Kopf der Bande.", "Finn：七公斤的淡定，偷偷调皮。Fleur：身手敏捷，是出主意的那个。")}</figcaption>
+        </figure>
       </section>
 
       {plan && today.length > 0 && (

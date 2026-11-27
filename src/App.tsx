@@ -12,6 +12,8 @@ import { KuehlschrankPage } from "./KuehlschrankPage";
 import { VorratskammerPage } from "./VorratskammerPage";
 import { VorkochenPage } from "./VorkochenPage";
 import { HomePage } from "./HomePage";
+import { BackToTop } from "./components/BackToTop";
+import { Cat } from "./components/Cats";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -92,27 +94,6 @@ function NavIcon({ name }: { name: keyof typeof NAV_ICON_PATHS }) {
   );
 }
 
-// --- Back to Top Komponente ---
-function BackToTop() {
-  const { lang } = useLang();
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 300);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  return (
-    <button
-      className={`back-to-top ${visible ? "visible" : ""}`}
-      onClick={scrollToTop}
-      title={lang === "de" ? "Nach oben" : "回到顶部"}
-      aria-label={lang === "de" ? "Nach oben scrollen" : "回到顶部"}
-    >
-      <span className="arrow-up" />
-    </button>
-  );
-}
 
 // --- Mobile Helper ---
 function isMobile() {
@@ -931,6 +912,8 @@ export default function App() {
                 </Routes>
               )}
               </div>
+              {/* Finn döst am Ende jeder Seite */}
+              <div className="page-end" aria-hidden="true"><Cat who="finn" pose="doze" /></div>
             </main>
           </div>
         </div>

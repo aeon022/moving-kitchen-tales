@@ -1,65 +1,11 @@
 // Tuschezeichnungen (sumi-e) als Inline-SVG: Pinselstriche, flache Lavierungen, ein rotes Siegel.
 import type { ReactNode } from "react";
+import { B, CatFigure, Dot, Shape, W } from "./Cats";
 import { motifFor, type Motif } from "../utils/dishMotif";
 
 const INK = "var(--text)";
 const PAPER = "var(--panel)";
 const BLUE = "var(--accent)";
-
-// Pinselstrich: "x y" Start, dann je 6 Zahlen pro kubischem Bézier. Gefüllte Fläche mit
-// Aufsetzen, Schwellung und auslaufender Spitze statt gleichförmigem stroke.
-const cache = new Map<string, string>();
-function brushPath(d: string, w: number): string {
-  const key = `${w}|${d}`;
-  const done = cache.get(key);
-  if (done) return done;
-  const n = d.trim().split(/[\s,]+/).map(Number);
-  const pts: [number, number][] = [[n[0], n[1]]];
-  for (let i = 2; i + 5 < n.length; i += 6) {
-    const [x0, y0] = pts[pts.length - 1];
-    for (let s = 1; s <= 18; s++) {
-      const t = s / 18, u = 1 - t;
-      const at = (p0: number, k: number) => u * u * u * p0 + 3 * u * u * t * n[i + k] + 3 * u * t * t * n[i + k + 2] + t * t * t * n[i + k + 4];
-      pts.push([at(x0, 0), at(y0, 1)]);
-    }
-  }
-  const len = [0];
-  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-  const total = len[len.length - 1] || 1;
-  const left: string[] = [], right: string[] = [];
-  pts.forEach(([x, y], i) => {
-    const t = len[i] / total;
-    const [ax, ay] = pts[Math.max(0, i - 1)], [bx, by] = pts[Math.min(pts.length - 1, i + 1)];
-    const l = Math.hypot(bx - ax, by - ay) || 1;
-    const press = Math.min(1, 0.45 + t * 5) * (1 - 0.85 * t ** 2.2);
-    const half = (w / 2) * press * (1 + 0.14 * Math.sin(t * 11 + n[0]));
-    const ox = (-(by - ay) / l) * half, oy = ((bx - ax) / l) * half;
-    left.push(`${(x + ox).toFixed(1)} ${(y + oy).toFixed(1)}`);
-    right.unshift(`${(x - ox).toFixed(1)} ${(y - oy).toFixed(1)}`);
-  });
-  const r = (w * 0.22).toFixed(1);
-  const out = `M${left.join("L")}L${right.join("L")}A${r} ${r} 0 0 1 ${left[0]}Z`;
-  cache.set(key, out);
-  return out;
-}
-
-/** Pinselstrich */
-const B = ({ d, w = 4, c = INK, o = 0.92 }: { d: string; w?: number; c?: string; o?: number }) => (
-  <path d={brushPath(d, w)} style={{ fill: c, opacity: o }} />
-);
-/** Flache Lavierung */
-const W = ({ d, c = INK, o = 0.09 }: { d: string; c?: string; o?: number }) => <path d={d} style={{ fill: c, opacity: o }} />;
-/** Tupfer */
-const Dot = ({ x, y, r = 2.5, ry = r, a = 0, c = INK, o = 0.85 }: { x: number; y: number; r?: number; ry?: number; a?: number; c?: string; o?: number }) => (
-  <ellipse cx={x} cy={y} rx={r} ry={ry} transform={`rotate(${a} ${x} ${y})`} style={{ fill: c, opacity: o }} />
-);
-/** Form, die Dahinterliegendes verdeckt, optional mit Lavierung */
-const Shape = ({ d, o = 0, c = INK }: { d: string; o?: number; c?: string }) => (
-  <>
-    <path d={d} style={{ fill: PAPER }} />
-    {o > 0 && <W d={d} c={c} o={o} />}
-  </>
-);
 
 const oval = (x: number, y: number, rx: number, ry: number) =>
   `M${x - rx} ${y}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`;
@@ -618,6 +564,12 @@ const ART: Record<Motif, () => ReactNode> = {
   ),
 };
 
+const CAT = 0.44;
+const VISITORS = [
+  { who: "finn", pose: "sit" }, { who: "finn", pose: "peek" },
+  { who: "fleur", pose: "sit" }, { who: "fleur", pose: "peek" }, { who: "fleur", pose: "tilt" },
+] as const;
+
 export function DishArt({ title, ingredients, className }: { title: string; ingredients?: string[]; className?: string }) {
   const motif = motifFor(title, ingredients);
   // Stabiler Hash: Spiegelung, Siegelplatz und Mondkreis variieren je Titel.
@@ -627,11 +579,25 @@ export function DishArt({ title, ingredients, className }: { title: string; ingr
   const sealX = h & 2 ? 22 : 280;
   const sealY = 20 + ((h >>> 2) % 3) * 5;
   const moonX = sealX < 160 ? 236 : 84;
+  // Etwa jedes vierte Rezept bekommt Besuch; bei Fisch angelt Finn zusätzlich in jedem zweiten.
+  const k = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
+  const cat =
+    motif === "fish" && k & 0x100 ? ({ who: "finn", pose: "angle" } as const) : (k >>> 4) % 4 === 0 ? VISITORS[(k >>> 12) % VISITORS.length] : undefined;
+  const dir = k & 0x200 ? 1 : -1;
   return (
     <svg className={className} viewBox="0 0 320 180" role="img" aria-label={title} data-motif={motif} style={{ display: "block", width: "100%", height: "auto" }}>
       <rect width="320" height="180" style={{ fill: PAPER }} />
       <circle cx={moonX} cy={62 + ((h >>> 5) % 4) * 6} r={34 + ((h >>> 8) % 3) * 5} style={{ fill: h & 16 ? BLUE : INK, opacity: 0.06 }} />
-      <g transform={flip ? "matrix(-1 0 0 1 320 0)" : undefined}>{ART[motif]()}</g>
+      {/* Mit Katze rückt das Gericht etwas zur Seite */}
+      <g transform={cat ? `translate(${160 - dir * 32} 170) scale(0.76) translate(-160 -170)` : undefined}>
+        <g transform={flip ? "matrix(-1 0 0 1 320 0)" : undefined}>{ART[motif]()}</g>
+      </g>
+      {cat && (
+        // Katze unten am Rand (Oberkante >= y 100, das Siegel endet bei y 48); schaut zum Gericht.
+        <g transform={`translate(${160 + dir * 118} ${cat.pose === "peek" ? 180 - 160 * CAT : 176 - 183 * CAT}) scale(${dir * CAT} ${CAT}) translate(-100 0)`}>
+          <CatFigure {...cat} />
+        </g>
+      )}
       {/* Hanko-Siegel: der einzige rote Akzent */}
       <g transform={`translate(${sealX} ${sealY}) rotate(${((h >>> 11) % 7) - 3} 9 9)`}>
         <path d="M1 0.5L17.5 0L18 17L0 18Z" style={{ fill: "var(--seal)" }} />
