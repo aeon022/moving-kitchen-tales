@@ -43,5 +43,6 @@ for (const c of wanted) {
   const n = ways.filter((w) => w.cuts?.includes(c.id)).length;
   if (n < 5) errors.push(`${c.id}: nur ${n} Wege (mind. 5)`);
 }
+if (!only) for (const c of CUTS) if (!ways.some((w) => w.origin === "japan" && w.cuts.includes(c.id))) errors.push(`${c.id}: nichts Japanisches`);
 assert.equal(errors.length, 0, "\n" + errors.join("\n"));
 console.log(`vorrat ok: ${ways.length} Wege, ${wanted.length} Rohwaren`);

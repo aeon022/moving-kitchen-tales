@@ -264,6 +264,35 @@ function usePlans(): PlanRecord[] {
   }, []);
 }
 
+// Register: nach dem, was man gerade vorhat. Datenschutz steht ganz unten.
+type MenuItem = { to: string; icon: React.ComponentProps<typeof NavIcon>["name"]; title: [string, string] };
+const MENU: { de: string; zh: string; items: MenuItem[] }[] = [
+  { de: "一 · 今日 · Heute essen", zh: "一 · 今天吃什么", items: [
+    { to: "/", icon: "home", title: ["Startseite", "首页"] },
+    { to: "/kuehlschrank", icon: "fridge", title: ["Kühlschrank", "冰箱找菜谱"] },
+    { to: "/rezepte", icon: "database", title: ["Rezeptsammlung", "食谱库"] },
+    { to: "/bookmarks", icon: "star", title: ["Meine Merkliste", "我的收藏"] },
+  ] },
+  { de: "二 · 备餐 · Vorrat", zh: "二 · 备餐储备", items: [
+    { to: "/vorkochen", icon: "pot", title: ["Vorkochen", "备餐计划"] },
+    { to: "/verarbeiten", icon: "box", title: ["Was tun mit …?", "食材怎么做"] },
+    { to: "/gefrierschrank", icon: "snowflake", title: ["Gefrierschrank", "冷冻室"] },
+    { to: "/helfer", icon: "list", title: ["Helfer-Zettel", "帮厨单"] },
+    { to: "/preppen", icon: "box", title: ["Preppen", "备餐食谱"] },
+    { to: "/vorratskammer", icon: "jar", title: ["Vorratskammer", "储藏室"] },
+  ] },
+  { de: "三 · 厨艺 · Küche", zh: "三 · 厨艺", items: [
+    { to: "/festtagsgerichte", icon: "gift", title: ["Festtagsgerichte", "节日菜"] },
+    { to: "/kalte-gerichte", icon: "snowflake", title: ["Kalte Gerichte", "凉菜"] },
+    { to: "/kochtechniken", icon: "book-open", title: ["Kochtechniken", "烹饪技法"] },
+  ] },
+  { de: "四 · 家 · Zuhause", zh: "四 · 我们的家", items: [
+    { to: "/familie", icon: "gift", title: ["Familienrezepte", "家传菜谱"] },
+    { to: "/reisen", icon: "book-open", title: ["Reisetagebuch", "美食游记"] },
+    { to: "/katzen", icon: "book-open", title: ["Finn & Fleur", "Finn 和 Fleur"] },
+  ] },
+];
+
 // --- Sidebar (Mobile Optimized) ---
 function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => void }) {
   const { lang, setLang } = useLang();
@@ -384,130 +413,6 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
         </p>
 
         <div className="index-overlay-content">
-        <div className="index-section-label">{lang === "de" ? "一 · 导航 · Navigation" : "一 · 导航"}</div>
-        <ul className="nav-list">
-          <li>
-            <Link to="/" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="home" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Startseite" : "首页"}</span></span>
-            </Link>
-          </li>
-          {currentPlan && (
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpenYears(prev => ({ ...prev, [getPlanYear(currentPlan.startDate)]: true }));
-                  navigate(`/plan/${currentPlan.slug}?lang=${lang}`);
-                  handleLinkClick();
-                }}
-                className="nav-row"
-              >
-                <span className="nav-icon"><NavIcon name="arrow-right" /></span>
-                <span className="nav-body"><span className="nav-title">{lang === "de" ? "Zum aktuellen Plan" : "跳到本周菜单"}</span></span>
-              </button>
-            </li>
-          )}
-          <li>
-            <Link to="/bookmarks" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="star" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Meine Merkliste" : "我的收藏"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/kuehlschrank" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="fridge" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kühlschrank" : "冰箱找菜谱"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/vorratskammer" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="jar" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorratskammer" : "储藏室"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/familie" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="gift" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Familienrezepte" : "家传菜谱"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/reisen" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="book-open" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Reisetagebuch" : "美食游记"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/katzen" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="book-open" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Finn & Fleur" : "Finn 和 Fleur"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/datenschutz" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="list" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Datenschutz" : "隐私说明"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/vorkochen" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="pot" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Vorkochen" : "备餐计划"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/verarbeiten" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="box" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Was tun mit …?" : "食材怎么做"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/gefrierschrank" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="snowflake" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Gefrierschrank" : "冷冻室"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/helfer" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="list" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Helfer-Zettel" : "帮厨单"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/preppen" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="box" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Preppen" : "备餐"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/kalte-gerichte" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="snowflake" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kalte Gerichte" : "凉菜"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/festtagsgerichte" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="gift" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Festtagsgerichte" : "节日菜"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/kochtechniken" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="book-open" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Kochtechniken" : "烹饪技法"}</span></span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/rezepte" onClick={handleLinkClick} className="nav-row">
-              <span className="nav-icon"><NavIcon name="database" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezeptsammlung" : "食谱库"}</span></span>
-            </Link>
-          </li>
-        </ul>
-
-        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
-
         <div className="index-utility-row">
           <div
             className="lang-toggle"
@@ -569,37 +474,42 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           )}
         </div>
 
-        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
-        <div className="index-section-label">{lang === "de" ? "二 · 收藏 · Pinnwand" : "二 · 收藏"}</div>
-
-        {/* Pinnwand-Listen */}
-        <details className="year" open>
-          <summary>{lang === "de" ? "Pinnwand" : "收藏板"}</summary>
-          {bookmarkLists.length === 0 ? (
-            <div style={{ padding: "8px", fontSize: 13, color: "var(--muted)" }}>
-              <Link to="/pinnwand" onClick={handleLinkClick}>
-                {lang === "de" ? "Listen verwalten" : "管理列表"}
-              </Link>
-            </div>
-          ) : (
-            <ul className="nav-list">
-              {bookmarkLists.map((list: BookmarkList) => (
-                <li key={list.id}>
-                  <Link to="/pinnwand" onClick={handleLinkClick} className="nav-row">
-                    <span className="nav-lead">{list.bookmarks.length}</span>
-                    <span className="nav-body">
-                      <span className="nav-title">{list.name}</span>
-                      <span className="nav-sub">{lang === "de" ? "Rezepte" : "道食谱"}</span>
-                    </span>
-                  </Link>
-                </li>
+        {MENU.map((group, n) => (
+          <React.Fragment key={group.de}>
+            <div className="index-section-label">{lang === "de" ? group.de : group.zh}</div>
+            <ul className="nav-list menu-group">
+              {group.items.map((item, k) => (
+                <React.Fragment key={item.to}>
+                  <li>
+                    <Link to={item.to} onClick={handleLinkClick} className="nav-row">
+                      <span className="nav-icon"><NavIcon name={item.icon} /></span>
+                      <span className="nav-body"><span className="nav-title">{lang === "de" ? item.title[0] : item.title[1]}</span></span>
+                    </Link>
+                  </li>
+                  {n === 0 && k === 0 && currentPlan && (
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenYears(prev => ({ ...prev, [getPlanYear(currentPlan.startDate)]: true }));
+                  navigate(`/plan/${currentPlan.slug}?lang=${lang}`);
+                  handleLinkClick();
+                }}
+                className="nav-row"
+              >
+                <span className="nav-icon"><NavIcon name="arrow-right" /></span>
+                <span className="nav-body"><span className="nav-title">{lang === "de" ? "Zum aktuellen Plan" : "跳到本周菜单"}</span></span>
+              </button>
+            </li>
+          )}
+                </React.Fragment>
               ))}
             </ul>
-          )}
-        </details>
+          </React.Fragment>
+        ))}
 
         <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
-        <div className="index-section-label">{lang === "de" ? "三 · 索引 · Wochen" : "三 · 每周菜单"}</div>
+        <div className="index-section-label">{lang === "de" ? "五 · 索引 · Wochen" : "五 · 每周菜单"}</div>
 
         <div className="year-controls">
           <button className="small-btn" onClick={() => {
@@ -624,7 +534,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           >
             <summary>
               {y}
-              {currentPlan && y !== getPlanYear(currentPlan.startDate) && (
+              {currentPlan && y < getPlanYear(currentPlan.startDate) && (
                 <span style={{ marginLeft: 8, fontSize: 11, color: "var(--muted)", fontWeight: 400 }}>
                   {lang === "de" ? "Archiv" : "往年"}
                 </span>
@@ -680,6 +590,35 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           </details>
         ))}
 
+        <div className="ornament-divider" aria-hidden="true"><span>◆</span></div>
+        <div className="index-section-label">{lang === "de" ? "六 · 收藏 · Pinnwand" : "六 · 收藏"}</div>
+
+        {/* Pinnwand-Listen */}
+        <details className="year" open>
+          <summary>{lang === "de" ? "Pinnwand" : "收藏板"}</summary>
+          {bookmarkLists.length === 0 ? (
+            <div style={{ padding: "8px", fontSize: 13, color: "var(--muted)" }}>
+              <Link to="/pinnwand" onClick={handleLinkClick}>
+                {lang === "de" ? "Listen verwalten" : "管理列表"}
+              </Link>
+            </div>
+          ) : (
+            <ul className="nav-list">
+              {bookmarkLists.map((list: BookmarkList) => (
+                <li key={list.id}>
+                  <Link to="/pinnwand" onClick={handleLinkClick} className="nav-row">
+                    <span className="nav-lead">{list.bookmarks.length}</span>
+                    <span className="nav-body">
+                      <span className="nav-title">{list.name}</span>
+                      <span className="nav-sub">{lang === "de" ? "Rezepte" : "道食谱"}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </details>
+
         <a
           href={SUPPORT_URL}
           target="_blank"
@@ -690,6 +629,14 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           <span aria-hidden="true">♥</span>
           <span>{lang === "de" ? "Projekt unterstützen" : "支持项目"}</span>
         </a>
+        <ul className="nav-list menu-foot">
+          <li>
+            <Link to="/datenschutz" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="list" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Datenschutz" : "隐私说明"}</span></span>
+            </Link>
+          </li>
+        </ul>
         </div>
     </aside>
   );

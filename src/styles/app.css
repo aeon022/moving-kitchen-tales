@@ -1623,3 +1623,5 @@ details.prep-notice ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-
 .rezept-list a:hover { border-left-color: var(--seal); }
 .rezept-list small { color: var(--muted); }
 .planer .export-bar .prep-select, .rezept-filter .prep-select { margin: 0; flex: 1 1 140px; }
+.menu-group { margin-bottom: 24px; }
+.menu-foot { margin-top: 16px; }
