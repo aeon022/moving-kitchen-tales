@@ -8,6 +8,7 @@ import { riceAlternative } from "../utils/riceAlternative";
 import { ExportBar } from "../components/ExportBar";
 import { TEXTS } from "./planTexts";
 import { DishArt } from "../components/DishArt";
+import { Rating } from "../components/Rating";
 import { ZH_LABELS } from "./canon.zh";
 
 // Bild-Prompts für externe Text-zu-Bild-Tools (DALL·E/GPT-Image/Midjourney) — werden bewusst
@@ -311,6 +312,7 @@ function MealCard({ meal, source = meal, year, meta }) {
           </details>
         </div>
       ) : null}
+      <div style={{ marginTop: 12 }}><Rating title={source.title} /></div>
     </div>
   );
 }

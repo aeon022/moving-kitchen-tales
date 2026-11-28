@@ -11,10 +11,14 @@ import { localizedRecipes } from "./plans/prep/localized";
 import { WAYS, CUTS } from "./plans/vorrat";
 import { ORIGIN_NAMES } from "./plans/vorrat/labels";
 import { mainOf, originOf, formOf, Main, Form } from "./utils/classify";
+import { Rating } from "./components/Rating";
+import { useRatings } from "./hooks/useRatings";
 
 type Entry = {
   key: string;
   title: string;
+  /** Deutscher Titel, Schlüssel für die Bewertung. */
+  de: string;
   desc?: string;
   /** Titel und Zutaten in der gezeigten Sprache, für die Suche. */
   hay: string;
@@ -51,19 +55,19 @@ function collections(lang: "de" | "zh"): Entry[] {
   const i = lang === "zh" ? 1 : 0;
   const prep = localizedRecipes(lang).map((r, n) => {
     const de = PREP_RECIPES[n];
-    return { key: `p-${r.id}`, title: r.title, desc: r.desc, hay: [r.title, ...r.ingredients].join(" "), to: "/preppen", source: "prep", where: SOURCES.prep[i], ...classify(de.title, de.ingredients) };
+    return { key: `p-${r.id}`, title: r.title, de: de.title, desc: r.desc, hay: [r.title, ...r.ingredients].join(" "), to: "/preppen", source: "prep", where: SOURCES.prep[i], ...classify(de.title, de.ingredients) };
   });
   const ways = WAYS.map((w) => {
     const cut = CUTS.find((c) => c.id === w.cuts[0])!;
     const main: Main = cut.id === "garnelen" ? "meeresfruechte" : cut.id === "tofu" ? "tofu" : cut.group === "pflanzlich" ? "gemuese" : (cut.group as Main);
     return {
-      key: `v-${w.id}`, title: w[lang].title, hay: [w[lang].title, cut[lang], ...w.ingredients.map((x) => x[i])].join(" "), to: `/verarbeiten?zutat=${cut.id}`,
+      key: `v-${w.id}`, title: w[lang].title, de: w.de.title, hay: [w[lang].title, cut[lang], ...w.ingredients.map((x) => x[i])].join(" "), to: `/verarbeiten?zutat=${cut.id}`,
       source: "vorrat", where: SOURCES.vorrat[i], main, origin: w.origin, form: formOf(w.de.title),
     };
   });
   // Kalte und Festtagsgerichte gibt es nur auf Deutsch.
   const german = lang === "zh" ? [] : ([["kalt", COLD_DISHES, "/kalte-gerichte"], ["fest", FESTIVE_DISHES, "/festtagsgerichte"]] as const).flatMap(([source, list, to]) =>
-    list.map((r) => ({ key: `${source}-${r.id}`, title: r.title, desc: r.desc, hay: [r.title, ...r.ingredients].join(" "), to, source, where: SOURCES[source][0], ...classify(r.title, r.ingredients) }))
+    list.map((r) => ({ key: `${source}-${r.id}`, title: r.title, de: r.title, desc: r.desc, hay: [r.title, ...r.ingredients].join(" "), to, source, where: SOURCES[source][0], ...classify(r.title, r.ingredients) }))
   );
   return [...ways, ...prep, ...german];
 }
@@ -108,7 +112,7 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
         const base = deData.find((x) => x.id === r.id) ?? r;
         const meal = r.id.slice(-1);
         weeks.push({
-          key: `${p.slug}-${r.id}`, title: r.title, desc: r.desc, hay: [r.title, r.desc, ...(r.ingredients ?? [])].join(" "),
+          key: `${p.slug}-${r.id}`, title: r.title, de: base.title, desc: r.desc, hay: [r.title, r.desc, ...(r.ingredients ?? [])].join(" "),
           to: `/plan/${p.slug}#meal-${r.id}`, source: "woche", where: p.meta.title ?? "", meal: MEALS[meal] ? meal : undefined,
           rice: !!r.riceCooker?.enabled, viral: !!r.isViral, ...classify(base.title, (base.ingredients ?? []).filter((x: unknown) => typeof x === "string")),
         });
@@ -121,7 +125,8 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
   const matches = (e: Entry, skip?: string) =>
     (["main", "origin", "form", "source", "meal"] as const).every((k) => k === skip || !get(k) || e[k] === get(k)) &&
     (!get("rice") || e.rice) && (!get("viral") || e.viral) && (!q || e.hay.toLowerCase().includes(q));
-  const filtered = all.filter((e) => matches(e));
+  const ratings = useRatings();
+  const filtered = all.filter((e) => matches(e) && (!get("like") || ratings.up.includes(e.de)));
 
   const pick = (k: "main" | "origin" | "form" | "source" | "meal", label: string, names: Record<string, Pair>) => {
     const pool = all.filter((e) => matches(e, k));
@@ -151,6 +156,7 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
         {pick("form", t("Jede Art", "所有类型"), FORMS)}
         {pick("source", t("Alle Quellen", "所有来源"), SOURCES)}
         {pick("meal", t("Jede Mahlzeit", "所有餐次"), MEALS)}
+        <button type="button" className="prep-tab" aria-pressed={!!get("like")} onClick={() => set("like", get("like") ? "" : "1")}>{t("Hat uns geschmeckt", "我们喜欢的")} ({ratings.up.length})</button>
         <button type="button" className="prep-tab" aria-pressed={!!get("rice")} onClick={() => set("rice", get("rice") ? "" : "1")}>{t("Nur Reiskocher", "只看电饭煲菜")}</button>
         <button type="button" className="prep-tab" aria-pressed={!!get("viral")} onClick={() => set("viral", get("viral") ? "" : "1")}>{t("Nur Trends", "只看网红菜")}</button>
       </div>
@@ -161,12 +167,13 @@ export function RecipeDatabasePage({ plans }: { plans: PlanRecord[] }) {
       ) : (
         <ul className="rezept-list">
           {filtered.slice(0, shown).map((e) => (
-            <li key={e.key}>
+            <li key={e.key} className={ratings.down.includes(e.de) ? "is-down" : ""}>
               <Link to={e.to}>
                 <span className="prep-card-kicker">{MAINS[e.main][i]} · {ORIGIN_NAMES[e.origin][i]} · {FORMS[e.form][i]}</span>
                 <strong>{e.title}</strong>
                 <small>{e.where}</small>
               </Link>
+              <Rating title={e.de} />
             </li>
           ))}
         </ul>

@@ -13,7 +13,7 @@ assert.equal(eatBy(item), "2027-02-28");
 assert.equal(daysLeft(item, new Date(2027, 1, 27, 23)), 1);
 assert.deepEqual(validFrozen([item, { id: 1 }, { ...item, portions: -1 }, null]), [item]);
 
-const s = { lists: { "mkt.vorkochen.done": ["x"], "mkt.vorkochen.bought": [], "mkt.pantry.buy": ["酱油"] }, freezer: [item] };
+const s = { lists: { "mkt.vorkochen.done": ["x"], "mkt.vorkochen.bought": [], "mkt.pantry.buy": ["酱油"], "mkt.rating.up": ["Suppe"], "mkt.rating.down": [] }, freezer: [item] };
 assert.deepEqual(decodeShare(encodeShare(s)), s);
 assert.equal(decodeShare("kaputt!!"), null);
 assert.deepEqual(decodeShare(encodeShare({ lists: { evil: ["y"] }, freezer: "no" })).freezer, []);

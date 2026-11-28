@@ -76,6 +76,8 @@ export function GefrierschrankPage() {
         <button type="submit" className="prep-tab">{t("Hinzufügen", "添加")}</button>
       </form>
 
+      {sorted.length > 0 && <p><Link to="/etiketten">{t("Etiketten drucken →", "打印标签 →")}</Link></p>}
+
       <ShareState />
     </div>
   );

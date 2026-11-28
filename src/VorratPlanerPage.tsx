@@ -4,13 +4,14 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useLang } from "./App";
 import { WAYS, CUTS, Group, Origin, Art } from "./plans/vorrat";
 import { GROUPS, ORIGIN_NAMES, ARTS } from "./plans/vorrat/labels";
-import { toGrams, split, scaled, portions, Amount } from "./utils/vorrat";
+import { toGrams, allocate, scaled, portions, Amount } from "./utils/vorrat";
+import { Rating } from "./components/Rating";
 import { isoDay } from "./utils/freezer";
 import { useFreezer } from "./hooks/useFreezer";
 import { ExportBar } from "./components/ExportBar";
 
 const STORE = "mkt.planer";
-type State = { cut: string; amount: number; unit: Amount; chosen: string[] };
+type State = { cut: string; amount: number; unit: Amount; chosen: string[]; shares?: Record<string, number> };
 
 function load(): State {
   const fallback: State = { cut: "huhn-schenkel", amount: 1, unit: "kg", chosen: [] };
@@ -31,7 +32,7 @@ export function VorratPlanerPage() {
     const saved = load();
     // Sprung aus der Rezeptsammlung: ?zutat=… wählt die Rohware.
     const cut = params.get("zutat");
-    return cut && cut !== saved.cut && CUTS.some((c) => c.id === cut) ? { ...saved, cut, chosen: [] } : saved;
+    return cut && cut !== saved.cut && CUTS.some((c) => c.id === cut) ? { ...saved, cut, chosen: [], shares: {} } : saved;
   });
   const [origin, setOrigin] = useState<Origin | "">("");
   const [art, setArt] = useState<Art | "">("");
@@ -45,11 +46,22 @@ export function VorratPlanerPage() {
   const total = toGrams(s.amount || 0, unit, cut.piece);
   const ways = WAYS.filter((w) => w.cuts.includes(cut.id));
   const chosen = s.chosen.flatMap((id) => ways.filter((w) => w.id === id));
-  // Stückware wird in ganzen Stück geteilt, alles andere in 10-g-Schritten.
-  const parts = unit === "Stk" ? split(Math.round(s.amount || 0), chosen.length).map((n) => n * cut.piece!) : split(total, chosen.length, 10);
+  // Eigene Anteile stehen in der gewählten Einheit (Stück bzw. Gramm). Der Rest wird gleich verteilt:
+  // Stückware in ganzen Stück, alles andere in 10-g-Schritten.
+  const pieces = unit === "Stk";
+  const whole = pieces ? Math.round(s.amount || 0) : total;
+  const shares = allocate(whole, chosen.map((w) => w.id), s.shares ?? {}, pieces ? 1 : 10);
+  const parts = shares.map((n) => (pieces ? n * cut.piece! : n));
+  const over = shares.reduce((a, b) => a + b, 0) - whole;
+  const setShare = (id: string, value: string) => {
+    const next = { ...s.shares };
+    if (value === "") delete next[id];
+    else next[id] = Math.max(0, Math.min(Math.round(Number(value)), 100000));
+    setS({ ...s, shares: next });
+  };
   const shownShare = (g: number) => (unit === "Stk" ? `${g / cut.piece!} ${t("Stück", "个")}` : `${g} ${t("g", "克")}`);
 
-  const toggle = (id: string) => setS({ ...s, chosen: s.chosen.includes(id) ? s.chosen.filter((x) => x !== id) : [...s.chosen, id] });
+  const toggle = (id: string) => setS({ ...s, chosen: s.chosen.includes(id) ? s.chosen.filter((x) => x !== id) : [...s.chosen, id], shares: Object.fromEntries(Object.entries(s.shares ?? {}).filter(([k]) => k !== id)) });
   const shopping = chosen.flatMap((w, n) =>
     parts[n] ? w.ingredients.map((x) => ({ name: x[i] as string, amount: x[2], unit: x[3], grams: parts[n] })) : []
   );
@@ -69,7 +81,7 @@ export function VorratPlanerPage() {
           {t("Rohware und Menge eingeben, Wege wählen. Die Menge wird gleich aufgeteilt.", "选择食材和数量，再选做法。数量会平均分配。")}
         </p>
         <div className="export-bar ghk-no-print">
-          <select className="prep-select" value={cut.id} aria-label={t("Rohware", "食材")} onChange={(e) => setS({ ...s, cut: e.target.value, chosen: [] })}>
+          <select className="prep-select" value={cut.id} aria-label={t("Rohware", "食材")} onChange={(e) => setS({ ...s, cut: e.target.value, chosen: [], shares: {} })}>
             {(Object.keys(GROUPS) as Group[]).map((g) => (
               <optgroup key={g} label={GROUPS[g][i]}>
                 {CUTS.filter((c) => c.group === g).map((c) => <option key={c.id} value={c.id}>{c[lang]}</option>)}
@@ -78,7 +90,7 @@ export function VorratPlanerPage() {
           </select>
           <input className="fridge-input planer-amount" type="number" min="0" step="any" inputMode="decimal" aria-label={t("Menge", "数量")}
             value={s.amount || ""} onChange={(e) => setS({ ...s, amount: Math.max(0, Math.min(Number(e.target.value), 100000)) })} />
-          <select className="prep-select" value={unit} aria-label={t("Einheit", "单位")} onChange={(e) => setS({ ...s, unit: e.target.value as Amount })}>
+          <select className="prep-select" value={unit} aria-label={t("Einheit", "单位")} onChange={(e) => setS({ ...s, unit: e.target.value as Amount, shares: {} })}>
             <option value="g">{t("g", "克")}</option>
             <option value="kg">{t("kg", "公斤")}</option>
             {cut.piece && <option value="Stk">{t("Stück", "个")}</option>}
@@ -114,6 +126,13 @@ export function VorratPlanerPage() {
               <button type="button" className="prep-tab ghk-no-print" aria-pressed={n >= 0} onClick={() => toggle(w.id)}>
                 {n >= 0 ? t(`Gewählt: ${shownShare(grams)}`, `已选：${shownShare(grams)}`) : t("Wählen", "选择")}
               </button>
+              {n >= 0 && (
+                <label className="planer-share ghk-no-print">
+                  {t("Anteil", "份量")}
+                  <input type="number" className="fridge-input planer-amount" min={0} inputMode="numeric" value={s.shares?.[w.id] ?? ""} placeholder={String(shares[n])} onChange={(e) => setShare(w.id, e.target.value)} />
+                  {pieces ? t("Stück", "个") : t("g", "克")}{s.shares?.[w.id] === undefined && t(" (automatisch)", "（自动）")}
+                </label>
+              )}
               <details>
                 <summary className="prep-card-toggle">{t("Rezept ansehen", "查看做法")}</summary>
                 <p className="fridge-line">{t(`Zutaten für ${grams} g ${cut.de}`, `${grams}克${cut.zh}所需配料`)}:</p>
@@ -130,10 +149,19 @@ export function VorratPlanerPage() {
                   {stored ? t("Im Gefrierschrank eingetragen", "已记入冷冻室") : t(`Als eingefroren eintragen (${portions(grams)} Port.)`, `记为已冷冻（${portions(grams)}份）`)}
                 </button>
               )}
+              <div><Rating title={w.de.title} /></div>
             </article>
           );
         })}
       </div>
+
+      {chosen.length > 0 && over !== 0 && (
+        <p className="export-msg" role="status">
+          {over > 0
+            ? t(`Die Anteile ergeben ${over} ${pieces ? "Stück" : "g"} mehr, als da ist.`, `份量比现有的多${over}${pieces ? "个" : "克"}。`)
+            : t(`Noch ${-over} ${pieces ? "Stück" : "g"} nicht verteilt.`, `还有${-over}${pieces ? "个" : "克"}没有分配。`)}
+        </p>
+      )}
 
       {lines.length > 0 && (
         <section className="planer-shop">

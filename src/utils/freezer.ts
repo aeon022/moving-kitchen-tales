@@ -44,7 +44,7 @@ export function validFrozen(v: unknown): Frozen[] {
 }
 
 // --- Stand als Link teilen (ohne Server) ---
-export const STRING_KEYS = ["mkt.vorkochen.done", "mkt.vorkochen.bought", "mkt.pantry.buy"] as const;
+export const STRING_KEYS = ["mkt.vorkochen.done", "mkt.vorkochen.bought", "mkt.pantry.buy", "mkt.rating.up", "mkt.rating.down"] as const;
 export const FREEZER_KEY = "mkt.freezer";
 
 export type Shared = { lists: Record<string, string[]>; freezer: Frozen[] };

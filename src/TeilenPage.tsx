@@ -34,7 +34,7 @@ export function ShareState() {
   return (
     <section className="share-box">
       <h3>{t("Mit dem anderen Handy abgleichen", "同步到另一部手机")}</h3>
-      <p className="export-msg">{t("Der Link enthält Vorkoch-Haken, Einkaufshaken, Nachkaufliste und Gefrierschrank. Er gleicht nicht laufend ab: nach Änderungen neu schicken.", "链接包含备餐勾选、购物勾选、补货清单和冷冻库存。不会自动同步：有改动后请重新发送。")}</p>
+      <p className="export-msg">{t("Der Link enthält Vorkoch-Haken, Einkaufshaken, Nachkaufliste, Bewertungen und Gefrierschrank. Er gleicht nicht laufend ab: nach Änderungen neu schicken.", "链接包含备餐勾选、购物勾选、补货清单、评价和冷冻库存。不会自动同步：有改动后请重新发送。")}</p>
       <button type="button" className="prep-tab" onClick={share}>{t("Stand teilen", "分享当前状态")}</button>
       <p className="export-msg" aria-live="polite">{msg}</p>
     </section>

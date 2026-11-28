@@ -28,3 +28,11 @@ export function scaled(base: number, unit: Unit, grams: number, lang: "de" | "zh
 
 /** Rund 125 g Rohware je Portion. */
 export const portions = (grams: number) => Math.max(1, Math.round(grams / 125));
+
+/** Eigene Anteile (`fixed`) gelten, der Rest wird gleich auf die übrigen Wege verteilt. */
+export function allocate(total: number, ids: string[], fixed: Record<string, number>, step = 1): number[] {
+  const free = ids.filter((id) => fixed[id] === undefined);
+  const used = ids.reduce((n, id) => n + (fixed[id] ?? 0), 0);
+  const rest = split(Math.max(0, total - used), free.length, step);
+  return ids.map((id) => fixed[id] ?? rest[free.indexOf(id)]);
+}

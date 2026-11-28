@@ -22,6 +22,7 @@ import { TeilenPage } from "./TeilenPage";
 import { HelferPage } from "./HelferPage";
 import { SammlungPage } from "./SammlungPage";
 import { VorratPlanerPage } from "./VorratPlanerPage";
+import { EtikettenPage } from "./EtikettenPage";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -901,6 +902,7 @@ export default function App() {
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
                   <Route path="/katzen" element={<KatzenPage />} />
                   <Route path="/verarbeiten" element={<VorratPlanerPage />} />
+                  <Route path="/etiketten" element={<EtikettenPage />} />
                   <Route path="/gefrierschrank" element={<GefrierschrankPage />} />
                   <Route path="/teilen" element={<TeilenPage />} />
                   <Route path="/helfer" element={<HelferPage plans={plans} />} />
