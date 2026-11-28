@@ -21,6 +21,7 @@ import { GefrierschrankPage } from "./GefrierschrankPage";
 import { TeilenPage } from "./TeilenPage";
 import { HelferPage } from "./HelferPage";
 import { SammlungPage } from "./SammlungPage";
+import { VorratPlanerPage } from "./VorratPlanerPage";
 import { DatenschutzPage, CookieNotice } from "./Datenschutz";
 import { PLAN_MANIFEST } from "./plans/manifest";
 
@@ -456,6 +457,12 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
             </Link>
           </li>
           <li>
+            <Link to="/verarbeiten" onClick={handleLinkClick} className="nav-row">
+              <span className="nav-icon"><NavIcon name="box" /></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Was tun mit …?" : "食材怎么做"}</span></span>
+            </Link>
+          </li>
+          <li>
             <Link to="/gefrierschrank" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="snowflake" /></span>
               <span className="nav-body"><span className="nav-title">{lang === "de" ? "Gefrierschrank" : "冷冻室"}</span></span>
@@ -494,7 +501,7 @@ function IndexOverlay({ plans, onClose }: { plans: PlanRecord[], onClose: () => 
           <li>
             <Link to="/rezepte" onClick={handleLinkClick} className="nav-row">
               <span className="nav-icon"><NavIcon name="database" /></span>
-              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezept-Datenbank" : "食谱库"}</span></span>
+              <span className="nav-body"><span className="nav-title">{lang === "de" ? "Rezeptsammlung" : "食谱库"}</span></span>
             </Link>
           </li>
         </ul>
@@ -946,6 +953,7 @@ export default function App() {
                   <Route path="/rezepte" element={<RecipeDatabasePage plans={plans} />} />
                   <Route path="/plan/:slug" element={<PlanPage plans={plans} />} />
                   <Route path="/katzen" element={<KatzenPage />} />
+                  <Route path="/verarbeiten" element={<VorratPlanerPage />} />
                   <Route path="/gefrierschrank" element={<GefrierschrankPage />} />
                   <Route path="/teilen" element={<TeilenPage />} />
                   <Route path="/helfer" element={<HelferPage plans={plans} />} />

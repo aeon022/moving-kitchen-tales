@@ -72,6 +72,7 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
     { to: planPath, title: ["Wochenplan", "本周菜单"], text: ["Drei Mahlzeiten am Tag, mit Einkaufsliste", "一日三餐和购物清单"] },
     { to: "/kuehlschrank", title: ["Kühlschrank", "冰箱找菜谱"], text: ["Was ist da? Das passende Rezept dazu", "家里有什么，就做什么"] },
     { to: "/vorkochen", title: ["Vorkochen", "提前备餐"], text: ["Vier Wochenenden mit Einkaufszettel", "四个周末和购物单"] },
+    { to: "/verarbeiten", title: ["Was tun mit …?", "食材怎么做"], text: ["Vom Rohen zum Vorrat", "生食材变储备"] },
     { to: "/gefrierschrank", title: ["Gefrierschrank", "冷冻室"], text: ["Was im Eis liegt", "冷冻库存"] },
     { to: "/helfer", title: ["Helfer-Zettel", "帮厨单"], text: ["Für alle, die einspringen", "给帮忙的人"] },
     { to: "/preppen", title: ["Preppen", "备餐食谱"], text: ["Einfrieren, einlegen, vorbereiten", "冷冻、腌制、预处理"] },
@@ -84,7 +85,7 @@ export function HomePage({ plans }: { plans: PlanRecord[] }) {
     { to: "/katzen", title: ["Finn & Fleur", "Finn 和 Fleur"], text: ["Ein kleines Bilderbuch", "一本小绘本"] },
     { to: "/bookmarks", title: ["Merkliste", "我的收藏"], text: ["Deine Lieblinge", "你喜欢的菜"] },
   ];
-  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四"];
+  const numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五"];
 
   return (
     <div className="home-page">

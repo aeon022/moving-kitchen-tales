@@ -1609,3 +1609,17 @@ details.prep-notice ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-
   .helper-meal, .helper-thaw { break-inside: avoid; }
   .helper-cols { grid-template-columns: 1fr 1fr; gap: 12px; font-size: 9.5pt; }
 }
+
+/* Vorrat-Generator */
+.planer-amount { flex: 0 0 7em; }
+.planer-list { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); align-items: start; }
+.planer .fridge-card.is-chosen { border-left-color: var(--seal); }
+.planer .fridge-card > .prep-tab { margin: 6px 0; }
+.planer-shop { margin-top: 32px; }
+.planer select, .rezept-filter select { max-width: 100%; }
+.rezept-filter .fridge-input { flex-basis: 220px; }
+.rezept-list { list-style: none; padding: 0; margin: 16px 0; display: grid; gap: 10px; }
+.rezept-list a { display: grid; gap: 4px; padding: 12px 16px; background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent); color: var(--text); text-decoration: none; }
+.rezept-list a:hover { border-left-color: var(--seal); }
+.rezept-list small { color: var(--muted); }
+.planer .export-bar .prep-select, .rezept-filter .prep-select { margin: 0; flex: 1 1 140px; }

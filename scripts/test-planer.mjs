@@ -1,0 +1,41 @@
+// node --experimental-strip-types scripts/test-planer.mjs
+import assert from "node:assert/strict";
+import { toGrams, split, scaled, portions } from "../src/utils/vorrat.ts";
+import { mainOf, originOf, formOf } from "../src/utils/classify.ts";
+
+assert.equal(toGrams(40, "Stk", 80), 3200);
+assert.equal(toGrams(1.5, "kg"), 1500);
+assert.deepEqual(split(40, 3), [14, 13, 13]);
+assert.deepEqual(split(1000, 3, 10), [340, 330, 330]);
+assert.deepEqual(split(2, 3), [1, 1, 0]);
+assert.deepEqual(split(5, 0), []);
+assert.equal(scaled(3, "EL", 1000, "de"), "6 EL");
+assert.equal(scaled(1, "TL", 250, "de"), "½ TL");
+assert.equal(scaled(2, "Zehe", 1000, "de"), "4 Zehen");
+assert.equal(scaled(15, "g", 500, "zh"), "15 克");
+assert.equal(scaled(1, "TL", 100, "de"), "¼ TL");
+assert.equal(scaled(100, "ml", 3200, "de"), "640 ml");
+assert.equal(portions(1000), 8);
+assert.equal(portions(50), 1);
+
+assert.equal(mainOf(["Karotte 100 g", "Hähnchenbrust 260 g", "Hühnerbrühe 500 ml"]), "haehnchen");
+assert.equal(mainOf(["Rindfleisch mager 200 g", "Getrocknete Wakame 15 g"]), "rind");
+assert.equal(mainOf(["Fester Tofu 200 g", "Eier 1 Stück"]), "tofu");
+assert.equal(mainOf(["Eier 3 Stück", "Reis (gekocht) 200 g"]), "ei");
+assert.equal(mainOf(["Kabeljaufilet 260 g", "Austernsauce 1 EL"]), "fisch");
+assert.equal(mainOf(["Kürbis 300 g", "Hühnerbrühe 500 ml", "Fischsauce 1 EL"]), "gemuese");
+assert.equal(mainOf(["Haferflocken 100 g", "Milch 300 ml"]), "getreide");
+assert.equal(originOf("Spinat-Doenjang-Suppe mit Rind (시금치 된장국)"), "korea");
+assert.equal(originOf("Oyakodon mild (親子丼)"), "japan");
+assert.equal(originOf("Genmai-Okayu mit Hähnchen (玄米粥)"), "japan");
+assert.equal(originOf("Buta-Jiru Schweine-Misosuppe (豚汁)"), "japan");
+assert.equal(originOf("Gemüsereis nach Shanghai-Art (上海菜飯)"), "china");
+assert.equal(originOf("Schwedischer Blaubeer-Grießbrei"), "heimisch");
+assert.equal(originOf("Kroatische Fritaja mit Spargel"), "mittelmeer");
+assert.equal(originOf("Thai Grünes Curry-Hähnchen"), "suedostasien");
+assert.equal(originOf("Indisches Butter Chicken"), "indien");
+assert.equal(formOf("Tomaten-Rindfleisch-Suppe (番茄牛肉湯)"), "suppe");
+assert.equal(formOf("Lachs-Reisbrei"), "brei");
+assert.equal(mainOf(["Reis (gekocht) 200 g", "Rinderhack 100 g (gebraten)"]), "rind");
+assert.equal(mainOf(["Reis 200 g", "Parmesanrinde 30 g", "Zimtrinde 5 g"]), "getreide");
+console.log("planer ok");
