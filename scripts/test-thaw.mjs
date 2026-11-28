@@ -20,4 +20,10 @@ const ids = (id) => thawList(data.find((r) => r.id === id), PREP_RECIPES).map((i
 assert.deepEqual(ids("mo-a"), ["korea-miyeokguk-rind"]);
 assert.deepEqual(ids("fr-f"), ["wb-tori-daikon-soup"]);
 assert.deepEqual(ids("sa-a"), []);
+// Vorratsrezept und Wochenplan dürfen sich beim Auftauen nicht widersprechen.
+for (const id of ["korea-miyeokguk-rind", "japan-nikudango-suppe"]) assert.ok(needsThaw(PREP_RECIPES.find((r) => r.id === id).reheat), id);
+
+// Gerichte mit Fleisch, Fisch oder Meeresfrüchten: höchstens 2 Monate (Brühen und Saucen sind „basis“).
+for (const r of PREP_RECIPES.filter((r) => r.category === "gericht" && /fleisch|rind(?!en)|schwein|hähnchen(?!brühe)|hack|rippen|garnelen|lachs/i.test(r.ingredients.join(" "))))
+  assert.ok(!/^bis zu [3-9] Monate/.test(r.freezerLife), `${r.id}: ${r.freezerLife}`);
 console.log("thaw ok");
